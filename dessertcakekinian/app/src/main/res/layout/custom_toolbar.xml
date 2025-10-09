@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/customToolbar"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:background="@android:color/transparent"
+    android:paddingHorizontal="16dp">
+
+    <!-- Nama toko -->
+
+    <!-- Section kanan (icon + menu) -->
+
+    <ImageView
+        android:id="@+id/iconMenu"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_menu_off"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="#43D2D6" />
+
+    <TextView
+        android:id="@+id/txtNamaToko"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="dessertcakekinian"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/rightSection"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@id/iconMenu"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.531" />
+
+    <LinearLayout
+        android:id="@+id/rightSection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+
+
+        <ImageView
+            android:id="@+id/iconTransaksi"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_transaction"
+            android:layout_marginEnd="5dp"
+            app:tint="#43D2D6" />
+
+
+        <TextView
+            android:id="@+id/txtTransaksi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="transaksi"
+            android:textColor="#43D2D6"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <!-- Baris tombol plus-minus -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <ImageButton
+            android:id="@+id/btnMinus"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="2dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_minus"
+            android:scaleType="fitCenter"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvJumlah"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:layout_marginHorizontal="10dp"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/btnPlus"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="2dp"
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_plus"
+            android:contentDescription="@string/desc_btn_plus" />
+    </LinearLayout>
+
+    <!-- Tombol hapus di bawah -->
+    <Button
+        android:id="@+id/btnDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="42dp"
+        android:layout_marginTop="6dp"
+        android:text="Hapus"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@android:color/transparent"
+        android:visibility="gone" />
+
+
+</LinearLayout>
