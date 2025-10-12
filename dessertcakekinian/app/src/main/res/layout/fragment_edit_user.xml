@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/black"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:background="#DDDDDD" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Edit Data Pengguna"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="24dp" />
+
+    <EditText
+        android:id="@+id/edit_username"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/rounded_edittext_background"
+        android:drawableStart="@drawable/ic_person"
+        android:drawablePadding="12dp"
+        android:hint="Username"
+        android:inputType="textPersonName"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#9AA4AD"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/edit_phone"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/rounded_edittext_background"
+        android:drawableStart="@drawable/ic_phone"
+        android:drawablePadding="12dp"
+        android:hint="Nomor Telepon"
+        android:inputType="phone"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#9AA4AD"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/edit_password"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/rounded_edittext_background"
+        android:drawableStart="@drawable/ic_lock"
+        android:drawablePadding="12dp"
+        android:hint="Password Baru (kosongi jika tidak diubah)"
+        android:inputType="textPassword"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#9AA4AD"
+        android:layout_marginBottom="24dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pilih Role"
+        android:textColor="#9AA4AD"
+        android:layout_marginBottom="8dp" />
+
+    <RadioGroup
+        android:id="@+id/edit_role_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <RadioButton
+            android:id="@+id/edit_radio_admin"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Admin"
+            android:textColor="#FFFFFF"
+            android:buttonTint="#43D2D6" />
+
+        <RadioButton
+            android:id="@+id/edit_radio_karyawan"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Karyawan"
+            android:textColor="#FFFFFF"
+            android:buttonTint="#43D2D6"/>
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status Pengguna"
+        android:textColor="#9AA4AD"
+        android:layout_marginBottom="8dp" />
+
+    <RadioGroup
+        android:id="@+id/edit_status_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <RadioButton
+            android:id="@+id/edit_radio_aktif"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Aktif"
+            android:textColor="#FFFFFF"
+            android:buttonTint="#43D2D6" />
+
+        <RadioButton
+            android:id="@+id/edit_radio_nonaktif"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Non-Aktif"
+            android:textColor="#FFFFFF"
+            android:buttonTint="#43D2D6"/>
+    </RadioGroup>
+
+    <EditText
+        android:id="@+id/edit_alasan_nonaktif"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded_edittext_background"
+        android:hint="Alasan Non-Aktifkan Pengguna"
+        android:padding="12dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#9AA4AD"
+        android:visibility="gone"
+        android:layout_marginBottom="24dp" />
+
+    <Button
+        android:id="@+id/btn_update"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Simpan Perubahan"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#43D2D6" />
+
+</LinearLayout>

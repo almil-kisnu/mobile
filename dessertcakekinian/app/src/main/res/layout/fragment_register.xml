@@ -5,124 +5,109 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="#00091A"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context="fragment.registerFragment">
 
+    <!-- Judul Halaman -->
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="144dp"
-        android:text="yuk, gabung sekarang !!"
-        android:textColor="@color/white"
-        android:textSize="30dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.494"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/phone"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="80dp"
-        android:background="@drawable/rounded_edittext_background"
-        android:drawableStart="@drawable/ic_phone"
-        android:drawablePadding="8dp"
-        android:hint="082xxxxxx"
-        android:inputType="phone"
-        android:textColorHint="#9AA4AD"
-        android:padding="10dp"
+        android:text="Create Account"
+        android:textColor="@android:color/white"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/username"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:layout_constraintWidth_percent="0.8" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.6" />
 
+    <!-- Input Username -->
     <EditText
         android:id="@+id/username"
         android:layout_width="0dp"
         android:layout_height="50dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="200dp"
         android:background="@drawable/rounded_edittext_background"
         android:drawableStart="@drawable/ic_person"
-        android:drawablePadding="8dp"
+        android:drawablePadding="12dp"
         android:hint="Username"
-        android:padding="10dp"
+        android:inputType="textPersonName"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textColor="@android:color/white"
         android:textColorHint="#9AA4AD"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/phone"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_percent="0.8" />
 
+    <!-- Input Password -->
     <EditText
         android:id="@+id/password"
         android:layout_width="0dp"
         android:layout_height="50dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:background="@drawable/rounded_edittext_background"
         android:drawableStart="@drawable/ic_lock"
         android:drawableEnd="@drawable/ic_visibility"
-        android:drawablePadding="8dp"
+        android:drawablePadding="12dp"
         android:hint="Password"
         android:inputType="textPassword"
-        android:padding="10dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textColor="@android:color/white"
         android:textColorHint="#9AA4AD"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/username"
-        app:layout_constraintWidth_percent="0.8" />
+        app:layout_constraintEnd_toEndOf="@+id/username"
+        app:layout_constraintStart_toStartOf="@+id/username"
+        app:layout_constraintTop_toBottomOf="@+id/username" />
 
+    <!-- Input Konfirmasi Password -->
     <EditText
-        android:id="@+id/password2"
+        android:id="@+id/confirm_password"
         android:layout_width="0dp"
         android:layout_height="50dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:background="@drawable/rounded_edittext_background"
-        android:drawableStart="@drawable/ic_lock"
         android:drawableEnd="@drawable/ic_visibility"
-        android:drawablePadding="8dp"
-        android:hint="Konfirmasi Password"
+        android:drawableStart="@drawable/ic_lock"
+        android:drawablePadding="12dp"
+        android:hint="Confirm Password"
         android:inputType="textPassword"
-        android:padding="10dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textColor="@android:color/white"
         android:textColorHint="#9AA4AD"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/password"
-        app:layout_constraintWidth_percent="0.8" />
+        app:layout_constraintEnd_toEndOf="@+id/password"
+        app:layout_constraintStart_toStartOf="@+id/password"
+        app:layout_constraintTop_toBottomOf="@+id/password" />
 
+    <!-- Spinner untuk Role -->
+    <Spinner
+        android:id="@+id/role_spinner"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/rounded_edittext_background"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        app:layout_constraintEnd_toEndOf="@+id/confirm_password"
+        app:layout_constraintStart_toStartOf="@+id/confirm_password"
+        app:layout_constraintTop_toBottomOf="@+id/confirm_password" />
+
+    <!-- Tombol Register -->
     <Button
-        android:id="@+id/login_button"
+        android:id="@+id/register_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="48dp"
         android:backgroundTint="#43D2D6"
-        android:text="Daftar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/password2"
-        app:layout_constraintWidth_percent="0.8" />
-
-    <TextView
-        android:id="@+id/daftar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:text="sudah punya akun ?"
-        android:textColor="#9AA4AD"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.351"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/login_button" />
-
-    <TextView
-        android:id="@+id/daftar2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:text="masuk !"
-        android:textColor="#43D2D6"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.067"
-        app:layout_constraintStart_toEndOf="@+id/daftar"
-        app:layout_constraintTop_toBottomOf="@+id/login_button" />
+        android:text="Register"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/role_spinner"
+        app:layout_constraintStart_toStartOf="@+id/role_spinner"
+        app:layout_constraintTop_toBottomOf="@+id/role_spinner" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

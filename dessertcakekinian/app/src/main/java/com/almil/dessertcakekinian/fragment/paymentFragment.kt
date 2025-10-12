@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import com.almil.dessertcakekinian.activity.MainActivity
 import com.almil.dessertcakekinian.R
 import com.almil.dessertcakekinian.model.produk
 import com.almil.dessertcakekinian.model.OrderId
@@ -60,7 +61,7 @@ class paymentFragment : Fragment() {
         btnBack = view.findViewById(R.id.btnBack)
 
         btnBack.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            (activity as MainActivity).showFragment((activity as MainActivity).getTransactionFragment())
         }
 
         // Logic untuk tombol bayar

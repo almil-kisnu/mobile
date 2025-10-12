@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="status_filter_options">
+        <item>Semua Status</item>
+        <item>Aktif</item>
+        <item>Non-Aktif</item>
+    </string-array>
+
+    <string-array name="role_filter_options">
+        <item>Semua Role</item>
+        <item>Admin</item>
+        <item>Karyawan</item>
+    </string-array>
+</resources>

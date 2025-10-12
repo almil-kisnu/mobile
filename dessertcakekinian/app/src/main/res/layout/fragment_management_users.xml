@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="#00091A"
+    tools:context=".fragment.ManagementUsersFragment">
+
+    <!-- 1. SearchView di paling atas -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/searchViewUsers"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="2dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="12dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="10dp"
+                android:src="@android:drawable/ic_menu_search"
+                app:tint="#888888" />
+
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Cari produk..."
+                android:background="@null"
+                android:textColor="@android:color/white"
+                android:inputType="text"
+                android:padding="0dp"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- 2. Container untuk 2 Spinner (horizontal) -->
+    <LinearLayout
+        android:id="@+id/layoutFilters"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/searchViewUsers">
+
+
+        <!-- Spinner Status (Active/Non-active) -->
+        <Spinner
+            android:id="@+id/spinnerStatus"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/spinner_background"
+            android:padding="8dp" />
+
+
+        <!-- Spinner Role -->
+        <Spinner
+            android:id="@+id/spinnerRole"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/spinner_background"
+            android:padding="8dp"/>
+    </LinearLayout>
+
+    <!-- 3. RecyclerView untuk list users (scrollable) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewUsers"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layoutFilters"/>
+
+    <!-- 4. FAB (Floating Action Button) untuk tambah user -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:contentDescription="Tambah User"
+        android:src="@android:drawable/ic_input_add"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

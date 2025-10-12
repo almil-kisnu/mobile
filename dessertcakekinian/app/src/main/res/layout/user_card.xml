@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="#2C3A47"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#000000">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvUsernameLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Username:"
+            android:textColor="#9AA4AD"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvUsername"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBaseline_toBaselineOf="@+id/tvUsernameLabel"
+            app:layout_constraintEnd_toStartOf="@+id/tvStatus"
+            app:layout_constraintStart_toEndOf="@+id/tvUsernameLabel"
+            tools:text="Agus Santoso" />
+
+        <TextView
+            android:id="@+id/tvGmailLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Telepon:"
+            android:textColor="#9AA4AD"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvUsernameLabel" />
+
+        <TextView
+            android:id="@+id/tvGmail"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="#E0E0E0"
+            android:textSize="14sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/tvGmailLabel"
+            app:layout_constraintEnd_toStartOf="@+id/tvStatus"
+            app:layout_constraintStart_toEndOf="@+id/tvGmailLabel"
+            tools:text="08123456789" />
+
+        <TextView
+            android:id="@+id/tvPasswordLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Password:"
+            android:textColor="#9AA4AD"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvGmailLabel" />
+
+        <TextView
+            android:id="@+id/tvPassword"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="••••••••"
+            android:textColor="#E0E0E0"
+            android:textSize="14sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/tvPasswordLabel"
+            app:layout_constraintEnd_toStartOf="@+id/tvStatus"
+            app:layout_constraintStart_toEndOf="@+id/tvPasswordLabel" />
+
+        <TextView
+            android:id="@+id/tvRoleLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Role:"
+            android:textColor="#9AA4AD"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvPasswordLabel" />
+
+        <TextView
+            android:id="@+id/tvRole"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="#E0E0E0"
+            android:textSize="14sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/tvRoleLabel"
+            app:layout_constraintEnd_toStartOf="@+id/tvStatus"
+            app:layout_constraintStart_toEndOf="@+id/tvRoleLabel"
+            tools:text="Karyawan" />
+
+        <TextView
+            android:id="@+id/tvDateLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Tanggal Masuk:"
+            android:textColor="#9AA4AD"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvRoleLabel" />
+
+        <TextView
+            android:id="@+id/tvDate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="#E0E0E0"
+            android:textSize="14sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/tvDateLabel"
+            app:layout_constraintEnd_toStartOf="@+id/btnEdit"
+            app:layout_constraintStart_toEndOf="@+id/tvDateLabel"
+            tools:text="2025-10-12" />
+
+        <TextView
+            android:id="@+id/tvReasonLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Alasan:"
+            android:textColor="#9AA4AD"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvDateLabel"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tvReason"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="#E0E0E0"
+            android:textSize="14sp"
+            android:visibility="gone"
+            app:layout_constraintBaseline_toBaselineOf="@+id/tvReasonLabel"
+            app:layout_constraintEnd_toStartOf="@+id/btnEdit"
+            app:layout_constraintStart_toEndOf="@+id/tvReasonLabel"
+            tools:text="Resign"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="90dp"
+            android:layout_height="30dp"
+            android:background="@drawable/bg_status_aktif"
+            android:gravity="center"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="ACTIVE"
+            android:textColor="#4CAF50"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Edit Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEdit"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@android:color/transparent"
+            android:text="EDIT"
+            android:textColor="#F44336"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:cornerRadius="18dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvStatus"
+            app:strokeColor="#F44336"
+            app:strokeWidth="2dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

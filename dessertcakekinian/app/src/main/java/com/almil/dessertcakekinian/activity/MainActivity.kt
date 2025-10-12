@@ -10,13 +10,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.almil.dessertcakekinian.R
 import com.almil.dessertcakekinian.fragment.transactionFragment
+import com.almil.dessertcakekinian.fragment.paymentFragment
 import com.almil.dessertcakekinian.fragment.riwayatPesananFragment
+import com.almil.dessertcakekinian.fragment.ManagementUsersFragment
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var iconMenu: ImageView
     private var popupWindow: PopupWindow? = null
     private var isMenuVisible = false
+    private var activeFragment: Fragment? = null
+    private val transactionFragment = transactionFragment()
+
+    private val riwayatPesananFragment = riwayatPesananFragment()
+    private val managemenUsersFragment = ManagementUsersFragment()
+    private val paymentFragment = paymentFragment()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,13 +32,13 @@ class MainActivity : AppCompatActivity() {
 
         iconMenu = findViewById(R.id.iconMenu)
 
-        // Klik hamburger menu
         iconMenu.setOnClickListener {
             if (isMenuVisible) hidePopupMenu() else showPopupMenu(it)
         }
 
-        // Tampilkan fragment default (misal halaman produk)
-        // replaceFragment(ProductFragment()) kalau udah ada
+        if (savedInstanceState == null) {
+            showFragment(transactionFragment, "TransactionFragment")
+        }
     }
 
     private fun showPopupMenu(anchorView: View) {
@@ -49,16 +57,13 @@ class MainActivity : AppCompatActivity() {
         val produk = view.findViewById<LinearLayout>(R.id.produk)
         val transaksi = view.findViewById<LinearLayout>(R.id.transaksi)
 
-        // klik produk
         produk.setOnClickListener {
-            // TODO: ganti fragment produk
-            replaceFragment(riwayatPesananFragment())
+            showFragment(managemenUsersFragment)
             popupWindow?.dismiss()
         }
 
-        // klik transaksi
         transaksi.setOnClickListener {
-            replaceFragment(transactionFragment())
+            showFragment(transactionFragment)
             popupWindow?.dismiss()
         }
 
@@ -75,9 +80,37 @@ class MainActivity : AppCompatActivity() {
         isMenuVisible = false
     }
 
-    private fun replaceFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.container, fragment)
-            .commit()
+    fun showFragment(fragment: Fragment, tag: String = fragment.javaClass.simpleName) {
+        val transaction = supportFragmentManager.beginTransaction()
+        if (activeFragment != null && activeFragment != fragment) {
+            transaction.hide(activeFragment!!)
+        }
+        if (!fragment.isAdded) {
+            transaction.add(R.id.container, fragment, tag)
+        } else {
+            transaction.show(fragment)
+        }
+        findViewById<View>(R.id.customToolbar).visibility =
+            if (fragment is paymentFragment) View.GONE else View.VISIBLE
+        transaction.commit()
+        activeFragment = fragment
     }
+
+    fun getTransactionFragment(): Fragment {
+        return transactionFragment
+    }
+
+    fun getPaymentFragment(): Fragment {
+        return paymentFragment
+    }
+
+    fun resetTransactionFragment() {
+        if (transactionFragment.isAdded) {
+            transactionFragment.clearCart()
+            transactionFragment.refreshData()
+        }
+        showFragment(transactionFragment)
+    }
+
+
 }

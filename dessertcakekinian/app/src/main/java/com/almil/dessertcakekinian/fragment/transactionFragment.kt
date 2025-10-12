@@ -12,6 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.almil.dessertcakekinian.R
+import com.almil.dessertcakekinian.activity.MainActivity
 import com.almil.dessertcakekinian.database.SupabaseClientProvider
 import com.almil.dessertcakekinian.model.produk
 import com.almil.dessertcakekinian.model.KategoriProduk
@@ -58,10 +59,7 @@ class transactionFragment : Fragment() {
             }
             val total = calculateTotalPrice()
             val paymentFragment = paymentFragment.newInstance(cart, total)
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.container, paymentFragment)
-                .addToBackStack(null)
-                .commit()
+            (activity as MainActivity).showFragment(paymentFragment)
         }
 
         // Load data dari Supabase
@@ -69,7 +67,6 @@ class transactionFragment : Fragment() {
 
         return view
     }
-
 
     private fun loadDataFromSupabase() {
         lifecycleScope.launch {

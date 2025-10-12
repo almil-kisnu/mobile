@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/black"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="20dp"
+        android:background="#DDDDDD" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Buat Akun Baru"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="24dp" />
+
+    <EditText
+        android:id="@+id/username_input"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/rounded_edittext_background"
+        android:drawableStart="@drawable/ic_person"
+        android:drawablePadding="12dp"
+        android:hint="Username"
+        android:inputType="textPersonName"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#9AA4AD"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/phone_input"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/rounded_edittext_background"
+        android:drawableStart="@drawable/ic_phone"
+        android:drawablePadding="12dp"
+        android:hint="Nomor Telepon"
+        android:inputType="phone"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#9AA4AD"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/password_input"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/rounded_edittext_background"
+        android:drawableStart="@drawable/ic_lock"
+        android:drawablePadding="12dp"
+        android:hint="Password"
+        android:inputType="textPassword"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#9AA4AD"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/confirm_password_input"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/rounded_edittext_background"
+        android:drawableStart="@drawable/ic_lock"
+        android:drawablePadding="12dp"
+        android:hint="Konfirmasi Password"
+        android:inputType="textPassword"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#9AA4AD"
+        android:layout_marginBottom="24dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pilih Role"
+        android:textSize="14sp"
+        android:textColor="#9AA4AD"
+        android:layout_marginBottom="8dp" />
+
+    <RadioGroup
+        android:id="@+id/role_radio_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="24dp">
+
+        <RadioButton
+            android:id="@+id/radio_admin"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Admin"
+            android:textColor="#FFFFFF"
+            android:buttonTint="#43D2D6"
+            android:checked="true"/>
+
+        <RadioButton
+            android:id="@+id/radio_karyawan"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Karyawan"
+            android:textColor="#FFFFFF"
+            android:buttonTint="#43D2D6"/>
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/submit_button"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Daftar"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#43D2D6" />
+
+</LinearLayout>

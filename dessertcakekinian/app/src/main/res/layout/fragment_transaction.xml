@@ -22,7 +22,7 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        app:cardCornerRadius="24dp"
+        app:cardCornerRadius="20dp"
         app:cardElevation="2dp">
 
         <LinearLayout
@@ -33,6 +33,7 @@
             android:paddingHorizontal="12dp">
 
             <ImageView
+                android:layout_marginEnd="10dp"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:src="@android:drawable/ic_menu_search"
