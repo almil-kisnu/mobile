@@ -14,6 +14,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Dessertcakekinian">
         <activity
+            android:name=".activity.presensiActivity"
+            android:exported="false" />
+        <activity
             android:name=".activity.DaftarProdukActivity"
             android:exported="false" />
         <activity
