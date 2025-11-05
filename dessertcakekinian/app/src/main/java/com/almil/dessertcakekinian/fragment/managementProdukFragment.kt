@@ -5,30 +5,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RelativeLayout
 import com.almil.dessertcakekinian.R
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [managementProdukFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class managementProdukFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,23 +18,41 @@ class managementProdukFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_management_produk, container, false)
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Cari view berdasarkan ID yang sudah kita buat di XML
+        val layoutDaftarProduk: RelativeLayout = view.findViewById(R.id.dafar_produk)
+        val layoutRiwayatStok: RelativeLayout = view.findViewById(R.id.daftar_produk_rusak)
+
+        // Atur OnClickListener untuk "Daftar Produk"
+        layoutDaftarProduk.setOnClickListener {
+            val daftarProdukFragment = DaftarProdukFragment()
+            navigateToFragment(daftarProdukFragment)
+        }
+
+        // Atur OnClickListener untuk "Riwayat Stok"
+        layoutRiwayatStok.setOnClickListener {
+            val riwayatTransaksiFragment = RiwayatTransaksiFragment()
+            navigateToFragment(riwayatTransaksiFragment)
+        }
+    }
+
+    private fun navigateToFragment(fragment: Fragment) {
+        // Gunakan parentFragmentManager untuk melakukan transaksi fragment
+        parentFragmentManager.beginTransaction().apply {
+            // Ganti fragment saat ini dengan fragment yang baru
+            // GANTI R.id.fragment_container dengan ID container di Activity Anda
+            replace(R.id.container, fragment)
+            // Tambahkan ke back stack agar user bisa kembali dengan tombol back
+            addToBackStack(null)
+            // Lakukan transaksi
+            commit()
+        }
+    }
+
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment managementProdukFragment.
-         */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            managementProdukFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+        fun newInstance() = managementProdukFragment()
     }
 }

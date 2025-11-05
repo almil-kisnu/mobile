@@ -1,116 +1,72 @@
 package com.almil.dessertcakekinian.activity
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.widget.LinearLayout
-import android.widget.PopupWindow
-import android.widget.ImageView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import com.almil.dessertcakekinian.R
-import com.almil.dessertcakekinian.fragment.transactionFragment
-import com.almil.dessertcakekinian.fragment.paymentFragment
-import com.almil.dessertcakekinian.fragment.riwayatPesananFragment
-import com.almil.dessertcakekinian.fragment.ManagementUsersFragment
+import com.almil.dessertcakekinian.fragment.HomePageFragment
+import com.almil.dessertcakekinian.fragment.ProfileFragment
+import com.almil.dessertcakekinian.activity.loginActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var iconMenu: ImageView
-    private var popupWindow: PopupWindow? = null
-    private var isMenuVisible = false
-    private var activeFragment: Fragment? = null
-    private val transactionFragment = transactionFragment()
+    private lateinit var bottomNavigation: BottomNavigationView
 
-    private val riwayatPesananFragment = riwayatPesananFragment()
-    private val managemenUsersFragment = ManagementUsersFragment()
-    private val paymentFragment = paymentFragment()
+    // Fragment instances
+    private val homeFragment by lazy { HomePageFragment() }
+    private val profileFragment by lazy { ProfileFragment() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        iconMenu = findViewById(R.id.iconMenu)
+        bottomNavigation = findViewById(R.id.bottom_navigation)
+        setupBottomNavigation()
+        setupBackPress()
 
-        iconMenu.setOnClickListener {
-            if (isMenuVisible) hidePopupMenu() else showPopupMenu(it)
-        }
-
+        // Hanya load sekali saat pertama kali
         if (savedInstanceState == null) {
-            showFragment(transactionFragment, "TransactionFragment")
+            replaceFragment(homeFragment)
+            bottomNavigation.selectedItemId = R.id.nav_home
         }
     }
 
-    private fun showPopupMenu(anchorView: View) {
-        val view = LayoutInflater.from(this).inflate(R.layout.menu, null)
-
-        popupWindow = PopupWindow(
-            view,
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            true
-        ).apply {
-            isOutsideTouchable = true
-            elevation = 20f
-        }
-
-        val produk = view.findViewById<LinearLayout>(R.id.produk)
-        val transaksi = view.findViewById<LinearLayout>(R.id.transaksi)
-
-        produk.setOnClickListener {
-            showFragment(managemenUsersFragment)
-            popupWindow?.dismiss()
-        }
-
-        transaksi.setOnClickListener {
-            showFragment(transactionFragment)
-            popupWindow?.dismiss()
-        }
-
-        popupWindow?.showAsDropDown(anchorView, -150, 20)
-        isMenuVisible = true
-
-        popupWindow?.setOnDismissListener {
-            isMenuVisible = false
+    private fun setupBottomNavigation() {
+        bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    replaceFragment(homeFragment)
+                    true
+                }
+                R.id.nav_profile -> {
+                    replaceFragment(profileFragment)
+                    true
+                }
+                else -> false
+            }
         }
     }
 
-    private fun hidePopupMenu() {
-        popupWindow?.dismiss()
-        isMenuVisible = false
+    private fun replaceFragment(fragment: androidx.fragment.app.Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.container, fragment)
+            .commit()
     }
 
-    fun showFragment(fragment: Fragment, tag: String = fragment.javaClass.simpleName) {
-        val transaction = supportFragmentManager.beginTransaction()
-        if (activeFragment != null && activeFragment != fragment) {
-            transaction.hide(activeFragment!!)
+    private fun setupBackPress() {
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (bottomNavigation.selectedItemId != R.id.nav_home) {
+                    bottomNavigation.selectedItemId = R.id.nav_home
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
         }
-        if (!fragment.isAdded) {
-            transaction.add(R.id.container, fragment, tag)
-        } else {
-            transaction.show(fragment)
-        }
-        findViewById<View>(R.id.customToolbar).visibility =
-            if (fragment is paymentFragment) View.GONE else View.VISIBLE
-        transaction.commit()
-        activeFragment = fragment
+        onBackPressedDispatcher.addCallback(this, callback)
     }
-
-    fun getTransactionFragment(): Fragment {
-        return transactionFragment
-    }
-
-    fun getPaymentFragment(): Fragment {
-        return paymentFragment
-    }
-
-    fun resetTransactionFragment() {
-        if (transactionFragment.isAdded) {
-            transactionFragment.clearCart()
-            transactionFragment.refreshData()
-        }
-        showFragment(transactionFragment)
-    }
-
-
 }

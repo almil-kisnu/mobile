@@ -12,7 +12,6 @@
         android:layout_height="35dp"
         android:paddingVertical="0dp"
         android:backgroundTint="@color/button"
-        android:textColor="@color/white"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         app:strokeWidth="1dp"
         app:strokeColor="#43D2D6"

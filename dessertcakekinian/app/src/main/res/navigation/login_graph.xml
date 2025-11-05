@@ -7,16 +7,8 @@
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.almil.dessertcakekinian.fragment.loginFragment"
-        android:label="Login"
         tools:layout="@layout/fragment_login">
 
-        <action
-            android:id="@+id/action_login_to_register"
-            app:destination="@id/registerFragment"
-            app:enterAnim="@android:anim/slide_in_left"
-            app:exitAnim="@android:anim/slide_out_right"
-            app:popEnterAnim="@android:anim/slide_in_left"
-            app:popExitAnim="@android:anim/slide_out_right" />
         <action
             android:id="@+id/action_login_to_forgot"
             app:destination="@id/forgotFragment"
@@ -28,19 +20,6 @@
     </fragment>
 
     <fragment
-        android:id="@+id/registerFragment"
-        android:name="com.almil.dessertcakekinian.fragment.registerFragment"
-        android:label="Register"
-        tools:layout="@layout/fragment_register">
-
-        <action
-            android:id="@+id/action_register_to_login"
-            app:destination="@id/loginFragment"
-            app:popUpTo="@id/loginFragment"
-            app:popUpToInclusive="true" />
-    </fragment>
-
-    <fragment
         android:id="@+id/forgotFragment"
         android:name="com.almil.dessertcakekinian.fragment.forgotFragment"
         tools:layout="@layout/fragment_forgot">
@@ -48,8 +27,10 @@
         <action
             android:id="@+id/action_forgot_to_login"
             app:destination="@id/loginFragment"
-            app:popUpTo="@id/loginFragment"
-            app:popUpToInclusive="true" />
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
     </fragment>
 
 </navigation>

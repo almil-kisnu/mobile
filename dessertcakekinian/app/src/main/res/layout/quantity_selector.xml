@@ -43,6 +43,7 @@
             android:contentDescription="@string/desc_btn_plus" />
     </LinearLayout>
 
+
     <!-- Tombol hapus di bawah -->
     <Button
         android:id="@+id/btnDelete"

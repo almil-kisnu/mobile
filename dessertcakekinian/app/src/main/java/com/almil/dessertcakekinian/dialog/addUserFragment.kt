@@ -1,4 +1,4 @@
-package com.almil.dessertcakekinian.fragment
+package com.almil.dessertcakekinian.dialog
 
 import android.os.Bundle
 import android.util.Log
@@ -40,6 +40,11 @@ class AddUserBottomSheetFragment : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_add_user, container, false)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setStyle(STYLE_NORMAL, R.style.CustomBottomSheetDialogTheme)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

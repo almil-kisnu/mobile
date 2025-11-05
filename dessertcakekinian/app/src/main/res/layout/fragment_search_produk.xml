@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="24dp"
+    android:background="?attr/colorPrimaryVariant"
+    tools:context=".BottomSheet.SearchUserFragment">
+
+    <!-- Handle Bar di atas BottomSheet -->
+    <View
+        android:id="@+id/handleBar"
+        android:layout_width="48dp"
+        android:layout_height="4dp"
+        android:layout_marginTop="8dp"
+        android:background="?attr/colorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Judul BottomSheet -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:text="PILIH FILTER"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/handleBar" />
+
+    <!-- Divider di bawah Judul -->
+    <View
+        android:id="@+id/dividerUnderTitle"
+        android:layout_width="0dp"
+        android:layout_height="3dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="24dp"
+        android:background="?attr/colorPrimary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnRestart"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+
+    <!-- Tombol Restart -->
+    <Button
+        android:id="@+id/btnRestart"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:text="RESTART"
+        app:strokeColor="?attr/colorPrimary"
+        app:layout_constraintBottom_toBottomOf="@id/tvTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tvTitle" />
+
+    <!-- Container Filter (Spinner dan Checkbox) -->
+    <LinearLayout
+        android:id="@+id/checkboxContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle">
+
+        <!-- SPINNER 1: Pilih Kategori -->
+        <TextView
+            android:id="@+id/tv_category_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Pilih Kategori" />
+
+        <Spinner
+            android:id="@+id/spinner_category"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/rounded_edittext_background"
+            android:overlapAnchor="false"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp" />
+
+        <!-- SPINNER 2: Pilih Toko/Outlet (Visibilitas diubah) -->
+        <TextView
+            android:id="@+id/tv_outlet_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Pilih Toko/Outlet"
+            android:visibility="visible"/> <!-- Visibilitas diubah menjadi terlihat -->
+
+        <Spinner
+            android:id="@+id/spinner_outlet"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/rounded_edittext_background"
+            android:overlapAnchor="false"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:visibility="visible"/> <!-- Visibilitas diubah menjadi terlihat -->
+
+        <!-- Checkbox Aktif -->
+        <CheckBox
+            android:id="@+id/cbAktif"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Aktif"
+            android:textColor="?attr/colorSecondaryVariant"
+            android:buttonTint="?attr/colorPrimary"
+            android:paddingVertical="10dp"
+            android:textSize="16sp" />
+
+        <!-- Checkbox Non-Aktif -->
+        <CheckBox
+            android:id="@+id/cbNonAktif"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Non-Aktif"
+            android:textColor="?attr/colorSecondaryVariant"
+            android:buttonTint="?attr/colorPrimary"
+            android:paddingVertical="10dp"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <!-- Tombol Terapin -->
+    <Button
+        android:id="@+id/btnTerapin"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="32dp"
+        android:text="TERAPIN"
+        android:paddingVertical="12dp"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/checkboxContainer" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

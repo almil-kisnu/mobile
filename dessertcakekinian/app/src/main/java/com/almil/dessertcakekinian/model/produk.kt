@@ -2,120 +2,91 @@ package com.almil.dessertcakekinian.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.parcelize.Parcelize // Import untuk @Parcelize
-import android.os.Parcelable // Import untuk Parcelable
 
 // Pastikan Anda telah menambahkan plugin 'kotlin-parcelize' di build.gradle (modul level)
 
-// WAJIB PARCELABLE JIKA INGIN DITRANSFER MELALUI BUNDLE/INTENT
-@Parcelize
 @Serializable
-data class produk(
-    @SerialName("idproduk")
-    val idproduk: Int? = null,
-
-    @SerialName("kodeproduk")
-    val kodeproduk: String? = null,
-
-    @SerialName("namaproduk")
+data class ProdukKategori(
+    val idproduk: Int,
     val namaproduk: String,
+    val kategori: String? = null,
+    val status: String,
+    val barcode: String? = null
+)
 
-    @SerialName("idkategori")
-    val idkategori: Int? = null,
-
-    @SerialName("hargamodal")
-    val hargamodal: Double? = null,
-
-    @SerialName("hargajual")
-    val hargajual: Double,
-
-    @SerialName("stock")
-    val stock: Int,
-
-    @SerialName("gambar")
-    val gambar: String? = null,
-
-    @SerialName("deskripsi")
-    val deskripsi: String,
-
-    @SerialName("status")
-    val status: String
-) : Parcelable // <-- DITAMBAHKAN
-
-// WAJIB PARCELABLE JIKA INGIN DITRANSFER MELALUI BUNDLE/INTENT
-@Parcelize
+// products.kt (Atau file tempat data class berada)
 @Serializable
-data class KategoriProduk(
-    @SerialName("idkategori")
-    val idkategori: Int? = null,
+data class DetailStok(
+    // PERBAIKAN: Mapping 'id_detail_stock' ke 'idDetailStock'
+    @SerialName("id_detail_stock") val idDetailStock: Int,
 
-    @SerialName("nkategori")
-    val nkategori: String
-) : Parcelable // <-- DITAMBAHKAN
+    val idproduk: Int,
+    // Kolom ini tidak perlu @SerialName jika namanya sama/sesuai
+    val idoutlet: Int,
+    val stok: Int,
 
-// WAJIB PARCELABLE JIKA INGIN DITRANSFER MELALUI BUNDLE/INTENT
-@Parcelize
+    // PERBAIKAN: Gunakan penamaan properti Kotlin yang standar (camelCase)
+    @SerialName("harga_beli") val hargaBeli: Double,
+    @SerialName("tgl_kadaluarsa") val tglKadaluarsa: String? = null
+)
+
 @Serializable
-data class ProdukWithKategori(
-    @SerialName("idproduk")
-    val idproduk: Int? = null,
+data class HargaGrosir(
+    @SerialName("id_harga") val idHarga: Int,
 
-    @SerialName("kodeproduk")
-    val kodeproduk: String? = null,
+    val idproduk: Int,
+    @SerialName("min_qty") val minQty: Int,
+    @SerialName("harga_jual") val hargaJual: Double
+)
 
-    @SerialName("namaproduk")
-    val namaproduk: String,
-
-    @SerialName("hargajual")
-    val hargajual: Double,
-
-    @SerialName("stock")
-    val stock: Int,
-
-    @SerialName("gambar")
-    val gambar: String? = null,
-
-    @SerialName("deskripsi")
-    val deskripsi: String,
-
-    @SerialName("kategori")
-    val kategori: KategoriProduk? = null
-) : Parcelable // <-- DITAMBAHKAN
-
-// Data class Order tidak terlalu sering dikirim antar komponen, tapi tetap bisa dijadikan Parcelable jika dibutuhkan.
-// Saya tidak mengubahnya menjadi Parcelable karena fokusnya adalah pada objek 'produk' yang menyebabkan error.
 @Serializable
-data class Order(
-    @SerialName("namapelanggan")
-    val namapelanggan: String,
+data class ProdukDetail(
+    val produk: ProdukKategori,
+    val hargaGrosir: List<HargaGrosir> = emptyList(),
+    val detailStok: List<DetailStok> = emptyList()
+)
 
-    @SerialName("total")
-    val total: Double, // total before diskon (same as subtotal)
+@Serializable
+data class Outlet(
+    @SerialName("idoutlet")
+    val idOutlet: Int, // Digunakan untuk menyimpan ke database pengguna
 
-    @SerialName("diskon")
-    val diskon: Double = 0.0,
+    @SerialName("kode_outlet")
+    val kodeOutlet: String, // Digunakan untuk tampilan di Spinner
 
-    @SerialName("grandtotal")
-    val grandtotal: Double, // final total after diskon (same as subtotal)
+    @SerialName("nama_outlet")
+    val namaOutlet: String, // Digunakan untuk tampilan di Spinner
 
-    @SerialName("bayar")
-    val bayar: Double, // assuming cash payment or a placeholder
+    @SerialName("alamat")
+    val alamat: String? = null,
 
-    @SerialName("kembalian")
-    val kembalian: Double,
+    @SerialName("telepon")
+    val telepon: String? = null,
 
-    @SerialName("metodebayar")
-    val metodebayar: String,
+    @SerialName("is_active")
+    val isActive: Boolean? = true,
 
-    @SerialName("idkasir")
-    val idkasir: Int
-    // tanggalorder will be handled by the database
+    @SerialName("created_at")
+    val createdAt: String? = null
+)
+@Serializable
+data class OutletInfo(
+    @SerialName("idoutlet")
+    val idOutlet: Int,
+    @SerialName("kode_outlet")
+    val kodeOutlet: String,
+
+    @SerialName("nama_outlet")
+    val namaOutlet: String
 )
 
 @Serializable
 data class Pengguna(
     @SerialName("iduser")
     val idUser: Int,
+
+    @SerialName("nik")
+    val nik: String? = null,
 
     @SerialName("username")
     val username: String,
@@ -144,9 +115,42 @@ data class Pengguna(
     @SerialName("hired_date")
     val hiredDate: String? = null,
 
-    // --- TAMBAHKAN BARIS INI ---
     @SerialName("updated_at")
-    val updatedAt: String? = null // Kolom baru yang menyebabkan error
+    val updatedAt: String? = null,
+
+    @SerialName("idoutlet")
+    val idOutlet: Int? = null,
+
+    @SerialName("outlet")
+    val outlet: OutletInfo? = null
+)
+
+@Serializable
+data class Order(
+    @SerialName("namapelanggan")
+    val namapelanggan: String,
+
+    @SerialName("total")
+    val total: Double, // total before diskon (same as subtotal)
+
+    @SerialName("diskon")
+    val diskon: Double = 0.0,
+
+    @SerialName("grandtotal")
+    val grandtotal: Double, // final total after diskon (same as subtotal)
+
+    @SerialName("bayar")
+    val bayar: Double, // assuming cash payment or a placeholder
+
+    @SerialName("kembalian")
+    val kembalian: Double,
+
+    @SerialName("metodebayar")
+    val metodebayar: String,
+
+    @SerialName("idkasir")
+    val idkasir: Int
+    // tanggalorder will be handled by the database
 )
 
 @Serializable

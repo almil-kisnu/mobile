@@ -25,7 +25,7 @@ class splashActivity : AppCompatActivity() {
 
         // Delay 3 detik lalu pindah ke LoginActivity
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, MainActivity::class.java))
+            startActivity(Intent(this, loginActivity::class.java))
             finish() // Supaya tidak kembali ke SplashActivity saat tombol back ditekan
         }, 3000) // 3000 ms = 3 detik
     }
