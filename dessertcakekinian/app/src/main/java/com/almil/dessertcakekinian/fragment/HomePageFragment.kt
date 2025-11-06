@@ -10,6 +10,8 @@ import android.widget.LinearLayout // Import LinearLayout
 import androidx.fragment.app.Fragment
 import com.almil.dessertcakekinian.R
 import com.almil.dessertcakekinian.activity.presensiActivity // Import presensiActivity
+import com.almil.dessertcakekinian.activity.DaftarProdukActivity
+
 
 class HomePageFragment : Fragment() {
 
@@ -28,16 +30,19 @@ class HomePageFragment : Fragment() {
 
         // 1. Cari LinearLayout dengan ID menuPresensi
         val menuPresensi: LinearLayout = view.findViewById(R.id.menuPresensi)
+        val menuProduk: LinearLayout = view.findViewById(R.id.menuProduk)
 
         // 2. Tambahkan Click Listener
         menuPresensi.setOnClickListener {
             // Membuat Intent untuk membuka presensiActivity
             val intent = Intent(requireContext(), presensiActivity::class.java)
             startActivity(intent)
+        }
 
-            // !!! Hapus baris ini: requireActivity().finish()
-            // Activity host akan tetap ada di back stack dan akan di-resume
-            // ketika presensiActivity ditutup.
+        menuProduk.setOnClickListener {
+            // Membuat Intent untuk membuka presensiActivity
+            val intent = Intent(requireContext(), DaftarProdukActivity::class.java)
+            startActivity(intent)
         }
 
         // ... (Kode inisialisasi lain)

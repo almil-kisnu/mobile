@@ -3,8 +3,6 @@ package com.almil.dessertcakekinian.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-// Pastikan Anda telah menambahkan plugin 'kotlin-parcelize' di build.gradle (modul level)
-
 @Serializable
 data class ProdukKategori(
     val idproduk: Int,
@@ -13,32 +11,22 @@ data class ProdukKategori(
     val status: String,
     val barcode: String? = null
 )
-
-// products.kt (Atau file tempat data class berada)
 @Serializable
 data class DetailStok(
-    // PERBAIKAN: Mapping 'id_detail_stock' ke 'idDetailStock'
     @SerialName("id_detail_stock") val idDetailStock: Int,
-
     val idproduk: Int,
-    // Kolom ini tidak perlu @SerialName jika namanya sama/sesuai
     val idoutlet: Int,
     val stok: Int,
-
-    // PERBAIKAN: Gunakan penamaan properti Kotlin yang standar (camelCase)
     @SerialName("harga_beli") val hargaBeli: Double,
     @SerialName("tgl_kadaluarsa") val tglKadaluarsa: String? = null
 )
-
 @Serializable
 data class HargaGrosir(
     @SerialName("id_harga") val idHarga: Int,
-
     val idproduk: Int,
     @SerialName("min_qty") val minQty: Int,
     @SerialName("harga_jual") val hargaJual: Double
 )
-
 @Serializable
 data class ProdukDetail(
     val produk: ProdukKategori,

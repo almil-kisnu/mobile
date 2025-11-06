@@ -14,24 +14,16 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-// --- Interface ---
-/**
- * Interface untuk menangani klik pada item produk di RecyclerView.
- */
 interface OnProductItemClickListener {
     fun onProductItemClicked(produkDetail: ProdukDetail)
 }
-// -----------------
 
 class ProductAdapter(
     private var productList: List<ProdukDetail>,
     private val currentOutletId: Int, // ID Outlet yang akan difilter
     private val listener: OnProductItemClickListener
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
-
-    // Format untuk menampilkan tanggal di UI (contoh: 01 07 2025)
     private val displayDateFormatter = SimpleDateFormat("dd MM yyyy", Locale.getDefault())
-    // Format yang diharapkan dari API (asumsi YYYY-MM-DD)
     private val apiDateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
     inner class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -53,30 +45,21 @@ class ProductAdapter(
         val currentDetail = productList[position]
         val produk = currentDetail.produk
 
-        // 1. Gambar
         holder.ivProductImage.setImageResource(R.drawable.ic_cake)
-
-        // 2. Data Utama
         holder.tvProductName.text = produk.namaproduk
         holder.tvBarcodeValue.text = produk.barcode ?: "-"
 
-        // 3. Filter DetailStok untuk Outlet saat ini
         val outletStokList = currentDetail.detailStok
             .filter { it.idoutlet == currentOutletId }
 
-        // 4. HITUNG TOTAL STOK (SUM) untuk Outlet ini (PERBAIKAN SESUAI PERMINTAAN)
-        // Menjumlahkan semua nilai 'stok' dari semua item DetailStok di outlet tersebut
         val totalStok = outletStokList.sumOf { it.stok }
         holder.tvStockValue.text = totalStok.toString()
 
-        // 5. Cari Tanggal Kadaluarsa Terdekat (EXP)
         val nearestExpiryDate = outletStokList
-            // Map tglKadaluarsa yang tidak null ke objek Date
             .mapNotNull { detail -> detail.tglKadaluarsa?.let { parseDate(it) } }
             // Sortir dan ambil tanggal yang paling kecil (paling dekat ke hari ini)
             .minOrNull()
 
-        // Tampilkan tanggal EXP terdekat
         if (nearestExpiryDate != null) {
             holder.tvExpValue.text = displayDateFormatter.format(nearestExpiryDate)
 
@@ -88,8 +71,6 @@ class ProductAdapter(
                 else -> R.color.status_active // Aman (Hijau/Warna default)
             }
 
-            // Asumsi Anda memiliki R.color.status_warning untuk warna peringatan
-            // Jika tidak ada, gunakan warna hijau/merah yang ada atau tambahkan warna baru di resources
             val finalColorId = try {
                 expColor
             } catch (e: Exception) {
@@ -115,15 +96,10 @@ class ProductAdapter(
         }
     }
 
-    /**
-     * Helper function untuk mengkonversi String tgl_kadaluarsa menjadi Date.
-     * Menggunakan SimpleDateFormat yang telah didefinisikan (apiDateFormatter).
-     */
     private fun parseDate(dateString: String): Date? {
         return try {
             apiDateFormatter.parse(dateString)
         } catch (e: Exception) {
-            // Jika format gagal, kembalikan null
             null
         }
     }

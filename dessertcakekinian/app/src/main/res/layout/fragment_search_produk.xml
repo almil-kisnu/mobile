@@ -50,7 +50,6 @@
         android:id="@+id/btnRestart"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="wrap_content"
-        android_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
         android:text="RESTART"
@@ -90,31 +89,16 @@
             android:paddingEnd="12dp" />
 
         <!-- SPINNER 2: Pilih Toko/Outlet (Visibilitas diubah) -->
-        <TextView
-            android:id="@+id/tv_outlet_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Pilih Toko/Outlet"
-            android:visibility="visible"/> <!-- Visibilitas diubah menjadi terlihat -->
+        <!-- Visibilitas diubah menjadi terlihat -->
 
-        <Spinner
-            android:id="@+id/spinner_outlet"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/rounded_edittext_background"
-            android:overlapAnchor="false"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:visibility="visible"/> <!-- Visibilitas diubah menjadi terlihat -->
+        <!-- Visibilitas diubah menjadi terlihat -->
 
         <!-- Checkbox Aktif -->
         <CheckBox
-            android:id="@+id/cbAktif"
+            android:id="@+id/cb_stok"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Aktif"
+            android:text="Stok menipis"
             android:textColor="?attr/colorSecondaryVariant"
             android:buttonTint="?attr/colorPrimary"
             android:paddingVertical="10dp"
@@ -122,10 +106,10 @@
 
         <!-- Checkbox Non-Aktif -->
         <CheckBox
-            android:id="@+id/cbNonAktif"
+            android:id="@+id/cb_exp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Non-Aktif"
+            android:text="Mendekati EXP"
             android:textColor="?attr/colorSecondaryVariant"
             android:buttonTint="?attr/colorPrimary"
             android:paddingVertical="10dp"
