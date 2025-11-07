@@ -162,7 +162,7 @@
 
                 <!-- MENU BARU: PEMBAYARAN -->
                 <LinearLayout
-                    android:id="@+id/menuPembayaran"
+                    android:id="@+id/menuDiskon"
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"

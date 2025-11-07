@@ -14,6 +14,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Dessertcakekinian">
         <activity
+            android:name=".activity.DiskonActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.RiwayatActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.TransaksiActivity"
+            android:exported="false" />
+        <activity
             android:name=".activity.presensiActivity"
             android:exported="false" />
         <activity

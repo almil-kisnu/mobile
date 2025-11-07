@@ -1,17 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- ========== APP THEME (MODE GELAP) ========== -->
     <style name="Theme.Dessertcakekinian" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 
-        <!-- 🎨 WARNA UTAMA -->
         <item name="colorPrimary">@color/primary_dark_mode</item>
         <item name="colorPrimaryVariant">@color/primary_variant_dark_mode</item>
 
-        <!-- 🌈 WARNA SEKUNDER -->
         <item name="colorSecondary">@color/primary_dark_mode</item>
         <item name="colorSecondaryVariant">@color/secondary_variant_dark_mode</item>
 
-        <!-- 🌚 LATAR BELAKANG DAN TEKS -->
         <item name="android:windowBackground">@color/background_dark</item>
         <item name="android:textColor">@color/text_primary_dark</item>
 
@@ -26,11 +22,19 @@
         <item name="android:textColor">@color/text_primary_dark</item>
         <item name="colorPrimary">@color/primary_dark_mode</item>
     </style>
-    <!-- ========== TEMA UNTUK BOTTOM SHEET ========== -->
+
+    <style name="AppModalStyle.Night" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@color/background_dark</item>
+    </style>
+
     <style name="CustomBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/AppModalStyle.Night</item>
+
         <item name="android:windowIsFloating">false</item>
         <item name="colorPrimary">@color/primary_dark_mode</item>
+
         <item name="android:windowBackground">@android:color/transparent</item>
+
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
@@ -40,6 +44,5 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">20%</item>
     </style>
-
 
 </resources>
