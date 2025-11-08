@@ -105,6 +105,7 @@
                 android:paddingTop="8dp"
                 android:gravity="center">
                 <ImageButton
+                    android:id="@+id/produkIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
@@ -114,10 +115,11 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="3dp"
+                    android:id="@+id/indicatorProduk"
                     android:background="?attr/colorPrimary"
                     android:layout_marginTop="8dp"
-                    android:layout_gravity="bottom" />
-            </LinearLayout>
+                    android:layout_gravity="bottom"
+                    android:visibility="visible" /> </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/tabScan"
@@ -128,6 +130,7 @@
                 android:paddingTop="8dp"
                 android:gravity="center">
                 <ImageButton
+                    android:id="@+id/scanIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
@@ -137,12 +140,11 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="3dp"
+                    android:id="@+id/indicatorScan"
                     android:background="?attr/colorPrimary"
                     android:layout_marginTop="8dp"
-                    android:visibility="gone" />
-            </LinearLayout>
+                    android:visibility="gone" /> </LinearLayout>
         </LinearLayout>
-
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView" android:layout_width="match_parent"
@@ -152,7 +154,23 @@
             android:clipToPadding="false"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:spanCount="2"
-            tools:listitem="@layout/daf_produk_card_transaksi" />
+            tools:listitem="@layout/daf_produk_card_transaksi"
+            android:visibility="visible" />
+
+        <FrameLayout
+            android:id="@+id/scanContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="100dp"
+            android:visibility="gone">
+
+            <com.journeyapps.barcodescanner.DecoratedBarcodeView
+                android:id="@+id/scanner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:zxing_scanner_layout="@layout/barcode_scanner" />
+        </FrameLayout>
+
 
     </LinearLayout>
 
@@ -163,7 +181,6 @@
         android:background="@android:color/white"
         android:elevation="8dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
-
         <View
             android:id="@+id/handleIndicator" android:layout_width="40dp"
             android:layout_height="4dp"
