@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingBottom="24dp"
-    android:background="?attr/colorPrimaryVariant"
+    android:background="#F9F9F9"
     tools:context=".BottomSheet.SearchUserFragment">
 
     <!-- Handle Bar di atas BottomSheet -->
