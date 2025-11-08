@@ -1,39 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="12dp"
-    android:gravity="center_vertical"
-    android:background="@drawable/bg_card_stok"
-    android:layout_marginBottom="8dp">
+    android:orientation="vertical">
 
-    <!-- Harga Beli -->
-    <TextView
-        android:id="@+id/tvHargaBeli"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Rp 6.000"
-        android:textSize="16sp" />
+        android:orientation="horizontal"
+        android:paddingVertical="8dp"
+        android:gravity="center_vertical">
 
-    <!-- Stok -->
-    <TextView
-        android:id="@+id/tvStok"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:text="stok : 1400"
-        android:textSize="16sp" />
+        <TextView
+            android:id="@+id/tvHargaBeli"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            tools:text="Rp 6.000"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"/>
 
-    <!-- Kadaluarsa -->
-    <TextView
-        android:id="@+id/tvExp"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:gravity="end"
-        android:text="14 Okt 2025"
-        android:textSize="16sp" />
+        <TextView
+            android:id="@+id/tvStok"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            tools:text="1400 pcs"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"/>
+
+        <TextView
+            android:id="@+id/tvExp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
+            tools:text="14 Okt 2025"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"/>
+    </LinearLayout>
+
+    <View style="@style/Divider" />
 </LinearLayout>
