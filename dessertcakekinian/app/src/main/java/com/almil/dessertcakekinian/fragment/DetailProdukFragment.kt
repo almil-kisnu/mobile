@@ -16,7 +16,6 @@ import com.almil.dessertcakekinian.model.ProdukDetail
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 
-// Nama kunci untuk argumen
 private const val ARG_PRODUK_DETAIL = "produk_detail"
 
 class DetailProdukFragment : Fragment() {
@@ -27,6 +26,7 @@ class DetailProdukFragment : Fragment() {
     private lateinit var tvNamaProduk: TextView
     private lateinit var tvBarcode: TextView
     private lateinit var tvKategori: TextView
+    private lateinit var tvHarga: TextView
     private lateinit var btnBack: ImageButton
     private lateinit var rvHargaBeli: RecyclerView
     private lateinit var rvHargaJual: RecyclerView
@@ -61,10 +61,10 @@ class DetailProdukFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Inisialisasi Views
         tvNamaProduk = view.findViewById(R.id.tv_nama_produk)
         tvBarcode = view.findViewById(R.id.tv_barcode)
         tvKategori = view.findViewById(R.id.tv_kategori)
+        tvHarga = view.findViewById(R.id.tv_harga_eceran)
         btnBack = view.findViewById(R.id.btn_back)
         rvHargaBeli = view.findViewById(R.id.rv_harga_beli)
         rvHargaJual = view.findViewById(R.id.rv_harga_jual)
@@ -74,11 +74,12 @@ class DetailProdukFragment : Fragment() {
             (activity as? OnDetailCloseListener)?.onDetailClosed()
         }
 
-        // Tampilkan Data
         produkDetail?.let { detail ->
             tvNamaProduk.text = detail.produk.namaproduk
             tvBarcode.text = detail.produk.barcode ?: "-"
             tvKategori.text = detail.produk.kategori ?: "-"
+            val harga = detail.produk.harga_eceran
+            tvHarga.text = if (harga != null) "Rp ${"%,.0f".format(harga).replace(',', '.')}" else "-"
 
             // Setup RecyclerView Harga Beli
             rvHargaBeli.layoutManager = LinearLayoutManager(context)

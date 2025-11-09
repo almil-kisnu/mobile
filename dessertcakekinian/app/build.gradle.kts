@@ -41,18 +41,16 @@ android {
 }
 
 dependencies {
-    implementation("io.ktor:ktor-client-android:2.3.0")   // ✅
+    implementation("io.ktor:ktor-client-android:2.3.0")
     implementation("io.ktor:ktor-client-okhttp:2.3.0")
-    implementation("io.ktor:ktor-client-core:2.3.0")      // ✅
-
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")   // ✅
-
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")   // ✅
-
-    implementation("io.github.jan-tennert.supabase:gotrue-kt:2.0.0")    // ✅ auth (login/register)
-    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.0") // ✅ database query
-    implementation("io.github.jan-tennert.supabase:storage-kt:2.0.0")   // ⚠️ kalau gak upload file bisa dibuang
-    implementation("io.github.jan-tennert.supabase:realtime-kt:2.0.0")  // ⚠️ kalau gak butuh realtime listener bisa dibuang
+    implementation("io.ktor:ktor-client-core:2.3.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("io.github.jan-tennert.supabase:gotrue-kt:2.0.0")
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.0")
+    implementation("io.github.jan-tennert.supabase:storage-kt:2.0.0")
+    implementation("io.github.jan-tennert.supabase:realtime-kt:2.0.0")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

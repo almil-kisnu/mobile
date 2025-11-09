@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="100dp"
+    android:backgroundTint="?attr/colorPrimaryVariant" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <!-- Gambar -->
+        <ImageView
+            android:id="@+id/imgMenu"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_launcher_foreground"
+            android:scaleType="centerCrop"
+            android:contentDescription="Menu Image" />
+
+        <!-- Info Makanan -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="10dp">
+
+            <!-- Nama Menu -->
+            <TextView
+                android:id="@+id/tvNamaMenu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mie Goreng Sosis"
+                android:textStyle="bold"
+                android:textSize="14sp" />
+
+            <!-- Deskripsi -->
+
+            <!-- Harga -->
+            <TextView
+                android:id="@+id/tvHarga"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rp 38.500"
+                android:textStyle="bold"
+                android:textSize="10sp"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:id="@+id/tvHargaDiskon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rp 35.500"
+                android:textStyle="bold"
+                android:textSize="10sp"
+                android:layout_marginTop="4dp"
+                android:visibility="gone"/>
+
+            <!-- Stok -->
+        </LinearLayout>
+
+        <!-- Custom QuantitySelector -->
+        <com.almil.dessertcakekinian.common.QuantitySelector
+            android:id="@+id/quantitySelector"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:gravity="center" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

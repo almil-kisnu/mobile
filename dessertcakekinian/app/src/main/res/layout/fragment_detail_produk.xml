@@ -127,6 +127,25 @@
                         tools:text="Bahan Makanan"
                         android:textSize="16sp"
                         android:textColor="@android:color/black"
+                        android:layout_marginTop="4dp"/>
+
+                    <View style="@style/Divider" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Harga eceran"
+                        android:textSize="13sp"
+                        android:textColor="#888888"
+                        android:layout_marginTop="12dp" />
+
+                    <TextView
+                        android:id="@+id/tv_harga_eceran"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        tools:text="Rp. 8000"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black"
                         android:layout_marginTop="4dp" />
 
                 </LinearLayout>

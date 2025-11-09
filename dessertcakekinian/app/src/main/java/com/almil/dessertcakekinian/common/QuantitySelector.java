@@ -1,23 +1,24 @@
 package com.almil.dessertcakekinian.common;
 
 import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.widget.Button;
-import android.widget.ImageButton;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.Button;
 
 import com.almil.dessertcakekinian.R;
 
+// Custom View untuk mengontrol kuantitas, dengan input yang dapat diedit secara manual.
 public class QuantitySelector extends LinearLayout {
-    private ImageButton btnPlus, btnMinus;
-    private Button btnDelete; // Tombol hapus
-    private TextView tvJumlah;
+    private Button btnPlus, btnMinus; // Sekarang MaterialButton (di-cast sebagai Button)
+    private EditText etJumlah; // Sekarang EditText
     private int quantity = 0;
     private OnQuantityChangeListener listener;
 
-    // Interface untuk callback
     public interface OnQuantityChangeListener {
         void onQuantityChanged(int quantity);
     }
@@ -44,17 +45,19 @@ public class QuantitySelector extends LinearLayout {
         // Inisialisasi view
         btnPlus = findViewById(R.id.btnPlus);
         btnMinus = findViewById(R.id.btnMinus);
-        tvJumlah = findViewById(R.id.tvJumlah);
-        btnDelete = findViewById(R.id.btnDelete); // Tombol baru
+        // Menggunakan ID tvJumlah, tetapi di-cast ke EditText
+        etJumlah = findViewById(R.id.tvJumlah);
+
+        // --- LOGIKA TOMBOL DELETE DIHAPUS SESUAI PERMINTAAN ---
 
         // Set tampilan awal
-        updateVisibility();
+        updateUI();
 
         // Tombol +
         btnPlus.setOnClickListener(v -> {
             quantity++;
             updateUI();
-            if (listener != null) listener.onQuantityChanged(quantity);
+            notifyQuantityChange();
         });
 
         // Tombol -
@@ -62,42 +65,99 @@ public class QuantitySelector extends LinearLayout {
             if (quantity > 0) {
                 quantity--;
                 updateUI();
-                if (listener != null) listener.onQuantityChanged(quantity);
+                notifyQuantityChange();
+            }
+            // Tombol minus akan otomatis dinonaktifkan ketika quantity = 0 (dikelola di updateButtonState)
+        });
+
+        // Listener untuk Input Manual pada EditText
+        etJumlah.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { /* Kosong */ }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Jika teks dihapus, ini akan di-trigger
+                if (s.length() == 0) {
+                    quantity = 0;
+                    updateButtonState(); // Nonaktifkan minus segera
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String text = s.toString();
+                if (!text.isEmpty()) {
+                    try {
+                        int newQuantity = Integer.parseInt(text);
+                        // Cek apakah ada perubahan. Jika ya, update quantity.
+                        if (newQuantity != quantity) {
+                            quantity = Math.max(0, newQuantity); // Pastikan tidak negatif
+                            notifyQuantityChange();
+                        }
+                    } catch (NumberFormatException e) {
+                        // Jika input bukan angka valid, biarkan saja (harusnya dicegah oleh inputType="number" di XML)
+                    }
+                } else {
+                    // Ketika input dikosongkan, kirim notifikasi 0
+                    if (quantity != 0) {
+                        quantity = 0;
+                        notifyQuantityChange();
+                    }
+                }
+                updateButtonState(); // Pastikan state tombol diperbarui
             }
         });
 
-        // Tombol hapus
-        btnDelete.setOnClickListener(v -> {
-            reset(); // kembalikan ke default
-            if (listener != null) listener.onQuantityChanged(quantity);
+        // Listener untuk menyelesaikan input (optional, tapi membantu)
+        etJumlah.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                // Pastikan nilai di EditText dikonversi dan diset lagi
+                if (v.getText().toString().isEmpty()) {
+                    setQuantity(0);
+                } else {
+                    setQuantity(Integer.parseInt(v.getText().toString()));
+                }
+                return false; // Membiarkan keyboard ditutup
+            }
+            return false;
         });
     }
 
     private void updateUI() {
-        tvJumlah.setText(String.valueOf(quantity));
-        updateVisibility();
+        // Tampilkan kuantitas saat ini di EditText
+        // Perhatian: text watcher dapat memicu loop, jadi pastikan kita hanya mengubah jika teks berbeda.
+        String currentText = etJumlah.getText().toString();
+        String newText = String.valueOf(quantity);
+        if (!currentText.equals(newText)) {
+            etJumlah.setText(newText);
+            // Pindahkan kursor ke akhir agar mudah dilihat
+            etJumlah.setSelection(etJumlah.getText().length());
+        }
+
+        // Update status tombol minus
+        updateButtonState();
     }
 
-    private void updateVisibility() {
-        if (quantity == 0) {
-            // Mode default → hanya plus yang tampil
-            btnPlus.setVisibility(VISIBLE);
-            btnMinus.setVisibility(GONE);
-            tvJumlah.setVisibility(GONE);
-            btnDelete.setVisibility(GONE);
-        } else {
-            // Mode aktif → tampil semua
-            btnPlus.setVisibility(VISIBLE);
-            btnMinus.setVisibility(VISIBLE);
-            tvJumlah.setVisibility(VISIBLE);
-            btnDelete.setVisibility(VISIBLE);
+    private void updateButtonState() {
+        // Tombol minus hanya aktif jika quantity > 0
+        btnMinus.setEnabled(quantity > 0);
+
+        // Tidak ada lagi logika visibility, semua kontrol selalu terlihat
+    }
+
+    private void notifyQuantityChange() {
+        if (listener != null) {
+            listener.onQuantityChanged(quantity);
         }
     }
 
     // ===== PUBLIC METHODS =====
     public void setQuantity(int quantity) {
+        // Pastikan kuantitas tidak negatif
         this.quantity = Math.max(0, quantity);
         updateUI();
+        notifyQuantityChange();
     }
 
     public int getQuantity() {
@@ -109,7 +169,6 @@ public class QuantitySelector extends LinearLayout {
     }
 
     public void reset() {
-        quantity = 0;
-        updateUI();
+        setQuantity(0);
     }
 }

@@ -9,7 +9,8 @@ data class ProdukKategori(
     val namaproduk: String,
     val kategori: String? = null,
     val status: String,
-    val barcode: String? = null
+    val barcode: String? = null,
+    val harga_eceran: Double? = null
 )
 @Serializable
 data class DetailStok(

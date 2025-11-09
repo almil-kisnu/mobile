@@ -1,60 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:gravity="center">
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:padding="4dp">
 
-    <!-- Baris tombol plus-minus -->
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <!-- Tombol Minus -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnMinus"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:minWidth="40dp"
+        android:text="-"
+        android:textSize="18sp"
+        app:iconPadding="0dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="?attr/colorPrimary"
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp" />
+
+    <!-- Jumlah -->
+    <EditText
+        android:id="@+id/tvJumlah"
+        android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
+        android:layout_marginHorizontal="8dp"
+        android:background="@null"
+        android:gravity="center"
+        android:inputType="number"
+        android:imeOptions="actionDone"
+        android:text="0"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:maxLength="3" />
 
-        <ImageButton
-            android:id="@+id/btnMinus"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="2dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_minus"
-            android:scaleType="fitCenter"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/tvJumlah"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
-            android:layout_marginHorizontal="10dp"
-            android:visibility="gone" />
-
-        <ImageButton
-            android:id="@+id/btnPlus"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="2dp"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_plus"
-            android:contentDescription="@string/desc_btn_plus" />
-    </LinearLayout>
-
-
-    <!-- Tombol hapus di bawah -->
-    <Button
-        android:id="@+id/btnDelete"
-        android:layout_width="wrap_content"
-        android:layout_height="42dp"
-        android:layout_marginTop="6dp"
-        android:text="Hapus"
-        android:textAllCaps="false"
-        android:textColor="@android:color/white"
-        android:backgroundTint="@android:color/transparent"
-        android:visibility="gone" />
-
+    <!-- Tombol Plus -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPlus"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:minWidth="40dp"
+        android:text="+"
+        android:textSize="18sp"
+        app:strokeColor="?attr/colorPrimary"
+        app:iconPadding="0dp"
+        app:strokeWidth="1dp"
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp" />
 
 </LinearLayout>
