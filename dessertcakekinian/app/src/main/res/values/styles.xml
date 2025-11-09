@@ -5,4 +5,32 @@
         <item name="android:layout_height">1dp</item>
         <item name="android:background">#EEEEEE</item>
     </style>
+
+    <style name="StrukLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">#666666</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:layout_gravity">start</item>
+        <item name="android:layout_marginEnd">16dp</item>
+    </style>
+
+    <style name="StrukValue" parent="StrukLabel">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:layout_gravity">end</item>
+        <item name="android:gravity">end</item>
+        <item name="android:layout_marginEnd">0dp</item>
+    </style>
+
+    <style name="StrukLabel.Bold" parent="StrukLabel">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="StrukValue.Bold" parent="StrukValue">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?attr/colorPrimary</item> </style>
+
 </resources>
