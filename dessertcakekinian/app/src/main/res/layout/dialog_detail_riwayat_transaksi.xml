@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+    tools:context=".fragment.RiwayatTransaksiFragment">
+
+    <View
+        android:id="@+id/handleIndicator"
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dp"
+        android:background="#E0E0E0" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="500dp"
+        android:layout_marginTop="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingBottom="32dp">
+
+            <TextView
+                android:id="@+id/tvNamaToko"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="Sweetbake"
+                android:textColor="@android:color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvAlamatToko"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="4dp"
+                android:textColor="#666666"
+                android:textSize="12sp"
+                tools:text="Jl. Cendrawasih No. 45, Jakarta"/>
+
+            <TextView
+                android:id="@+id/tvTeleponToko"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textColor="#666666"
+                android:textSize="12sp"
+                tools:text="0812-3456-7890"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/dashed_divider" />
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:columnCount="2"
+                android:rowCount="4">
+
+                <TextView android:text="Tanggal" style="@style/StrukLabel" />
+                <TextView android:id="@+id/tvTanggalDetail" style="@style/StrukValue" />
+                <TextView android:text="Waktu" style="@style/StrukLabel" />
+                <TextView android:id="@+id/tvWaktuDetail" style="@style/StrukValue" />
+                <TextView android:text="ID Transaksi" style="@style/StrukLabel" />
+                <TextView android:id="@+id/tvNomorInvoiceDetail" style="@style/StrukValue" />
+                <TextView android:text="Kasir" style="@style/StrukLabel" />
+                <TextView android:id="@+id/tvKasirDetail" style="@style/StrukValue" />
+
+            </GridLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/dashed_divider" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvDetailItem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/dashed_divider" />
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:columnCount="2"
+                android:rowCount="3">
+
+                <TextView android:text="Subtotal" style="@style/StrukLabel" />
+                <TextView android:id="@+id/tvSubtotalStruk" style="@style/StrukValue" />
+                <TextView android:text="Diskon" style="@style/StrukLabel" />
+                <TextView android:id="@+id/tvDiskonStruk" style="@style/StrukValue" />
+
+                <TextView android:text="Total" style="@style/StrukLabel.Bold" />
+                <TextView android:id="@+id/tvTotalStruk" style="@style/StrukValue.Bold" />
+
+            </GridLayout>
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:columnCount="2">
+                <TextView android:text="Metode Pembayaran" style="@style/StrukLabel" />
+                <TextView android:id="@+id/tvMetodePembayaran" style="@style/StrukValue" />
+            </GridLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/dashed_divider" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:text="Terima kasih telah berbelanja!"
+                android:textColor="#666666"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>
