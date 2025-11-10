@@ -1,4 +1,3 @@
-// File: adapter/TransaksiAdapter.kt
 package com.almil.dessertcakekinian.adapter
 
 import android.view.LayoutInflater
@@ -8,20 +7,23 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.almil.dessertcakekinian.R
+import com.almil.dessertcakekinian.common.QuantitySelector
 import com.almil.dessertcakekinian.model.ProdukDetail
 import com.google.android.material.button.MaterialButton
 import java.text.NumberFormat
 import java.util.Locale
 
 interface OnTransaksiItemClickListener {
-    fun onTransaksiItemClicked(produkDetail: ProdukDetail)
+    fun onUpdateCartItem(produkDetail: ProdukDetail, quantity: Int)
     fun onShowHargaGrosir(produkDetail: ProdukDetail)
 }
 
 class TransaksiAdapter(
     private var productList: List<ProdukDetail>,
     private val currentOutletId: Int,
-    private val listener: OnTransaksiItemClickListener
+    private val listener: OnTransaksiItemClickListener,
+    // UBAH: cartQuantities menjadi 'var' agar bisa diupdate secara eksternal
+    private var cartQuantities: Map<Int, Int> = emptyMap()
 ) : RecyclerView.Adapter<TransaksiAdapter.TransaksiViewHolder>() {
 
     private val currencyFormat = NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply {
@@ -34,7 +36,7 @@ class TransaksiAdapter(
         val tvStockValue: TextView = itemView.findViewById(R.id.tvStokValue)
         val tvPriceValue: TextView = itemView.findViewById(R.id.tvHargaJualValue)
         val btnTambahAwal: MaterialButton = itemView.findViewById(R.id.btnTambahAwal)
-        val quantitySelector: com.almil.dessertcakekinian.common.QuantitySelector =
+        val quantitySelector: QuantitySelector =
             itemView.findViewById(R.id.quantitySelector)
     }
 
@@ -48,6 +50,8 @@ class TransaksiAdapter(
         val currentDetail = productList[position]
         val produk = currentDetail.produk
 
+        val initialQuantity = cartQuantities[produk.idproduk] ?: 0
+
         holder.ivProductImage.setImageResource(R.drawable.ic_cake)
         holder.tvProductName.text = produk.namaproduk
 
@@ -59,38 +63,55 @@ class TransaksiAdapter(
         holder.tvPriceValue.text = produk.harga_eceran?.takeIf { it > 0 }
             ?.let { currencyFormat.format(it) } ?: "Rp 0"
 
-        // Reset state
-        holder.btnTambahAwal.visibility = View.VISIBLE
-        holder.quantitySelector.visibility = View.GONE
-        holder.quantitySelector.setQuantity(0)
+        if (initialQuantity > 0) {
+            holder.btnTambahAwal.visibility = View.GONE
+            holder.quantitySelector.visibility = View.VISIBLE
+            holder.quantitySelector.setQuantity(initialQuantity) // Set kuantitas dari keranjang
+        } else {
+            holder.btnTambahAwal.visibility = View.VISIBLE
+            holder.quantitySelector.visibility = View.GONE
+            holder.quantitySelector.setQuantity(0)
+        }
 
         holder.btnTambahAwal.setOnClickListener {
             holder.btnTambahAwal.visibility = View.GONE
             holder.quantitySelector.visibility = View.VISIBLE
             holder.quantitySelector.setQuantity(1)
+            listener.onUpdateCartItem(currentDetail, 1) // Panggil listener saat pertama kali ditambahkan
         }
+        holder.quantitySelector.setOnQuantityChangeListener(null)
 
+        // Listener untuk perubahan kuantitas pada QuantitySelector
         holder.quantitySelector.setOnQuantityChangeListener { qty ->
             if (qty <= 0) {
                 holder.btnTambahAwal.visibility = View.VISIBLE
                 holder.quantitySelector.visibility = View.GONE
             }
+
+            listener.onUpdateCartItem(currentDetail, qty)
         }
 
-        // KLIK CARD → Dialog atau tambah ke keranjang
         holder.itemView.setOnClickListener {
             if (currentDetail.hargaGrosir.isNotEmpty()) {
                 listener.onShowHargaGrosir(currentDetail)
-            } else {
-                listener.onTransaksiItemClicked(currentDetail)
             }
         }
     }
 
     override fun getItemCount(): Int = productList.size
-
-    fun updateData(newList: List<ProdukDetail>) {
+    fun updateData(newList: List<ProdukDetail>, newCartQuantities: Map<Int, Int> = emptyMap()) {
         productList = newList
+        cartQuantities = newCartQuantities
         notifyDataSetChanged()
+    }
+    fun updateCartQuantities(newCartQuantities: Map<Int, Int>) {
+        if (this.cartQuantities != newCartQuantities) {
+            this.cartQuantities = newCartQuantities
+            notifyDataSetChanged()
+        }
+    }
+
+    fun getProductList(): List<ProdukDetail> {
+        return productList
     }
 }

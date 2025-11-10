@@ -1,4 +1,4 @@
-// File: fragment/transaksiFragment.kt
+// File: transaksiFragment.kt (Kode 1 - Logic Scanner Sudah Benar)
 package com.almil.dessertcakekinian.fragment
 
 import android.content.Context
@@ -12,28 +12,38 @@ import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.almil.dessertcakekinian.R
 import com.almil.dessertcakekinian.adapter.OnTransaksiItemClickListener
 import com.almil.dessertcakekinian.adapter.TransaksiAdapter
+import com.almil.dessertcakekinian.adapter.CartAdapter
 import com.almil.dessertcakekinian.dialog.HargaGrosirDialog
-import com.almil.dessertcakekinian.model.ProductDataState
-import com.almil.dessertcakekinian.model.ProductViewModel
-import com.almil.dessertcakekinian.model.ProdukDetail
+import com.almil.dessertcakekinian.model.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.journeyapps.barcodescanner.BarcodeResult
 import com.journeyapps.barcodescanner.DecoratedBarcodeView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
+import android.widget.EditText
+import android.text.TextWatcher
+import android.text.Editable
 
 class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
 
+    private lateinit var searchEditText: EditText // BARU: Input pencarian
+    private var allProductList: List<ProdukDetail> = emptyList()
     private val productViewModel: ProductViewModel by activityViewModels()
+    private val cartViewModel: CartViewModel by activityViewModels()
     private var barcodeScannerView: DecoratedBarcodeView? = null
     private lateinit var recyclerView: RecyclerView
+    private lateinit var recyclerViewCart: RecyclerView
     private lateinit var scanContainer: FrameLayout
     private lateinit var tabProduk: LinearLayout
     private lateinit var tabScan: LinearLayout
@@ -41,9 +51,16 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
     private lateinit var scanIcon: ImageButton
     private lateinit var indicatorProduk: View
     private lateinit var indicatorScan: View
+    private lateinit var btnBeli: TextView
+    private lateinit var tvTotalPrice: TextView
     private lateinit var transaksiAdapter: TransaksiAdapter
+    private lateinit var cartAdapter: CartAdapter
     private var currentOutletId: Int = -1
     private lateinit var sharedPreferences: SharedPreferences
+
+    private val currencyFormat = NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply {
+        maximumFractionDigits = 0
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,7 +72,6 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // --- INIT SharedPreferences ---
         sharedPreferences = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE)
         currentOutletId = sharedPreferences.getInt("USER_OUTLET_ID", -1)
 
@@ -64,8 +80,8 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
             return
         }
 
-        // --- INIT VIEWS ---
         recyclerView = view.findViewById(R.id.recyclerView)
+        recyclerViewCart = view.findViewById(R.id.recyclerViewCart)
         scanContainer = view.findViewById(R.id.scanContainer)
         tabProduk = view.findViewById(R.id.tabProduk)
         tabScan = view.findViewById(R.id.tabScan)
@@ -74,19 +90,59 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
         indicatorProduk = view.findViewById(R.id.indicatorProduk)
         indicatorScan = view.findViewById(R.id.indicatorScan)
         barcodeScannerView = view.findViewById(R.id.scanner)
-
-        // --- SETUP RECYCLERVIEW (HANYA SEKALI!) ---
+        tvTotalPrice = view.findViewById(R.id.tvTotalPrice)
+        btnBeli = view.findViewById(R.id.btnBeli)
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
-        transaksiAdapter = TransaksiAdapter(emptyList(), currentOutletId, this)
+        transaksiAdapter = TransaksiAdapter(emptyList(), currentOutletId, this, cartViewModel.getCartQuantitiesMap())
         recyclerView.adapter = transaksiAdapter
 
-        // --- OBSERVE DATA ---
-        observeProductData()
+        recyclerViewCart.layoutManager = LinearLayoutManager(requireContext())
+        cartAdapter = CartAdapter(requireContext(), cartViewModel.cartItems.value ?: emptyMap(), cartViewModel)
+        recyclerViewCart.adapter = cartAdapter
 
-        // --- SCANNER, TAB, BOTTOM SHEET ---
+
+        observeProductData()
+        updateTotalPriceUI()
+
+        cartViewModel.cartItems.observe(viewLifecycleOwner) { newCartItemsMap ->
+            updateTotalPriceUI()
+            recyclerViewCart.post {
+                cartAdapter.updateData(newCartItemsMap)
+            }
+            transaksiAdapter.updateCartQuantities(cartViewModel.getCartQuantitiesMap())
+        }
+
+
+        searchEditText = view.findViewById(R.id.searchEditText)
         setupScanner()
         setupTabSwitching()
         setupBottomSheet(view)
+        setupPaymentButton()
+        setupSearch()
+    }
+
+    private fun setupPaymentButton() {
+        btnBeli.setOnClickListener {
+            val total = calculateTotalPrice()
+            if (total <= 0) {
+                return@setOnClickListener
+            }
+
+            val totalHargaText = tvTotalPrice.text.toString()
+            Log.d("transaksiFragment", "Total Harga yang dikirim: $totalHargaText")
+            val pembayaranFragment = PembayaranFragment.newInstance(totalHargaText)
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, pembayaranFragment)
+                .addToBackStack(null)
+                .commit()
+        }
+    }
+
+    override fun onUpdateCartItem(produkDetail: ProdukDetail, quantity: Int) {
+        val idproduk = produkDetail.produk.idproduk
+        cartViewModel.updateCart(idproduk, produkDetail, quantity)
+
     }
 
     override fun onShowHargaGrosir(produkDetail: ProdukDetail) {
@@ -94,8 +150,30 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
             .show(childFragmentManager, "HargaGrosirDialog")
     }
 
-    override fun onTransaksiItemClicked(produkDetail: ProdukDetail) {
-        Log.i("transaksiFragment", "Tambah: ${produkDetail.produk.namaproduk}")
+    private fun calculateTotalPrice(): Double {
+        var total = 0.0
+        val currentCart = cartViewModel.cartItems.value ?: emptyMap()
+
+        for (item in currentCart.values) {
+            val hargaJual = item.hargaSatuan
+            val quantity = item.quantity
+            total += hargaJual * quantity
+        }
+        return total
+    }
+
+    private fun updateTotalPriceUI() {
+        val total = calculateTotalPrice()
+        val totalQty = calculateTotalQuantity()
+        tvTotalPrice.text = currencyFormat.format(total)
+
+        val buttonText = if (totalQty > 0) {
+            "BAYAR ($totalQty)"
+        } else {
+            "BAYAR (0)"
+        }
+        btnBeli.text = buttonText
+        btnBeli.isEnabled = totalQty > 0
     }
 
     private fun observeProductData() {
@@ -104,10 +182,12 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
                 when (state) {
                     is ProductDataState.Loading -> {}
                     is ProductDataState.Success -> {
-                        val filtered = state.produkDetails.filter { produk ->
+                        // BARU: Filter berdasarkan outlet dan simpan ke allProductList
+                        allProductList = state.produkDetails.filter { produk ->
                             produk.detailStok.any { it.idoutlet == currentOutletId }
                         }
-                        transaksiAdapter.updateData(filtered)
+                        // BARU: Tampilkan daftar produk awal (tanpa filter search)
+                        updateProductDisplay(allProductList)
                     }
                     is ProductDataState.Error -> {
                         Log.e("transaksiFragment", "Error: ${state.message}")
@@ -116,12 +196,83 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
             }
         }
     }
+    // Tambahkan di akhir kelas transaksiFragment
+
+    private fun updateProductDisplay(list: List<ProdukDetail>) {
+        // Fungsi pembantu untuk memperbarui RecyclerView produk
+        transaksiAdapter.updateData(list, cartViewModel.getCartQuantitiesMap())
+    }
+
+    private fun filterProducts(query: String) {
+        if (query.isBlank()) {
+            // Jika kueri kosong, tampilkan semua produk
+            updateProductDisplay(allProductList)
+            return
+        }
+
+        val lowerCaseQuery = query.lowercase(Locale.ROOT)
+
+        val filteredList = allProductList.filter { productDetail ->
+
+            val isBarcodeMatch = productDetail.produk.barcode?.contains(lowerCaseQuery, true) == true
+
+            val isNameMatch = productDetail.produk.namaproduk.lowercase(Locale.ROOT).contains(lowerCaseQuery)
+
+            val isCategoryMatch = productDetail.produk.kategori?.lowercase(Locale.ROOT)?.contains(lowerCaseQuery) == true
+
+            isBarcodeMatch || isNameMatch || isCategoryMatch
+        }
+
+        updateProductDisplay(filteredList)
+    }
+
+    private fun setupSearch() {
+        searchEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Tidak perlu melakukan apa-apa sebelum perubahan teks
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Tidak perlu melakukan apa-apa selama perubahan teks
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // Panggil filterProducts setiap kali teks berubah
+                filterProducts(s.toString())
+            }
+        })
+    }
+    private fun handleBarcodeScanned(barcode: String) {
+        val productToUpdate = productViewModel.allProducts.value
+            .let { if (it is ProductDataState.Success) it.produkDetails else emptyList() }
+            .firstOrNull { it.produk.barcode == barcode }
+
+        productToUpdate?.let { produkDetail ->
+            val idproduk = produkDetail.produk.idproduk
+            // Dapatkan kuantitas saat ini
+            val currentQuantity = cartViewModel.cartItems.value?.get(idproduk)?.quantity ?: 0
+            val newQuantity = currentQuantity + 1
+
+            // 1. Tambahkan ke keranjang (memanggil CartViewModel)
+            onUpdateCartItem(produkDetail, newQuantity)
+
+            // 2. Scroll ke posisi item yang di-scan di daftar produk
+            val position = transaksiAdapter.getProductList().indexOfFirst { it.produk.idproduk == idproduk }
+            if (position != -1) {
+                recyclerView.scrollToPosition(position)
+            }
+        } ?: run {
+            Log.w("BarcodeScanner", "Produk dengan barcode $barcode tidak ditemukan.")
+        }
+    }
 
     private fun setupScanner() {
         barcodeScannerView?.decodeContinuous { result: BarcodeResult? ->
             result?.text?.let { barcode ->
                 Log.d("BarcodeScanner", "Scanned: $barcode")
                 barcodeScannerView?.pause()
+                handleBarcodeScanned(barcode)
+                // Lanjutkan scan setelah jeda 2 detik
                 barcodeScannerView?.postDelayed({ barcodeScannerView?.resume() }, 2000)
             }
         }
@@ -180,21 +331,9 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
         })
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (scanContainer.visibility == View.VISIBLE) startScanner()
+    private fun calculateTotalQuantity(): Int {
+        return cartViewModel.cartItems.value?.values?.sumOf { it.quantity } ?: 0
     }
-
-    override fun onPause() {
-        super.onPause()
-        stopScanner()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        barcodeScannerView = null
-    }
-
     private fun startScanner() = barcodeScannerView?.resume()
     private fun stopScanner() = barcodeScannerView?.pause()
     private fun dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
@@ -204,3 +343,4 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
         fun newInstance() = transaksiFragment()
     }
 }
+

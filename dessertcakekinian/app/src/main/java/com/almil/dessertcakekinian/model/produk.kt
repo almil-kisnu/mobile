@@ -32,7 +32,13 @@ data class HargaGrosir(
 data class ProdukDetail(
     val produk: ProdukKategori,
     val hargaGrosir: List<HargaGrosir> = emptyList(),
-    val detailStok: List<DetailStok> = emptyList()
+    val detailStok: List<DetailStok> = emptyList(),
+)
+
+data class CartItem(
+    val produkDetail: ProdukDetail,
+    var quantity: Int,
+    var hargaSatuan: Double = 0.0
 )
 
 @Serializable
@@ -68,6 +74,25 @@ data class OutletInfo(
     @SerialName("nama_outlet")
     val namaOutlet: String
 )
+@Serializable // Wajib ada
+data class Order(
+    val grandtotal: Double,
+    val bayar: Double,
+    val kembalian: Double,
+    val idkasir: Int,
+    val idoutlet: Int,
+    val metode_pembayaran: String
+)
+
+@Serializable
+data class DetailOrder(
+    val idorder: Int,
+    val idproduk: Int,
+    val harga: Double,
+    val jumlah: Int,
+    val subtotal: Double
+)
+
 
 @Serializable
 data class Pengguna(
@@ -115,7 +140,7 @@ data class Pengguna(
 )
 
 @Serializable
-data class Order(
+data class Orders(
     @SerialName("namapelanggan")
     val namapelanggan: String,
 
@@ -148,12 +173,3 @@ data class OrderId(
     val idorder: Int? = null
 )
 // DetailOrder biasanya hanya digunakan untuk keperluan database/API, tidak perlu Parcelable
-@Serializable
-data class DetailOrder(
-    val idorder: Int,
-    val idproduk: Int,
-    val harga: Double, // price of the product
-    val jumlah: Int, // quantity
-    val subtotal: Double, // price * quantity
-    val catatan: String? // product-specific note
-)

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:maxHeight="600dp"
+    android:orientation="vertical"
+    android:background="@drawable/dialog_background"
+    tools:context=".dialog.dialog_struk">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:id="@+id/strukturLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp">
+
+            <!-- Isi sama seperti sebelumnya -->
+            <TextView
+                android:id="@+id/tvNamaToko"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="Sweetbake"
+                android:textColor="@android:color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvAlamatToko"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="4dp"
+                android:textColor="#666666"
+                android:textSize="12sp"
+                tools:text="Jl. Cendrawasih No. 45, Jakarta"/>
+
+            <TextView
+                android:id="@+id/tvTeleponToko"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textColor="#666666"
+                android:textSize="12sp"
+                tools:text="0812-3456-7890"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/dashed_divider" />
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:columnCount="2"
+                android:rowCount="4">
+
+                <TextView android:text="Tanggal" style="@style/StrukLabel" />
+                <TextView android:id="@+id/tvTanggalDetail" style="@style/StrukValue" tools:text="09/11/2025" />
+
+                <TextView android:text="Waktu" style="@style/StrukLabel" />
+                <TextView android:id="@+id/tvWaktuDetail" style="@style/StrukValue" tools:text="14:30" />
+
+                <TextView android:text="Kasir" style="@style/StrukLabel" />
+                <TextView android:id="@+id/tvKasirDetail" style="@style/StrukValue" tools:text="Admin" />
+
+            </GridLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/dashed_divider" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Daftar Belanja"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvDetailItem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="3"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/dashed_divider" />
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:columnCount="2"
+                android:rowCount="3">
+
+                <TextView
+                    android:text="Total"
+                    style="@style/StrukLabel" />
+                <TextView
+                    android:id="@+id/tvTotalStruk"
+                    style="@style/StrukValue"
+                    tools:text="Rp 44.000" />
+
+                <TextView
+                    android:text="Bayar"
+                    style="@style/StrukLabel" />
+                <TextView
+                    android:id="@+id/tvBayarStruk"
+                    style="@style/StrukValue"
+                    tools:text="Rp 100.000" />
+
+                <TextView
+                    android:text="Kembalian"
+                    style="@style/StrukLabel" />
+                <TextView
+                    android:id="@+id/tvKembalianStruk"
+                    style="@style/StrukValue"
+                    tools:text="Rp 56.000" />
+
+            </GridLayout>
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:columnCount="2">
+
+                <TextView
+                    android:text="Metode Pembayaran"
+                    style="@style/StrukLabel" />
+                <TextView
+                    android:id="@+id/tvMetodePembayaran"
+                    style="@style/StrukValue"
+                    tools:text="Tunai" />
+            </GridLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/dashed_divider" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="8dp"
+                android:text="Terima kasih telah berbelanja!"
+                android:textColor="#666666"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Button Container -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="@android:color/white">
+
+        <Button
+            android:id="@+id/btnDownload"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:text="Download"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:backgroundTint="#FF5722"
+            android:layout_marginEnd="8dp"
+            style="@style/Widget.MaterialComponents.Button"/>
+
+        <Button
+            android:id="@+id/btnPrint"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:text="Print"
+            android:textColor="#FF5722"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:backgroundTint="@android:color/white"
+            android:layout_marginStart="8dp"
+            app:strokeColor="#FF5722"
+            app:strokeWidth="1dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -53,11 +53,12 @@
             android:paddingVertical="16dp">
 
             <EditText
-                android:id="@+id/searchEditText" android:layout_width="0dp"
+                android:id="@+id/searchEditText"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/bg_search"
-                android:hint="Cari Kategori/Nama/Sku/Barcode"
+                android:hint="Cari Kategori/Nama/Barcode"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="12dp"
                 android:drawableStart="@drawable/ic_searchbar"
@@ -139,7 +140,8 @@
                     android:id="@+id/indicatorScan"
                     android:background="?attr/colorPrimary"
                     android:layout_marginTop="8dp"
-                    android:visibility="gone" /> </LinearLayout>
+                    android:visibility="gone" />
+            </LinearLayout>
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -236,7 +238,7 @@
                         android:id="@+id/btnBeli"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Beli (5)"
+                        android:text="bayar (5)"
                         android:textColor="@android:color/white"
                         android:textSize="16sp"
                         android:textStyle="bold"
@@ -278,8 +280,7 @@
             android:layout_height="wrap_content"
             android:padding="8dp"
             android:clipToPadding="false"
-            android:nestedScrollingEnabled="true"
-            tools:listitem="@android:layout/simple_list_item_1" />
+            android:nestedScrollingEnabled="true" />
 
         <View
             android:layout_width="match_parent"

@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="35dp"
         android:paddingVertical="0dp"
-        android:backgroundTint="@color/button"
+        android:backgroundTint="@color/radio_button_text_color"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         app:strokeWidth="1dp"
         app:strokeColor="#43D2D6"

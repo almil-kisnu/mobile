@@ -14,7 +14,6 @@
         android:orientation="horizontal"
         android:padding="10dp">
 
-        <!-- Gambar -->
         <ImageView
             android:id="@+id/imgMenu"
             android:layout_width="50dp"
@@ -23,7 +22,6 @@
             android:scaleType="centerCrop"
             android:contentDescription="Menu Image" />
 
-        <!-- Info Makanan -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -31,7 +29,6 @@
             android:orientation="vertical"
             android:layout_marginStart="10dp">
 
-            <!-- Nama Menu -->
             <TextView
                 android:id="@+id/tvNamaMenu"
                 android:layout_width="wrap_content"
@@ -40,9 +37,6 @@
                 android:textStyle="bold"
                 android:textSize="14sp" />
 
-            <!-- Deskripsi -->
-
-            <!-- Harga -->
             <TextView
                 android:id="@+id/tvHarga"
                 android:layout_width="wrap_content"
@@ -52,26 +46,61 @@
                 android:textSize="10sp"
                 android:layout_marginTop="4dp" />
 
-            <TextView
-                android:id="@+id/tvHargaDiskon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Rp 35.500"
-                android:textStyle="bold"
-                android:textSize="10sp"
-                android:layout_marginTop="4dp"
-                android:visibility="gone"/>
-
-            <!-- Stok -->
         </LinearLayout>
 
-        <!-- Custom QuantitySelector -->
-        <com.almil.dessertcakekinian.common.QuantitySelector
-            android:id="@+id/quantitySelector"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginStart="8dp"
-            android:gravity="center" />
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMinus"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:minWidth="40dp"
+                android:text="-"
+                android:textSize="18sp"
+                app:iconPadding="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="?attr/colorPrimary"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp" />
+
+            <EditText
+                android:id="@+id/tvJumlah"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:background="@null"
+                android:gravity="center"
+                android:inputType="number"
+                android:imeOptions="actionDone"
+                android:text="0"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:maxLength="3" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPlus"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:minWidth="40dp"
+                android:text="+"
+                android:textSize="18sp"
+                app:strokeColor="?attr/colorPrimary"
+                app:iconPadding="0dp"
+                app:strokeWidth="1dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp" />
+        </LinearLayout>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -16,10 +16,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.launch
 
-/**
- * Interface untuk komunikasi dari BottomSheet ke Fragment pemanggil.
- * Memberi sinyal bahwa pengguna baru telah berhasil ditambahkan.
- */
 interface UserAddedListener {
     fun onUserAdded()
 }

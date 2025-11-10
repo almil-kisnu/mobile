@@ -94,6 +94,7 @@
             android:text="Tambah"
             android:textColor="?attr/colorPrimary"
             app:strokeColor="?attr/colorPrimary" />
+
         <com.almil.dessertcakekinian.common.QuantitySelector
             android:id="@+id/quantitySelector"
             android:layout_width="match_parent"
