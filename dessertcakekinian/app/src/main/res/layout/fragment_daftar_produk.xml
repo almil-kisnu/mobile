@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F9F9F9" tools:context=".fragment.DaftarProdukFragment">
+    android:background="?attr/android:windowBackground"
+    tools:context=".fragment.DaftarProdukFragment">
 
     <LinearLayout
         android:id="@+id/headerLayout"
@@ -14,7 +15,9 @@
         android:gravity="center_vertical"
         android:elevation="4dp"
         android:paddingHorizontal="16dp"
-        android:background="@android:color/white" app:layout_constraintTop_toTopOf="parent"
+
+        android:background="?attr/android:windowBackground"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -24,7 +27,8 @@
             android:layout_height="40dp"
             android:src="@drawable/ic_arrow_back"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="@android:color/black" android:contentDescription="Kembali" />
+            app:tint="?attr/android:textColor"
+            android:contentDescription="Kembali" />
 
         <TextView
             android:id="@+id/tvJudulProduk"
@@ -34,7 +38,9 @@
             android:text="Produk"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black" android:gravity="center"
+            android:gravity="center"
+
+            android:textColor="?attr/android:textColor"
             android:layout_marginStart="-40dp" />
     </LinearLayout>
 
@@ -45,20 +51,25 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
+
         android:background="@drawable/bg_search"
+
         android:hint="Cari produk..."
         android:paddingHorizontal="16dp"
         android:paddingVertical="12dp"
         android:drawableStart="@drawable/ic_searchbar"
         android:drawablePadding="8dp"
-        android:textColorHint="#999999"
+
+        android:textColorHint="?android:attr/textColorHint"
+        android:drawableTint="?android:attr/textColorHint"
+
         android:textSize="14sp"
         android:elevation="2dp"
         app:layout_constraintEnd_toStartOf="@+id/card_filter"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/headerLayout" />
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_filter"
         android:layout_width="46dp"
         android:layout_height="46dp"
@@ -66,10 +77,11 @@
         app:cardCornerRadius="12dp"
         app:cardElevation="2dp"
         app:cardBackgroundColor="?attr/colorPrimaryVariant"
+        app:strokeWidth="1dp"
+        app:strokeColor="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="@id/edit_text_search"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/edit_text_search">
-
         <ImageButton
             android:id="@+id/button_filter"
             android:layout_width="match_parent"
@@ -79,8 +91,8 @@
             android:padding="10dp"
             android:scaleType="centerInside"
             tools:ignore="ContentDescription" />
-    </androidx.cardview.widget.CardView>
 
+    </com.google.android.material.card.MaterialCardView>
     <TextView
         android:id="@+id/textViewError"
         android:layout_width="wrap_content"
@@ -109,4 +121,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/edit_text_search" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

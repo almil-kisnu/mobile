@@ -1,26 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
     android:paddingBottom="24dp"
-    android:background="#F9F9F9"
     tools:context=".BottomSheet.SearchUserFragment">
 
-    <!-- Handle Bar di atas BottomSheet -->
     <View
         android:id="@+id/handleBar"
-        android:layout_width="48dp"
+        android:layout_width="40dp"
         android:layout_height="4dp"
-        android:layout_marginTop="8dp"
-        android:background="?attr/colorPrimary"
+        android:layout_marginTop="12dp"
+        android:background="#BDBDBD"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Judul BottomSheet -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
@@ -33,32 +30,43 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/handleBar" />
 
-    <!-- Divider di bawah Judul -->
     <View
         android:id="@+id/dividerUnderTitle"
         android:layout_width="0dp"
         android:layout_height="3dp"
-        android:layout_marginTop="8dp"
         android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="8dp"
         android:background="?attr/colorPrimary"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnRestart"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
-    <!-- Tombol Restart -->
-    <Button
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/btnRestart"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:text="RESTART"
-        app:strokeColor="?attr/colorPrimary"
+        android:layout_width="50dp"
+        android:layout_height="35dp"
+        android:layout_marginEnd="50dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:cardBackgroundColor="?attr/colorPrimaryVariant"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
         app:layout_constraintBottom_toBottomOf="@id/tvTitle"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tvTitle" />
+        app:layout_constraintTop_toTopOf="@id/tvTitle"
+        app:strokeColor="?attr/colorPrimary"
+        app:strokeWidth="1dp">
 
-    <!-- Container Filter (Spinner dan Checkbox) -->
+        <ImageView
+            android:id="@+id/image_view_restart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:contentDescription="Restart Filter"
+            android:src="@drawable/ic_restart"
+            app:tint="?attr/colorPrimary" />
+    </com.google.android.material.card.MaterialCardView>
     <LinearLayout
         android:id="@+id/checkboxContainer"
         android:layout_width="0dp"
@@ -70,7 +78,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle">
 
-        <!-- SPINNER 1: Pilih Kategori -->
         <TextView
             android:id="@+id/tv_category_title"
             android:layout_width="match_parent"
@@ -88,44 +95,36 @@
             android:paddingStart="12dp"
             android:paddingEnd="12dp" />
 
-        <!-- SPINNER 2: Pilih Toko/Outlet (Visibilitas diubah) -->
-        <!-- Visibilitas diubah menjadi terlihat -->
-
-        <!-- Visibilitas diubah menjadi terlihat -->
-
-        <!-- Checkbox Aktif -->
         <CheckBox
             android:id="@+id/cb_stok"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Stok menipis"
-            android:textColor="?attr/colorSecondaryVariant"
             android:buttonTint="?attr/colorPrimary"
             android:paddingVertical="10dp"
+            android:text="Stok menipis"
+            android:textColor="?attr/colorSecondaryVariant"
             android:textSize="16sp" />
 
-        <!-- Checkbox Non-Aktif -->
         <CheckBox
             android:id="@+id/cb_exp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Mendekati EXP"
-            android:textColor="?attr/colorSecondaryVariant"
             android:buttonTint="?attr/colorPrimary"
             android:paddingVertical="10dp"
+            android:text="Mendekati EXP"
+            android:textColor="?attr/colorSecondaryVariant"
             android:textSize="16sp" />
 
     </LinearLayout>
 
-    <!-- Tombol Terapin -->
     <Button
         android:id="@+id/btnTerapin"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="32dp"
-        android:text="TERAPIN"
         android:paddingVertical="12dp"
+        android:text="TERAPIN"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

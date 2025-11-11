@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F9F9F9"
+    android:background="?attr/android:windowBackground"
     tools:context=".fragment.transaksiFragment">
 
     <LinearLayout
@@ -22,7 +22,7 @@
             android:gravity="center_vertical"
             android:elevation="4dp"
             android:paddingHorizontal="16dp"
-            android:background="@android:color/white">
+            android:background="?attr/android:windowBackground">
 
             <ImageButton
                 android:id="@+id/btnBackTransaksi"
@@ -30,7 +30,7 @@
                 android:layout_height="40dp"
                 android:src="@drawable/ic_arrow_back"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="@android:color/black"
+                app:tint="?attr/android:textColor"
                 android:contentDescription="Kembali" />
             <TextView
                 android:id="@+id/tvJudulTransaksi"
@@ -57,6 +57,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+
+                android:layout_marginEnd="8dp"
+
                 android:background="@drawable/bg_search"
                 android:hint="Cari Kategori/Nama/Barcode"
                 android:paddingHorizontal="16dp"
@@ -67,24 +70,29 @@
                 android:textSize="14sp"
                 android:elevation="2dp" />
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_filter_transaksi"
                 android:layout_width="46dp"
                 android:layout_height="46dp"
-                android:layout_marginStart="8dp"
+
                 app:cardCornerRadius="12dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="?attr/colorPrimaryVariant">
+                app:cardBackgroundColor="?attr/colorPrimaryVariant"
+                app:strokeWidth="1dp"
+                app:strokeColor="?attr/colorPrimary">
 
                 <ImageButton
-                    android:id="@+id/filterIcon" android:layout_width="match_parent"
+                    android:id="@+id/filterIcon"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_filter_off"
+                    android:src="@drawable/ic_bell"
                     android:padding="10dp"
                     android:scaleType="centerInside"
+                    app:tint="?attr/colorPrimary"
                     tools:ignore="ContentDescription" />
-            </androidx.cardview.widget.CardView>
+
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
         <LinearLayout
@@ -179,7 +187,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="?attr/colorPrimaryVariant"
+        android:background="?attr/android:windowBackground"
         android:elevation="8dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 

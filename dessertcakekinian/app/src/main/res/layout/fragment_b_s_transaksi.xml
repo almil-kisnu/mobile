@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@android:color/white"
+
+    android:background="?attr/colorPrimaryVariant"
     tools:context=".BottomSheet.BSTransaksiFragment">
 
     <View
@@ -14,8 +15,9 @@
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="12dp"
-        android:background="#E0E0E0"
-        android:backgroundTint="#BDBDBD" />
+
+        android:background="?android:attr/listDivider"
+        android:backgroundTint="?android:attr/listDivider" />
 
     <LinearLayout
         android:id="@+id/headerLayout"
@@ -43,7 +45,8 @@
                     android:layout_height="wrap_content"
                     android:text="Total"
                     android:textSize="12sp"
-                    android:textColor="#666666" />
+
+                    android:textColor="?android:attr/textColorHint" />
 
                 <TextView
                     android:id="@+id/tvTotalPrice"
@@ -52,7 +55,8 @@
                     android:text="Rp38.000"
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    android:textColor="#212121"
+
+                    android:textColor="?attr/android:textColor"
                     android:layout_marginTop="4dp" />
 
             </LinearLayout>
@@ -62,14 +66,16 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="#F44336">
+
+                app:cardBackgroundColor="?attr/colorPrimary">
 
                 <TextView
                     android:id="@+id/btnBeli"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Beli (5)"
-                    android:textColor="@android:color/white"
+
+                    android:textColor="?attr/colorOnPrimary"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:paddingStart="32dp"
@@ -89,7 +95,8 @@
         android:id="@+id/dividerView"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#EEEEEE"
+
+        android:background="?android:attr/listDivider"
         android:layout_marginTop="16dp" />
 
     <TextView
@@ -99,7 +106,8 @@
         android:layout_gravity="end"
         android:layout_marginEnd="16dp"
         android:text="Kosongkan Keranjang"
-        android:textColor="#F44336"
+
+        android:textColor="?attr/colorPrimary"
         android:textSize="12sp"
         android:layout_marginTop="8dp"
         android:clickable="true"

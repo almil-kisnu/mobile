@@ -25,7 +25,6 @@
             android:paddingTop="16dp"
             android:paddingBottom="16dp">
 
-            <!-- Isi sama seperti sebelumnya -->
             <TextView
                 android:id="@+id/tvNamaToko"
                 android:layout_width="wrap_content"
@@ -68,6 +67,8 @@
                 android:columnCount="2"
                 android:rowCount="4">
 
+                <TextView android:text="No. Struk" style="@style/StrukLabel" />
+                <TextView android:id="@+id/tvNoStrukDetail" style="@style/StrukValue" tools:text="TRX-12345678" />
                 <TextView android:text="Tanggal" style="@style/StrukLabel" />
                 <TextView android:id="@+id/tvTanggalDetail" style="@style/StrukValue" tools:text="09/11/2025" />
 
@@ -193,7 +194,7 @@
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:backgroundTint="#FF5722"
+            android:backgroundTint="?attr/colorPrimary"
             android:layout_marginEnd="8dp"
             style="@style/Widget.MaterialComponents.Button"/>
 
@@ -203,12 +204,12 @@
             android:layout_height="50dp"
             android:layout_weight="1"
             android:text="Print"
-            android:textColor="#FF5722"
+            android:textColor="?attr/colorPrimary"
             android:textSize="14sp"
             android:textStyle="bold"
             android:backgroundTint="@android:color/white"
             android:layout_marginStart="8dp"
-            app:strokeColor="#FF5722"
+            app:strokeColor="?attr/colorPrimary"
             app:strokeWidth="1dp"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 

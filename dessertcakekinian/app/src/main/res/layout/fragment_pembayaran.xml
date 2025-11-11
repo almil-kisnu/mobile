@@ -15,7 +15,7 @@
         android:gravity="center_vertical"
         android:elevation="4dp"
         android:paddingHorizontal="16dp"
-        android:background="@android:color/white">
+        android:background="?attr/android:windowBackground">
 
         <ImageButton
             android:id="@+id/btnBack"
@@ -24,7 +24,7 @@
             android:src="@drawable/ic_arrow_back"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Kembali"
-            app:tint="@android:color/black" />
+            app:tint="?attr/android:textColor" />
 
         <TextView
             android:id="@+id/tvJudulProduk"
@@ -100,8 +100,8 @@
                     android:id="@+id/tvTotalTagihan"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="24sp"
-                    android:textColor="#4CAF50"
+                    android:textSize="18sp"
+                    android:textColor="?attr/colorPrimary"
                     android:textStyle="bold"
                     tools:text="Rp 150.000" />
             </LinearLayout>
@@ -136,7 +136,7 @@
                     android:layout_weight="1"
                     android:text="Tunai"
                     android:textSize="16sp"
-                    android:textColor="@color/radio_button_text_color"
+                    android:textColor="?attr/colorPrimary"
                     android:background="@drawable/radio_button_background"
                     android:button="@null"
                     android:gravity="center"
@@ -148,9 +148,9 @@
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight="1"
-                    android:text="Non Tunai"
+                    android:text="Qris"
                     android:textSize="16sp"
-                    android:textColor="@color/radio_button_text_color"
+                    android:textColor="?attr/colorPrimary"
                     android:background="@drawable/radio_button_background"
                     android:button="@null"
                     android:gravity="center"
@@ -200,7 +200,7 @@
                     android:id="@+id/tvKembalian"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="24sp"
+                    android:textSize="18sp"
                     android:textColor="@android:color/black"
                     android:textStyle="bold"
                     tools:text="Rp 0" />
@@ -215,7 +215,7 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/white"
-                android:backgroundTint="#FF5722" />
+                android:backgroundTint="?attr/colorPrimary" />
 
         </LinearLayout>
 
