@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.*
 import com.almil.dessertcakekinian.R
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+// 💡 IMPOR DISESUAIKAN
+import com.google.android.material.card.MaterialCardView
 
 // Interface baru untuk mengkomunikasikan hasil filter produk
 interface ProductFilterAppliedListener {
@@ -24,20 +26,19 @@ class SearchProdukFragment : BottomSheetDialogFragment() {
         private const val ARG_CATEGORY_FILTER = "category_filter"
         private const val ARG_LOW_STOCK_FILTER = "low_stock_filter"
         private const val ARG_NEAR_EXP_FILTER = "near_exp_filter"
-        private const val ARG_ALL_CATEGORIES = "all_categories" // 💡 ARGUMEN BARU
+        private const val ARG_ALL_CATEGORIES = "all_categories"
 
         fun newInstance(
             currentCategoryFilter: String?,
             currentLowStockFilter: Boolean,
             currentNearExpFilter: Boolean,
-            allUniqueCategories: List<String> // 💡 Parameter Baru
+            allUniqueCategories: List<String>
         ): SearchProdukFragment {
             return SearchProdukFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_CATEGORY_FILTER, currentCategoryFilter)
                     putBoolean(ARG_LOW_STOCK_FILTER, currentLowStockFilter)
                     putBoolean(ARG_NEAR_EXP_FILTER, currentNearExpFilter)
-                    // Menggunakan StringArrayList untuk mengirim List<String>
                     putStringArrayList(ARG_ALL_CATEGORIES, ArrayList(allUniqueCategories))
                 }
             }
@@ -56,7 +57,10 @@ class SearchProdukFragment : BottomSheetDialogFragment() {
     private lateinit var cbLowStock: CheckBox
     private lateinit var cbNearExp: CheckBox
     private lateinit var btnTerapin: Button
-    private lateinit var btnRestart: Button
+
+    // 💡 VARIABEL DISESUAIKAN DENGAN XML
+    private lateinit var btnRestart: MaterialCardView
+    private lateinit var imageViewRestart: ImageView // <-- Menjadi ImageView
 
     // Variabel untuk data Spinner Kategori
     private var allCategories = listOf<Kategori>()
@@ -68,8 +72,6 @@ class SearchProdukFragment : BottomSheetDialogFragment() {
             currentCategoryFilter = it.getString(ARG_CATEGORY_FILTER)
             currentLowStockFilter = it.getBoolean(ARG_LOW_STOCK_FILTER, false)
             currentNearExpFilter = it.getBoolean(ARG_NEAR_EXP_FILTER, false)
-
-            // 💡 Baca daftar kategori dari argumen dan konversi ke List<Kategori>
             val categoriesFromArgs = it.getStringArrayList(ARG_ALL_CATEGORIES) ?: emptyList()
             allCategories = categoriesFromArgs.map { Kategori(it) }
         }
@@ -93,13 +95,15 @@ class SearchProdukFragment : BottomSheetDialogFragment() {
         cbLowStock = view.findViewById(R.id.cb_stok)
         cbNearExp = view.findViewById(R.id.cb_exp)
         btnTerapin = view.findViewById(R.id.btnTerapin)
-        btnRestart = view.findViewById(R.id.btnRestart)
 
-        // 💡 TIDAK PERLU MEMANGGIL fetchCategories() lagi
+        // 💡 INISIALISASI KEDUA VIEW RESTART
+        btnRestart = view.findViewById(R.id.btnRestart)
+        imageViewRestart = view.findViewById(R.id.image_view_restart) // <-- Mencari ID baru
+
         setupCategorySpinner()
         setupCheckboxListeners()
-        restoreFilterState() // Restore setelah data Spinner siap
-        updateRestartButtonState()
+        restoreFilterState()
+        updateRestartButtonState() // Panggil setelah semua view di-setup
 
 
         // Logika Tombol Terapin
@@ -109,6 +113,7 @@ class SearchProdukFragment : BottomSheetDialogFragment() {
         }
 
         // Logika Tombol Restart
+        // Listener tetap di CardView
         btnRestart.setOnClickListener {
             // Default: Semua Kategori (null), Stok (false), EXP (false)
             filterAppliedListener?.onProductFilterApplied(null, false, false)
@@ -120,8 +125,6 @@ class SearchProdukFragment : BottomSheetDialogFragment() {
     fun setProductFilterAppliedListener(listener: ProductFilterAppliedListener) {
         this.filterAppliedListener = listener
     }
-
-    // FUNGSI fetchCategories() DIHAPUS
 
     // Fungsi untuk mengatur Spinner Kategori
     private fun setupCategorySpinner() {
@@ -182,7 +185,7 @@ class SearchProdukFragment : BottomSheetDialogFragment() {
         filterAppliedListener?.onProductFilterApplied(categoryFilter, lowStockFilter, nearExpFilter)
     }
 
-    // Memperbarui status tombol Restart
+    // 💡 LOGIKA FUNGSI INI DIUBAH
     private fun updateRestartButtonState() {
         // Default filter: null (Semua Kategori), false (Stok), false (EXP)
 
@@ -192,6 +195,14 @@ class SearchProdukFragment : BottomSheetDialogFragment() {
 
         val isDefaultFilter = isCategoryDefault && isLowStockDefault && isNearExpDefault
 
-        btnRestart.isEnabled = !isDefaultFilter
+        // Jika filter BUKAN default, 'isEnabled' = true (aktif/pink)
+        // Jika filter ADALAH default, 'isEnabled' = false (non-aktif/abu-abu)
+        val shouldBeEnabled = !isDefaultFilter
+
+        // Matikan CardView untuk menghentikan klik dan efek ripple
+        btnRestart.isEnabled = shouldBeEnabled
+
+        // Matikan ImageView agar tint-nya berubah jadi abu-abu
+        imageViewRestart.isEnabled = shouldBeEnabled
     }
 }

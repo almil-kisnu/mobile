@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Layout for a single product item card, based on the provided image -->
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -9,15 +8,16 @@
     android:layout_margin="8dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="4dp"
-    app:strokeWidth="1dp">
+    app:strokeWidth="1dp"
+
+    app:cardBackgroundColor="?attr/colorPrimaryVariant"
+    app:strokeColor="?attr/colorPrimary" >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <!-- 1. Product Image / Icon (Left) -->
-        <!-- Menggunakan ImageView sederhana karena gambar di contoh tidak berbentuk lingkaran -->
         <ImageView
             android:id="@+id/ivProductImage"
             android:layout_width="60dp"
@@ -29,7 +29,6 @@
             tools:srcCompat="@drawable/ic_cake"
             android:contentDescription="Product Icon" />
 
-        <!-- 2. Product Name (Top Left, Italic) -->
         <TextView
             android:id="@+id/tvProductName"
             android:layout_width="0dp"
@@ -38,12 +37,12 @@
             android:layout_marginEnd="8dp"
             android:textSize="16sp"
             android:textStyle="bold"
+            android:textColor="?attr/android:textColor"
             app:layout_constraintEnd_toStartOf="@+id/tvBarcodeLabel"
             app:layout_constraintStart_toEndOf="@+id/ivProductImage"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="selai stroberry" />
 
-        <!-- 3. Stock Label (Middle Left) -->
         <TextView
             android:id="@+id/tvStockLabel"
             android:layout_width="wrap_content"
@@ -51,21 +50,21 @@
             android:layout_marginTop="4dp"
             android:textSize="12sp"
             android:text="stok : "
+            android:textColor="?attr/android:textColor"
             app:layout_constraintStart_toStartOf="@+id/tvProductName"
             app:layout_constraintTop_toBottomOf="@+id/tvProductName" />
 
-        <!-- 4. Stock Value (Next to Label, Bold) -->
         <TextView
             android:id="@+id/tvStockValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp"
             android:textStyle="bold"
+            android:textColor="?attr/android:textColor"
             app:layout_constraintBaseline_toBaselineOf="@+id/tvStockLabel"
             app:layout_constraintStart_toEndOf="@+id/tvStockLabel"
             tools:text="1000" />
 
-        <!-- 5. Expiry Label (Bottom Left) -->
         <TextView
             android:id="@+id/tvExpLabel"
             android:layout_width="wrap_content"
@@ -73,38 +72,40 @@
             android:layout_marginTop="4dp"
             android:textSize="12sp"
             android:text="exp : "
+            android:textColor="?attr/android:textColor"
             app:layout_constraintStart_toStartOf="@+id/tvProductName"
             app:layout_constraintTop_toBottomOf="@+id/tvStockLabel" />
 
-        <!-- 6. Expiry Value (Next to Label, Green and Bold) -->
         <TextView
             android:id="@+id/tvExpValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp"
             android:textStyle="bold"
-            android:textColor="#4CAF50"
+
+            android:textColor="@color/expiry_safe_light"
+
             app:layout_constraintBaseline_toBaselineOf="@+id/tvExpLabel"
             app:layout_constraintStart_toEndOf="@+id/tvExpLabel"
             tools:text="01 07 2025" />
 
-        <!-- 7. Barcode Label (Top Right) -->
         <TextView
             android:id="@+id/tvBarcodeLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp"
             android:text="Barcode :"
+            android:textColor="?attr/android:textColor"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- 8. Barcode Value (Below Label, Large and Bold) -->
         <TextView
             android:id="@+id/tvBarcodeValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:textSize="12sp"
+            android:textColor="?attr/android:textColor"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvBarcodeLabel"
             tools:text="212198282390219" />

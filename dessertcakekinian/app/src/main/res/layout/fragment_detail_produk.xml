@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F9F9F9"
+    android:background="?attr/android:windowBackground"
     tools:context=".fragment.DetailProdukFragment">
 
     <LinearLayout
@@ -14,7 +14,7 @@
         android:layout_height="?attr/actionBarSize"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:background="@android:color/white"
+        android:background="?attr/android:windowBackground"
         android:elevation="4dp"
         android:paddingHorizontal="16dp"
         app:layout_constraintTop_toTopOf="parent"
@@ -27,7 +27,7 @@
             android:layout_height="40dp"
             android:src="@drawable/ic_arrow_back"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="@android:color/black"
+            app:tint="?attr/android:textColor"
             android:contentDescription="Kembali" />
 
         <TextView
@@ -38,7 +38,7 @@
             android:text="Detail Produk"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black"
+            android:textColor="?attr/android:textColor"
             android:gravity="center_horizontal"
             android:layout_marginStart="-40dp" />
     </LinearLayout>
@@ -59,12 +59,15 @@
             android:orientation="vertical"
             android:paddingHorizontal="12dp">
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="3dp">
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="?attr/colorPrimaryVariant"
+                app:strokeWidth="1dp"
+                app:strokeColor="?attr/colorPrimary">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -77,7 +80,7 @@
                         android:layout_height="wrap_content"
                         android:text="Nama Produk"
                         android:textSize="13sp"
-                        android:textColor="#888888" />
+                        android:textColor="?android:attr/textColorHint" />
 
                     <TextView
                         android:id="@+id/tv_nama_produk"
@@ -86,18 +89,22 @@
                         tools:text="Tepung Terigu Serbaguna"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="@android:color/black"
+                        android:textColor="?attr/android:textColor"
                         android:layout_marginTop="4dp"
                         android:layout_marginBottom="12dp"/>
 
-                    <View style="@style/Divider" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/listDivider" />
+
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Barcode"
                         android:textSize="13sp"
-                        android:textColor="#888888"
+                        android:textColor="?android:attr/textColorHint"
                         android:layout_marginTop="12dp" />
 
                     <TextView
@@ -106,18 +113,21 @@
                         android:layout_height="wrap_content"
                         tools:text="9876543210987"
                         android:textSize="16sp"
-                        android:textColor="@android:color/black"
+                        android:textColor="?attr/android:textColor"
                         android:layout_marginTop="4dp"
                         android:layout_marginBottom="12dp"/>
 
-                    <View style="@style/Divider" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/listDivider" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Kategori"
                         android:textSize="13sp"
-                        android:textColor="#888888"
+                        android:textColor="?android:attr/textColorHint"
                         android:layout_marginTop="12dp" />
 
                     <TextView
@@ -126,17 +136,21 @@
                         android:layout_height="wrap_content"
                         tools:text="Bahan Makanan"
                         android:textSize="16sp"
-                        android:textColor="@android:color/black"
-                        android:layout_marginTop="4dp"/>
+                        android:textColor="?attr/android:textColor"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="12dp"/>
 
-                    <View style="@style/Divider" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/listDivider" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Harga eceran"
                         android:textSize="13sp"
-                        android:textColor="#888888"
+                        android:textColor="?android:attr/textColorHint"
                         android:layout_marginTop="12dp" />
 
                     <TextView
@@ -145,18 +159,21 @@
                         android:layout_height="wrap_content"
                         tools:text="Rp. 8000"
                         android:textSize="16sp"
-                        android:textColor="@android:color/black"
+                        android:textColor="?attr/android:textColor"
                         android:layout_marginTop="4dp" />
 
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="3dp">
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="?attr/colorPrimaryVariant"
+                app:strokeWidth="1dp"
+                app:strokeColor="?attr/colorPrimary">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -177,7 +194,7 @@
                             android:text="Harga Beli"
                             android:textStyle="bold"
                             android:textSize="14sp"
-                            android:textColor="@android:color/black"/>
+                            android:textColor="?attr/android:textColor"/>
 
                         <TextView
                             android:layout_width="0dp"
@@ -187,7 +204,7 @@
                             android:text="Stok"
                             android:textStyle="bold"
                             android:textSize="14sp"
-                            android:textColor="@android:color/black"/>
+                            android:textColor="?attr/android:textColor"/>
 
                         <TextView
                             android:layout_width="0dp"
@@ -197,10 +214,13 @@
                             android:text="Kadaluarsa"
                             android:textStyle="bold"
                             android:textSize="14sp"
-                            android:textColor="@android:color/black"/>
+                            android:textColor="?attr/android:textColor"/>
                     </LinearLayout>
 
-                    <View style="@style/Divider" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/listDivider" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_harga_beli"
@@ -211,14 +231,17 @@
                         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="3dp">
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="?attr/colorPrimaryVariant"
+                app:strokeWidth="1dp"
+                app:strokeColor="?attr/colorPrimary">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -239,7 +262,7 @@
                             android:text="Min Pembelian"
                             android:textStyle="bold"
                             android:textSize="14sp"
-                            android:textColor="@android:color/black"/>
+                            android:textColor="?attr/android:textColor"/>
 
                         <TextView
                             android:layout_width="0dp"
@@ -249,10 +272,13 @@
                             android:text="Harga"
                             android:textStyle="bold"
                             android:textSize="14sp"
-                            android:textColor="@android:color/black"/>
+                            android:textColor="?attr/android:textColor"/>
                     </LinearLayout>
 
-                    <View style="@style/Divider" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?android:attr/listDivider" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_harga_jual"
@@ -263,7 +289,7 @@
                         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </ScrollView>
