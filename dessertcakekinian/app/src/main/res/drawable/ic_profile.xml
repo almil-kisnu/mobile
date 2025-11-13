@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- File: ic_profile_default.xml -->
+<!-- Lokasi: res/drawable/ic_profile_default.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Background Circle -->
+    <path
+        android:fillColor="#FF91A4"
+        android:pathData="M60,60m-60,0a60,60 0,1 1,120 0a60,60 0,1 1,-120 0"/>
+
+    <!-- Head Circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M60,35m-12,0a12,12 0,1 1,24 0a12,12 0,1 1,-24 0"/>
+
+    <!-- Body -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,85 Q40,60 60,60 Q80,60 80,85 L80,100 Q80,100 60,100 Q40,100 40,100 Z"/>
+</vector>
