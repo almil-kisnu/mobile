@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="nav_home" type="id" />
+    <item name="nav_riwayat" type="id" />
+    <item name="nav_profile" type="id" />
+    <item name="bottom_navigation" type="id"/>
+    <item name="tv_greeting" type="id"/>
+    <item name="tv_date" type="id"/>
+    <item name="tv_jam_masuk" type="id"/>
+    <item name="tv_jam_pulang" type="id"/>
+    <item name="tv_jam_kerja" type="id"/>
+    <item name="btn_absen_masuk" type="id"/>
+    <item name="btn_absen_pulang" type="id"/>
+    <item name="recycler_riwayat" type="id"/>
+    <item name="tv_tanggal" type="id"/>
+    <item name="tv_jam_masuk_label" type="id"/>
+    <item name="tv_jam_masuk_value" type="id"/>
+    <item name="tv_jam_masuk_seharusnya" type="id"/>
+    <item name="tv_jam_pulang_label" type="id"/>
+    <item name="tv_jam_pulang_value" type="id"/>
+    <item name="tv_jam_pulang_seharusnya" type="id"/>
+    <item name="tv_name"  type="id"/>
+    <item name="tv_position"  type="id"/>
+    <item name="tv_email"  type="id"/>
+    <item name="tv_phone"  type="id"/>
+    <item name="tv_location"  type="id"/>
+    <item name="tv_coordinates"  type="id"/>
+    <item name="txt_tanggal"  type="id"/>
+    <item name="txt_jam_masuk"  type="id"/>
+    <item name="txt_jam_pulang"  type="id"/>
+    <item name="txt_jam_masuk_seharusnya" type="id"/>
+    <item name="txt_jam_pulang_seharusnya"  type="id"/>
+    <item name="tv_nama" type="id"/>
+    <item name="tv_role" type="id"/>
+    <item name="tv_status" type="id"/>
+    <item name="tv_keterangan" type="id"/>
+    <item name="tv_pesan_owner" type="id"/>
+    <item name="recycler_absensi_home" type="id"/>
+    <item name="et_search_home" type="id"/>
+    <item name="spinner_status_home" type="id"/>
+    <item name="spinner_role_home" type="id"/>
+    <item name="et_search" type="id"/>
+    <item name="spinner_status" type="id"/>
+    <item name="spinner_role" type="id"/>
+    <item name="recycler_jadwal" type="id"/>
+    <item name="tv_empty" type="id"/>
+    <item name="nav_jadwal" type="id"/>
+    <item name="fragment_container_main" type="id"/>
+    <item name="tv_jam_sekarang" type="id"/>
+</resources>
