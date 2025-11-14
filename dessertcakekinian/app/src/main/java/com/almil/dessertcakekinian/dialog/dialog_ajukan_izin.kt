@@ -1,5 +1,8 @@
 package com.almil.dessertcakekinian.dialog
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,11 +14,11 @@ import com.almil.dessertcakekinian.R
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import java.text.SimpleDateFormat
+import java.util.*
 
-// 1. UBAH DARI 'Fragment()' MENJADI 'DialogFragment()'
 class dialog_ajukan_izin : DialogFragment() {
 
-    // 2. Deklarasikan View di sini agar bisa diakses di semua fungsi
     private lateinit var btnClose: ImageButton
     private lateinit var btnKirim: MaterialButton
     private lateinit var etNamaKaryawan: TextInputEditText
@@ -24,98 +27,115 @@ class dialog_ajukan_izin : DialogFragment() {
     private lateinit var etJamSelesai: TextInputEditText
     private lateinit var etAlasanIzin: TextInputEditText
 
-    // Layout untuk menampilkan error (opsional namun disarankan)
     private lateinit var layoutTanggalIzin: TextInputLayout
     private lateinit var layoutJamMulai: TextInputLayout
     private lateinit var layoutJamSelesai: TextInputLayout
     private lateinit var layoutAlasanIzin: TextInputLayout
 
+    private val calendar = Calendar.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // 3. GANTI LAYOUT DENGAN NAMA FILE XML DIALOG ANDA
         return inflater.inflate(R.layout.dialog_ajukan_izin, container, false)
     }
 
-    // 4. TAMBAHKAN FUNGSI onViewCreated UNTUK SEMUA LOGIKA
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 5. WAJIB: Membuat background dialog transparan agar sudut bulat XML terlihat
         dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        // 6. Inisialisasi semua View dari XML
+        initViews(view)
+        setupAutoFillData()
+        setupClickListeners()
+    }
+
+    private fun initViews(view: View) {
         btnClose = view.findViewById(R.id.btnClose)
         btnKirim = view.findViewById(R.id.btnKirimPermintaan)
         etNamaKaryawan = view.findViewById(R.id.etNamaKaryawan)
-
         etTanggalIzin = view.findViewById(R.id.etTanggalIzin)
-        etJamMulai = view.findViewById(R.id.etJamMulai) // <-- BARU
-        etJamSelesai = view.findViewById(R.id.etJamSelesai) // <-- BARU
+        etJamMulai = view.findViewById(R.id.etJamMulai)
+        etJamSelesai = view.findViewById(R.id.etJamSelesai)
         etAlasanIzin = view.findViewById(R.id.etAlasanIzin)
 
-        // Inisialisasi Layout (untuk error)
         layoutTanggalIzin = view.findViewById(R.id.layoutTanggalIzin)
-        layoutJamMulai = view.findViewById(R.id.layoutJamMulai) // <-- BARU
-        layoutJamSelesai = view.findViewById(R.id.layoutJamSelesai) // <-- BARU
+        layoutJamMulai = view.findViewById(R.id.layoutJamMulai)
+        layoutJamSelesai = view.findViewById(R.id.layoutJamSelesai)
         layoutAlasanIzin = view.findViewById(R.id.layoutAlasanIzin)
+    }
 
+    private fun setupAutoFillData() {
+        val sharedPreferences = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
+        val userName = sharedPreferences.getString("USER_NAME", "Karyawan") ?: "Karyawan"
+        etNamaKaryawan.setText(userName)
 
-        // --- Tambahkan Logika Anda Di Sini ---
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale("id", "ID"))
+        etTanggalIzin.setText(dateFormat.format(Date()))
+    }
 
-        // TODO: Isi nama karyawan secara otomatis (misalnya dari SharedPreferences)
-        // etNamaKaryawan.setText("Almil (Otomatis)")
-
-        // 7. Logika tombol "Tutup" (X)
+    private fun setupClickListeners() {
         btnClose.setOnClickListener {
-            dismiss() // Menutup dialog
+            dismiss()
         }
 
-        // 8. Logika tombol "Tanggal Izin" (untuk memunculkan kalender)
         etTanggalIzin.setOnClickListener {
-            // TODO: Tampilkan DatePickerDialog (dialog kalender) di sini
-            // Contoh implementasi:
-            // showDatePicker()
-            Toast.makeText(context, "Buka Kalender...", Toast.LENGTH_SHORT).show()
+            showDatePicker()
         }
 
-        // 9. Logika "Jam Mulai" (untuk memunculkan TimePicker) <-- BARU
         etJamMulai.setOnClickListener {
-            // TODO: Tampilkan TimePickerDialog (dialog jam) di sini
-            // Contoh implementasi:
-            // showTimePicker(isSelectingStartTime = true)
-            Toast.makeText(context, "Buka Jam Mulai...", Toast.LENGTH_SHORT).show()
+            showTimePicker(true)
         }
 
-        // 10. Logika "Jam Selesai" (untuk memunculkan TimePicker) <-- BARU
         etJamSelesai.setOnClickListener {
-            // TODO: Tampilkan TimePickerDialog (dialog jam) di sini
-            // Contoh implementasi:
-            // showTimePicker(isSelectingStartTime = false)
-            Toast.makeText(context, "Buka Jam Selesai...", Toast.LENGTH_SHORT).show()
+            showTimePicker(false)
         }
 
-        // 11. Logika tombol "Kirim Permintaan" (Validasi diperbarui)
         btnKirim.setOnClickListener {
             if (validasiInput()) {
-                // TODO: Tambahkan logika kirim data ke database/API
-                // Ambil datanya:
-                // val tanggal = etTanggalIzin.text.toString()
-                // val jamMulai = etJamMulai.text.toString()
-                // val jamSelesai = etJamSelesai.text.toString()
-                // val alasan = etAlasanIzin.text.toString()
-
-                Toast.makeText(context, "Permintaan Izin Terkirim", Toast.LENGTH_SHORT).show()
-                dismiss() // Tutup dialog setelah kirim
+                kirimPermintaanIzin()
             }
         }
     }
 
-    // 12. Fungsi validasi terpisah agar lebih rapi <-- BARU
+    private fun showDatePicker() {
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val datePicker = DatePickerDialog(requireContext(), { _, selectedYear, selectedMonth, selectedDay ->
+            calendar.set(selectedYear, selectedMonth, selectedDay)
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale("id", "ID"))
+            etTanggalIzin.setText(dateFormat.format(calendar.time))
+        }, year, month, day)
+
+        datePicker.datePicker.minDate = System.currentTimeMillis() - 1000
+        datePicker.show()
+    }
+
+    private fun showTimePicker(isStartTime: Boolean) {
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+
+        val timePicker = TimePickerDialog(requireContext(), { _, selectedHour, selectedMinute ->
+            calendar.set(Calendar.HOUR_OF_DAY, selectedHour)
+            calendar.set(Calendar.MINUTE, selectedMinute)
+
+            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val timeText = timeFormat.format(calendar.time)
+
+            if (isStartTime) {
+                etJamMulai.setText(timeText)
+            } else {
+                etJamSelesai.setText(timeText)
+            }
+        }, hour, minute, true)
+
+        timePicker.show()
+    }
+
     private fun validasiInput(): Boolean {
-        // Reset error sebelumnya
         layoutTanggalIzin.error = null
         layoutJamMulai.error = null
         layoutJamSelesai.error = null
@@ -143,6 +163,41 @@ class dialog_ajukan_izin : DialogFragment() {
             return false
         }
 
-        return true // Semua validasi lolos
+        if (jamMulai.isNotEmpty() && jamSelesai.isNotEmpty()) {
+            try {
+                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                val startTime = timeFormat.parse(jamMulai)
+                val endTime = timeFormat.parse(jamSelesai)
+
+                if (endTime != null && startTime != null && endTime.before(startTime)) {
+                    layoutJamSelesai.error = "Jam selesai harus setelah jam mulai"
+                    return false
+                }
+            } catch (e: Exception) {
+                // Format time tidak valid
+            }
+        }
+
+        return true
+    }
+
+    private fun kirimPermintaanIzin() {
+        val nama = etNamaKaryawan.text.toString()
+        val tanggal = etTanggalIzin.text.toString()
+        val jamMulai = etJamMulai.text.toString()
+        val jamSelesai = etJamSelesai.text.toString()
+        val alasan = etAlasanIzin.text.toString()
+
+        // Simpan ke SharedPreferences sementara
+        val prefs = requireContext().getSharedPreferences("izin_data", Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+        val izinId = "izin_${System.currentTimeMillis()}"
+
+        val izinData = "$nama|$tanggal|$jamMulai|$jamSelesai|$alasan|PENDING"
+        editor.putString(izinId, izinData)
+        editor.apply()
+
+        Toast.makeText(requireContext(), "Permintaan izin berhasil dikirim!", Toast.LENGTH_SHORT).show()
+        dismiss()
     }
 }

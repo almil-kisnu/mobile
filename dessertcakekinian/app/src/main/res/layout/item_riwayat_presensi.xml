@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,146 +9,158 @@
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp"
     app:contentPadding="16dp"
-    app:cardBackgroundColor="?attr/colorPrimaryVariant" app:strokeWidth="1dp" app:strokeColor="?attr/colorPrimary"> <androidx.constraintlayout.widget.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    app:cardBackgroundColor="?attr/colorPrimaryVariant"
+    app:strokeWidth="1dp"
+    app:strokeColor="?attr/colorPrimary">
 
-    <TextView
-        android:id="@+id/tvTanggal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Selasa, 17 Oktober 2023" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/tvStatusBadge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_badge_hadir"
-        android:paddingHorizontal="10dp"
-        android:paddingVertical="4dp"
-        android:textColor="@android:color/white"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Hadir" />
+        <TextView
+            android:id="@+id/tvTanggal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Selasa, 17 Oktober 2023" />
 
-    <ImageView
-        android:id="@+id/iconClockIn"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
-        android:layout_marginTop="16dp"
-        android:src="@drawable/ic_absen_masuk"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTanggal"
-        app:tint="?android:attr/textColorSecondary" />
+        <TextView
+            android:id="@+id/tvStatusBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_badge_hadir"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Hadir" />
 
-    <TextView
-        android:id="@+id/tvLabelClockIn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="Absen Masuk"
-        android:textColor="?android:attr/textColorSecondary"
-        app:layout_constraintBottom_toBottomOf="@id/iconClockIn"
-        app:layout_constraintStart_toEndOf="@id/iconClockIn"
-        app:layout_constraintTop_toTopOf="@id/iconClockIn" />
+        <ImageView
+            android:id="@+id/iconClockIn"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/ic_absen_masuk"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTanggal"
+            app:tint="?android:attr/textColorSecondary" />
 
-    <TextView
-        android:id="@+id/tvWaktuClockIn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tvLabelClockIn"
-        tools:text="08:01" />
+        <!-- TAMBAH ID DI SINI -->
+        <TextView
+            android:id="@+id/tvLabelClockIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Absen Masuk"
+            android:textColor="?android:attr/textColorSecondary"
+            app:layout_constraintBottom_toBottomOf="@id/iconClockIn"
+            app:layout_constraintStart_toEndOf="@id/iconClockIn"
+            app:layout_constraintTop_toTopOf="@id/iconClockIn" />
 
-    <ImageView
-        android:id="@+id/iconClockOut"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
-        android:layout_marginTop="8dp"
-        android:src="@drawable/ic_absen_pulang"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/iconClockIn"
-        app:tint="?android:attr/textColorSecondary" />
+        <!-- TAMBAH ID DI SINI -->
+        <TextView
+            android:id="@+id/tvWaktuClockIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvLabelClockIn"
+            tools:text="08:01" />
 
-    <TextView
-        android:id="@+id/tvLabelClockOut"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="Absen Pulang"
-        android:textColor="?android:attr/textColorSecondary"
-        app:layout_constraintBottom_toBottomOf="@id/iconClockOut"
-        app:layout_constraintStart_toEndOf="@id/iconClockOut"
-        app:layout_constraintTop_toTopOf="@id/iconClockOut" />
+        <ImageView
+            android:id="@+id/iconClockOut"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/ic_absen_pulang"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/iconClockIn"
+            app:tint="?android:attr/textColorSecondary" />
 
-    <TextView
-        android:id="@+id/tvWaktuClockOut"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tvLabelClockOut"
-        tools:text="17:05" />
+        <!-- TAMBAH ID DI SINI -->
+        <TextView
+            android:id="@+id/tvLabelClockOut"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Absen Pulang"
+            android:textColor="?android:attr/textColorSecondary"
+            app:layout_constraintBottom_toBottomOf="@id/iconClockOut"
+            app:layout_constraintStart_toEndOf="@id/iconClockOut"
+            app:layout_constraintTop_toTopOf="@id/iconClockOut" />
 
-    <View
-        android:id="@+id/separator"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginTop="16dp"
-        android:background="#EEEEEE"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvWaktuClockOut" />
+        <!-- TAMBAH ID DI SINI -->
+        <TextView
+            android:id="@+id/tvWaktuClockOut"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvLabelClockOut"
+            tools:text="17:05" />
 
-    <TextView
-        android:id="@+id/tvLabelTotalJam"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Total Jam Kerja"
-        android:textColor="?android:attr/textColorSecondary"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/separator" />
+        <View
+            android:id="@+id/separator"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="#EEEEEE"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvWaktuClockOut" />
 
-    <TextView
-        android:id="@+id/tvTotalJam"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tvLabelTotalJam"
-        tools:text="9 Jam 4 Menit" />
+        <!-- TAMBAH ID DI SINI -->
+        <TextView
+            android:id="@+id/tvLabelTotalJam"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Total Jam Kerja"
+            android:textColor="?android:attr/textColorSecondary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/separator" />
 
-    <TextView
-        android:id="@+id/tvLabelJamTerhutang"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Jam Terhutang"
-        android:textColor="?android:attr/textColorSecondary"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvLabelTotalJam" />
+        <!-- TAMBAH ID DI SINI -->
+        <TextView
+            android:id="@+id/tvTotalJam"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvLabelTotalJam"
+            tools:text="9 Jam 4 Menit" />
 
-    <TextView
-        android:id="@+id/tvJamTerhutang"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#E53935"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tvLabelJamTerhutang"
-        tools:text="-8 Jam" />
+        <!-- TAMBAH ID DI SINI -->
+        <TextView
+            android:id="@+id/tvLabelJamTerhutang"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Jam Terhutang"
+            android:textColor="?android:attr/textColorSecondary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvLabelTotalJam" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- TAMBAH ID DI SINI -->
+        <TextView
+            android:id="@+id/tvJamTerhutang"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#E53935"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvLabelJamTerhutang"
+            tools:text="-8 Jam" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

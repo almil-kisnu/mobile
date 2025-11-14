@@ -12,8 +12,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import com.almil.dessertcakekinian.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.almil.dessertcakekinian.fragment.HomePresensiFragment // Asumsi Anda membuat fragment ini
-import com.almil.dessertcakekinian.fragment.RiwayatAbsenFragment // Asumsi Anda membuat fragment ini
 import com.almil.dessertcakekinian.fragment.JadwalFragment
 import com.almil.dessertcakekinian.fragment.PresensiFragment // Asumsi Anda membuat fragment ini
 import com.almil.dessertcakekinian.fragment.transaksiFragment

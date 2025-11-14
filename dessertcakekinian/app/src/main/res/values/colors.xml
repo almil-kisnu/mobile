@@ -28,5 +28,8 @@
     <color name="status_warning">#FFF176</color>
     <color name="status_active">#00FF08</color>
     <color name="status_inactive">#FF0000</color>
+
+    <color name="white">#FFFFFF</color>
+
 </resources>
 
