@@ -1,6 +1,6 @@
 
 <resources>
-    <color name="primary_light">#E6A4B4</color>
+    <color name="primary_light">#E690A5</color>
     <color name="primary_dark">#fff8f3</color>
     <color name="secondary_light">#e6a4b4</color>
     <color name="secondary_dark">#41464D</color>
@@ -8,18 +8,28 @@
     <color name="text_primary_light">#000000</color>
     <color name="expiry_safe_light">#4CAF50</color>
     <color name="spinner_background_color_light">#FFFFFF</color>
+    <color name="status_hijau_absen_light">#4CAF50</color>
+    <color name="status_merah_absen_light">#F44336</color>
+    <color name="status_oren_absen_light">#FF9800</color>
 
-    <color name="primary_dark_mode">#E6A4B4</color>
-    <color name="primary_variant_dark_mode">#283334</color>
-    <color name="secondary_dark_mode">#E6A4B4</color>
+
+    <color name="primary_dark_mode">#4E8FE0</color>
+    <color name="primary_variant_dark_mode">#313D3E</color>
+    <color name="secondary_dark_mode">#3970B1</color>
     <color name="secondary_variant_dark_mode">#FFFFFF</color>
     <color name="background_dark">#1A2223</color>
     <color name="text_primary_dark">#FFFFFF</color>
     <color name="expiry_safe_dark">#81C784</color>
     <color name="spinner_background_color_dark">#283334</color>
+    <color name="status_hijau_absen_dark">#4CAF50</color>
+    <color name="status_merah_absen_dark">#F44336</color>
+    <color name="status_oren_absen_dark">#FF9800</color>
 
     <color name="status_warning">#FFF176</color>
     <color name="status_active">#00FF08</color>
     <color name="status_inactive">#FF0000</color>
+
+    <color name="white">#FFFFFF</color>
+
 </resources>
 

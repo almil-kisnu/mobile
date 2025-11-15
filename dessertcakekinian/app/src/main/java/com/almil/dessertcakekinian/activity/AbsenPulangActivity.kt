@@ -2,21 +2,27 @@ package com.almil.dessertcakekinian.activity
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationTokenSource
 import com.almil.dessertcakekinian.R
 import com.almil.dessertcakekinian.database.PenggunaApi
 import com.almil.dessertcakekinian.database.SupabaseHelper
@@ -33,64 +39,80 @@ class AbsenPulangActivity : AppCompatActivity() {
         const val RADIUS_METERS = 100.0f
     }
 
-    private lateinit var tvGreeting: TextView
-    private lateinit var tvJamMasuk: TextView
-    private lateinit var tvJamSekarang: TextView
-    private lateinit var tvJamKerja: TextView
-    private lateinit var tvLocation: TextView
-    private lateinit var tvCoordinates: TextView
-    private lateinit var btnAbsenPulang: Button
+    private lateinit var tvNamaKaryawan: TextView
+    private lateinit var tvLokasi: TextView
+    private lateinit var tvJamRealTime: TextView
+    private lateinit var tvTanggalRealTime: TextView
+    private lateinit var btnKonfirmasi: Button
+    private lateinit var btnBack: ImageButton
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var currentLatitude = 0.0
     private var currentLongitude = 0.0
     private var currentAddress = "Lokasi tidak diketahui"
     private var pendingPulang = false
-    private var singleToast: Toast? = null
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_absen_pulang)
 
-        tvGreeting = findViewById(R.id.tv_greeting)
-        tvJamMasuk = findViewById(R.id.tv_jam_masuk)
-        tvJamSekarang = findViewById(R.id.tv_jam_sekarang)
-        tvJamKerja = findViewById(R.id.tv_jam_kerja)
-        tvLocation = findViewById(R.id.tv_location)
-        tvCoordinates = findViewById(R.id.tv_coordinates)
-        btnAbsenPulang = findViewById(R.id.btn_absen_pulang)
+        // Initialize views dengan ID yang sesuai dari XML
+        tvNamaKaryawan = findViewById(R.id.tvNamaKaryawan)
+        tvLokasi = findViewById(R.id.tvLokasi)
+        tvJamRealTime = findViewById(R.id.tvJamRealTime)
+        tvTanggalRealTime = findViewById(R.id.tvTanggalRealTime)
+        btnKonfirmasi = findViewById(R.id.btnKonfirmasi)
+        btnBack = findViewById(R.id.btnBack)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        tvGreeting.text = "Selamat Tinggal, Kasir"
 
+        // Untuk testing - enable dev mode (bisa absen di luar lokasi)
+        getSharedPreferences("absen_data", Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean("dev_mode", true)
+            .apply()
+
+        // Set nama karyawan dari shared preferences
+        val userSession = getSharedPreferences("user_session", Context.MODE_PRIVATE)
+        val userName = userSession.getString("USER_NAME", "Karyawan") ?: "Karyawan"
+        tvNamaKaryawan.text = userName
+
+        // Set tanggal dan waktu real-time
+        setCurrentDateTime()
+
+        // Cek status absen
         val prefs = getSharedPreferences("absen_data", Context.MODE_PRIVATE)
         val status = prefs.getString("status_absen", "BELUM_ABSEN")
 
         if (status == "BELUM_ABSEN") {
             showToast("❌ Anda harus absen masuk dulu")
-            btnAbsenPulang.isEnabled = false
+            btnKonfirmasi.isEnabled = false
             return
         }
 
         if (status == "SUDAH_PULANG") {
             showToast("❌ Anda sudah absen pulang hari ini")
-            btnAbsenPulang.isEnabled = false
+            btnKonfirmasi.isEnabled = false
             return
         }
 
-        val jamMasuk = prefs.getString("jam_masuk_hari_ini", "08:00")
-        tvJamMasuk.text = jamMasuk
+        // Setup button listeners
+        setupButtonListeners()
 
-        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
-        val jamSekarang = sdf.format(Date())
-        tvJamSekarang.text = jamSekarang
-        hitungJamKerja(jamMasuk!!, jamSekarang)
-
+        // Request location permission
         requestLocationPermission()
+    }
 
-        btnAbsenPulang.setOnClickListener {
-            btnAbsenPulang.isEnabled = false
-            btnAbsenPulang.postDelayed({ btnAbsenPulang.isEnabled = true }, 1500)
+    private fun setupButtonListeners() {
+        // Tombol Back
+        btnBack.setOnClickListener {
+            finish()
+        }
+
+        // Tombol Konfirmasi
+        btnKonfirmasi.setOnClickListener {
+            btnKonfirmasi.isEnabled = false
+            btnKonfirmasi.postDelayed({ btnKonfirmasi.isEnabled = true }, 1500)
 
             val prefsCheck = getSharedPreferences("absen_data", Context.MODE_PRIVATE)
             val statusCheck = prefsCheck.getString("status_absen", "BELUM_ABSEN")
@@ -115,7 +137,7 @@ class AbsenPulangActivity : AppCompatActivity() {
             } else {
                 showToast("Mohon tunggu, sedang mengambil lokasi...")
                 pendingPulang = true
-                getCurrentLocation()
+                requestLocationPermission()
             }
         }
 
@@ -126,31 +148,38 @@ class AbsenPulangActivity : AppCompatActivity() {
         })
     }
 
+    private fun setCurrentDateTime() {
+        try {
+            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val dateFormat = SimpleDateFormat("EEEE, dd MMMM yyyy", Locale("id", "ID"))
+
+            val currentTime = timeFormat.format(Date())
+            val currentDate = dateFormat.format(Date())
+
+            tvJamRealTime.text = currentTime
+            tvTanggalRealTime.text = currentDate
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private fun validateNamaThen(onValid: () -> Unit) {
         val prefs = getSharedPreferences("absen_data", Context.MODE_PRIVATE)
-        val nama = prefs.getString("nama_pengguna", "")?.trim() ?: ""
+
+        // Ambil nama dari user_session (login) bukan dari absen_data
+        val userSession = getSharedPreferences("user_session", Context.MODE_PRIVATE)
+        val nama = userSession.getString("USER_NAME", "")?.trim() ?: ""
 
         if (nama.isEmpty()) {
-            showToast("Isi nama pengguna dulu (sesuai tabel pengguna)")
+            showToast("Error: Nama pengguna tidak ditemukan")
             return
         }
 
-        showToast("Memeriksa nama di Supabase...")
-        PenggunaApi().getByUsername(nama, object : PenggunaApi.PenggunaCallback {
-            override fun onSuccess(pengguna: PenggunaApi.Pengguna) {
-                try {
-                    getSharedPreferences("absen_data", Context.MODE_PRIVATE)
-                        .edit()
-                        .putInt("id_pengguna", pengguna.iduser)
-                        .apply()
-                } catch (ignored: Exception) {}
-                runOnUiThread(onValid)
-            }
+        // Simpan nama ke absen_data untuk digunakan nanti
+        prefs.edit().putString("nama_pengguna", nama).apply()
 
-            override fun onError(error: String) {
-                runOnUiThread { showToast("Nama tidak valid: $error") }
-            }
-        })
+        // Langsung lanjut tanpa validasi Supabase (karena sudah login)
+        runOnUiThread(onValid)
     }
 
     private fun isWithinTargetLocation(userLat: Double, userLng: Double): Boolean {
@@ -223,7 +252,6 @@ class AbsenPulangActivity : AppCompatActivity() {
 
         val message = "✅ Absen Pulang berhasil!\nWaktu: $currentTime" +
                 "\nLokasi: $currentAddress" +
-                "\nJam kerja: ${tvJamKerja.text}" +
                 "\n📍 Lokasi: Jurusan TI Polije ✅"
         showToast(message)
         finish()
@@ -262,33 +290,37 @@ class AbsenPulangActivity : AppCompatActivity() {
         }
     }
 
-    private fun hitungJamKerja(jamMasuk: String, jamPulang: String) {
-        try {
-            val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
-            val timeMasuk = sdf.parse(jamMasuk)
-            val timePulang = sdf.parse(jamPulang)
-
-            if (timeMasuk != null && timePulang != null) {
-                var diff = timePulang.time - timeMasuk.time
-                if (diff < 0) diff += 24 * 60 * 60 * 1000
-                val hours = diff / (60 * 60 * 1000)
-                val minutes = (diff % (60 * 60 * 1000)) / (60 * 1000)
-                tvJamKerja.text = "$hours jam $minutes menit"
-            } else {
-                tvJamKerja.text = "0 jam 0 menit"
-            }
-        } catch (e: Exception) {
-            tvJamKerja.text = "0 jam 0 menit"
-        }
-    }
-
     private fun requestLocationPermission() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
-                LOCATION_PERMISSION_REQUEST_CODE
-            )
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            // Tampilkan dialog penjelasan sebelum minta permission
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // Jelaskan kenapa butuh lokasi
+                AlertDialog.Builder(this)
+                    .setTitle("Izin Lokasi Diperlukan")
+                    .setMessage("Aplikasi membutuhkan akses lokasi untuk memastikan Anda berada di Jurusan TI Polije saat absen pulang.")
+                    .setPositiveButton("OK") { _, _ ->
+                        // Minta permission setelah user paham
+                        ActivityCompat.requestPermissions(this,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                            LOCATION_PERMISSION_REQUEST_CODE
+                        )
+                    }
+                    .setNegativeButton("Batal") { _, _ ->
+                        Toast.makeText(this, "Tidak bisa absen pulang tanpa izin lokasi", Toast.LENGTH_LONG).show()
+                        finish()
+                    }
+                    .show()
+            } else {
+                // Langsung minta permission
+                ActivityCompat.requestPermissions(this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
+            }
         } else {
+            // Permission sudah diberikan, ambil lokasi
             getCurrentLocation()
         }
     }
@@ -296,127 +328,132 @@ class AbsenPulangActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && (
-                        grantResults[0] == PackageManager.PERMISSION_GRANTED ||
-                                (grantResults.size > 1 && grantResults[1] == PackageManager.PERMISSION_GRANTED)
-                        )) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission diberikan, ambil lokasi
                 getCurrentLocation()
             } else {
-                tvLocation.text = "Izin lokasi ditolak"
-                tvCoordinates.text = "Tidak dapat mengakses lokasi"
-                showToast("Izin lokasi diperlukan untuk absen")
+                // Permission ditolak
+                tvLokasi.text = "Izin lokasi ditolak"
+                Toast.makeText(this, "Tidak bisa absen pulang tanpa izin lokasi. Silakan berikan izin lokasi di pengaturan.", Toast.LENGTH_LONG).show()
+
+                // Beri opsi ke pengaturan
+                AlertDialog.Builder(this)
+                    .setTitle("Izin Lokasi Ditolak")
+                    .setMessage("Untuk dapat absen pulang, Anda perlu memberikan izin lokasi. Buka pengaturan aplikasi?")
+                    .setPositiveButton("Buka Pengaturan") { _, _ ->
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        intent.data = Uri.parse("package:$packageName")
+                        startActivity(intent)
+                    }
+                    .setNegativeButton("Nanti") { _, _ ->
+                        finish()
+                    }
+                    .show()
             }
         }
     }
 
     @SuppressLint("MissingPermission")
     private fun getCurrentLocation() {
-        val fineGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        val coarseGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-
-        if (fineGranted || coarseGranted) {
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location ->
-                    if (location != null) {
-                        currentLatitude = location.latitude
-                        currentLongitude = location.longitude
-                        tvCoordinates.text = String.format(Locale.getDefault(),
-                            "Lat: %.6f, Long: %.6f", currentLatitude, currentLongitude)
-
-                        getAddressFromLocation(location)
-                        if (pendingPulang) {
-                            if (isWithinTargetLocation(currentLatitude, currentLongitude)) {
-                                pendingPulang = false
-                                validateNamaThen(this::simpanAbsenPulang)
-                            } else {
-                                pendingPulang = false
-                                showLocationError()
-                            }
-                        }
-                    } else {
-                        val cts = CancellationTokenSource()
-                        fusedLocationClient.getCurrentLocation(
-                            Priority.PRIORITY_HIGH_ACCURACY,
-                            cts.token
-                        ).addOnSuccessListener { loc ->
-                            if (loc != null) {
-                                currentLatitude = loc.latitude
-                                currentLongitude = loc.longitude
-                                tvCoordinates.text = String.format(Locale.getDefault(),
-                                    "Lat: %.6f, Long: %.6f", currentLatitude, currentLongitude)
-                                getAddressFromLocation(loc)
-                                if (pendingPulang) {
-                                    if (isWithinTargetLocation(currentLatitude, currentLongitude)) {
-                                        pendingPulang = false
-                                        validateNamaThen(this::simpanAbsenPulang)
-                                    } else {
-                                        pendingPulang = false
-                                        showLocationError()
-                                    }
-                                }
-                            } else {
-                                tvLocation.text = "Lokasi tidak ditemukan"
-                                tvCoordinates.text = "Coba lagi..."
-                            }
-                        }.addOnFailureListener { e ->
-                            tvLocation.text = "Gagal mengambil lokasi"
-                            tvCoordinates.text = "Error: ${e.message}"
-                            showToast("Gagal mengambil lokasi: ${e.message}")
-                        }
-                    }
-                }
-                .addOnFailureListener { e ->
-                    tvLocation.text = "Gagal mengambil lokasi"
-                    tvCoordinates.text = "Error: ${e.message}"
-                    showToast("Gagal mengambil lokasi: ${e.message}")
-                }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return
         }
+
+        showToast("Mengambil lokasi pulang...")
+
+        // Coba ambil last location dulu (lebih cepat)
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location ->
+                if (location != null) {
+                    // Berhasil dapat lokasi dari cache
+                    processLocation(location)
+                } else {
+                    // Jika last location null, request location baru
+                    requestNewLocation()
+                }
+            }
+            .addOnFailureListener { e ->
+                // Jika gagal, request location baru
+                requestNewLocation()
+            }
     }
 
-    private fun getAddressFromLocation(location: Location) {
-        try {
-            val geocoder = Geocoder(this, Locale("id", "ID"))
-            val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+    @SuppressLint("MissingPermission")
+    private fun requestNewLocation() {
+        val locationRequest = com.google.android.gms.location.LocationRequest.Builder(
+            com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+            10000
+        ).build()
 
-            if (addresses != null && addresses.isNotEmpty()) {
-                val address = addresses[0]
-                val addressText = StringBuilder()
-
-                if (address.subLocality != null) addressText.append(address.subLocality).append(", ")
-                if (address.locality != null) addressText.append(address.locality).append(", ")
-                if (address.subAdminArea != null) addressText.append(address.subAdminArea)
-
-                currentAddress = addressText.toString()
-
-                if (isWithinTargetLocation(currentLatitude, currentLongitude)) {
-                    tvLocation.text = "📍 $currentAddress ✅"
-                } else {
-                    tvLocation.text = "❌ $currentAddress"
-                }
-
-                if (pendingPulang && isWithinTargetLocation(currentLatitude, currentLongitude)) {
-                    pendingPulang = false
-                    validateNamaThen(this::simpanAbsenPulang)
-                }
-            } else {
-                currentAddress = "Lokasi: $currentLatitude, $currentLongitude"
-                if (isWithinTargetLocation(currentLatitude, currentLongitude)) {
-                    tvLocation.text = "📍 $currentAddress ✅"
-                } else {
-                    tvLocation.text = "❌ $currentAddress"
-                }
-                if (pendingPulang && isWithinTargetLocation(currentLatitude, currentLongitude)) {
-                    pendingPulang = false
-                    simpanAbsenPulang()
+        val locationCallback = object : com.google.android.gms.location.LocationCallback() {
+            override fun onLocationResult(locationResult: com.google.android.gms.location.LocationResult) {
+                locationResult.lastLocation?.let { location ->
+                    processLocation(location)
                 }
             }
-        } catch (e: Exception) {
-            currentAddress = "Lokasi: $currentLatitude, $currentLongitude"
+        }
+
+        // Request location dengan timeout
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+
+        // Timeout setelah 15 detik
+        Handler(Looper.getMainLooper()).postDelayed({
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+            if (currentLatitude == 0.0 && currentLongitude == 0.0) {
+                tvLokasi.text = "Gagal mengambil lokasi"
+                showToast("Gagal mengambil lokasi. Coba nyalakan GPS atau periksa koneksi.")
+
+                // Untuk testing, lanjutkan dengan dev mode
+                val prefs = getSharedPreferences("absen_data", Context.MODE_PRIVATE)
+                if (prefs.getBoolean("dev_mode", true)) {
+                    showToast("Dev mode: Lanjut tanpa lokasi")
+                    currentLatitude = TARGET_LATITUDE
+                    currentLongitude = TARGET_LONGITUDE
+                    currentAddress = "Jurusan TI Polije (Dev Mode)"
+                    tvLokasi.text = "📍 $currentAddress ✅"
+
+                    // Jika ada pending pulang, lanjutkan
+                    if (pendingPulang) {
+                        pendingPulang = false
+                        validateNamaThen(this::simpanAbsenPulang)
+                    }
+                }
+            }
+        }, 15000)
+    }
+
+    private fun processLocation(location: Location) {
+        currentLatitude = location.latitude
+        currentLongitude = location.longitude
+
+        println("📍 POSISI KAMU SEKARANG (PULANG):")
+        println("Latitude: $currentLatitude")
+        println("Longitude: $currentLongitude")
+        println("Target Latitude: $TARGET_LATITUDE")
+        println("Target Longitude: $TARGET_LONGITUDE")
+
+        // Hitung jarak
+        val results = FloatArray(1)
+        Location.distanceBetween(
+            currentLatitude, currentLongitude,
+            TARGET_LATITUDE, TARGET_LONGITUDE,
+            results
+        )
+        val distanceInKm = results[0] / 1000
+        println("📏 JARAK DARI TI POLIJE: ${String.format("%.2f", distanceInKm)} km")
+
+        // Update UI di main thread
+        runOnUiThread {
             if (isWithinTargetLocation(currentLatitude, currentLongitude)) {
-                tvLocation.text = "📍 $currentAddress ✅"
+                tvLokasi.text = "📍 Jurusan TI Polije ✅"
+                showToast("Lokasi valid - Dalam area TI Polije")
             } else {
-                tvLocation.text = "❌ $currentAddress"
+                tvLokasi.text = "❌ Diluar area TI Polije\nJarak: ${String.format("%.2f", distanceInKm)} km"
+                showToast("Anda berada ${String.format("%.2f", distanceInKm)} km dari TI Polije")
             }
+            getAddressFromLocation(location)
+
+            // Jika ada pending pulang dan lokasi valid, lanjutkan
             if (pendingPulang && isWithinTargetLocation(currentLatitude, currentLongitude)) {
                 pendingPulang = false
                 validateNamaThen(this::simpanAbsenPulang)
@@ -424,11 +461,42 @@ class AbsenPulangActivity : AppCompatActivity() {
         }
     }
 
-    private fun showToast(message: String) {
+    private fun getAddressFromLocation(location: Location) {
         try {
-            singleToast?.cancel()
-            singleToast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
-            singleToast?.show()
-        } catch (ignored: Exception) {}
+            val geocoder = Geocoder(this, Locale("id", "ID"))
+            val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+            if (addresses != null && addresses.isNotEmpty()) {
+                val address = addresses[0]
+                val addressText = StringBuilder()
+                if (address.subLocality != null) addressText.append(address.subLocality).append(", ")
+                if (address.locality != null) addressText.append(address.locality).append(", ")
+                if (address.subAdminArea != null) addressText.append(address.subAdminArea)
+
+                currentAddress = addressText.toString()
+                if (isWithinTargetLocation(currentLatitude, currentLongitude)) {
+                    tvLokasi.text = "📍 $currentAddress ✅"
+                } else {
+                    tvLokasi.text = "❌ $currentAddress"
+                }
+            } else {
+                currentAddress = "Lokasi: $currentLatitude, $currentLongitude"
+                if (isWithinTargetLocation(currentLatitude, currentLongitude)) {
+                    tvLokasi.text = "📍 $currentAddress ✅"
+                } else {
+                    tvLokasi.text = "❌ $currentAddress"
+                }
+            }
+        } catch (e: Exception) {
+            currentAddress = "Lokasi: $currentLatitude, $currentLongitude"
+            if (isWithinTargetLocation(currentLatitude, currentLongitude)) {
+                tvLokasi.text = "📍 $currentAddress ✅"
+            } else {
+                tvLokasi.text = "❌ $currentAddress"
+            }
+        }
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }

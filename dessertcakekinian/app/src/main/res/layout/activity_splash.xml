@@ -7,13 +7,15 @@
     android:layout_height="match_parent"
     tools:context=".activity.splashActivity">
 
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imageView"
-        android:layout_width="216dp"
-        android:layout_height="237dp"
-        android:layout_marginTop="156dp"
+        android:layout_width="240dp"
+        android:layout_height="310dp"
+        android:layout_marginTop="210dp"
+        android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_plus" />
+        app:srcCompat="@drawable/ic_splash" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
