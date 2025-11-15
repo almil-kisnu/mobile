@@ -64,6 +64,8 @@ class RiwayatAdapter(private var riwayatList: List<PresensiFragment.RiwayatPrese
         }
     }
 
+
+
     private fun computeWorkDuration(jamMasuk: String, jamPulang: String): String {
         return try {
             if (jamMasuk == "-" || jamPulang == "-") return "-"

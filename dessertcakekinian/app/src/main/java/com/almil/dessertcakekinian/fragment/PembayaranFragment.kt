@@ -21,7 +21,7 @@ import com.google.android.material.textfield.TextInputEditText
 import android.text.TextWatcher
 import android.text.Editable
 import android.util.Log
-import com.almil.dessertcakekinian.model.Order
+import com.almil.dessertcakekinian.model.TransaksiOrder
 import java.util.Locale
 import java.math.RoundingMode
 import java.text.DecimalFormat
@@ -33,12 +33,14 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import com.almil.dessertcakekinian.database.SupabaseClientProvider
-import com.almil.dessertcakekinian.model.DetailOrder
+import com.almil.dessertcakekinian.model.TransaksiDetailOrder
 import io.github.jan.supabase.postgrest.from
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.int
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.rpc
+import io.github.jan.supabase.postgrest.postgrest
 
 enum class MetodePembayaran {
     cash,
@@ -281,7 +283,7 @@ class PembayaranFragment : Fragment() {
             try {
                 val detailOrders = cartItems.map { (_, cartItem) ->
                     val subtotal = cartItem.hargaSatuan * cartItem.quantity
-                    DetailOrder(
+                    TransaksiDetailOrder(
                         idorder = orderId,
                         idproduk = cartItem.produkDetail.produk.idproduk,
                         harga = cartItem.hargaSatuan,
@@ -296,6 +298,26 @@ class PembayaranFragment : Fragment() {
                     .insert(detailOrders)
 
                 Log.d("SupabaseInsert", "Detail order berhasil disimpan: ${detailOrders.size} item")
+
+                // ** TAMBAHKAN KODE INI: Kurangi stok untuk setiap produk **
+                for ((_, cartItem) in cartItems) {
+                    try {
+                        val result = SupabaseClientProvider.client.postgrest.rpc(
+                                "reduce_stock_fefo",
+                                mapOf(
+                                    "p_idproduk" to cartItem.produkDetail.produk.idproduk,
+                                    "p_jumlah" to cartItem.quantity,
+                                    "p_idoutlet" to currentUserOutletId
+                                )
+                            )
+                            .decodeList<JsonObject>()
+
+                        Log.d("StockReduction", "Stok produk ${cartItem.produkDetail.produk.idproduk} berhasil dikurangi: $result")
+                    } catch (e: Exception) {
+                        Log.e("StockReduction", "Error mengurangi stok produk ${cartItem.produkDetail.produk.idproduk}", e)
+                        // Opsional: bisa throw exception atau tampilkan warning
+                    }
+                }
 
                 // Tampilkan dialog struk setelah berhasil insert
                 showStrukDialog(orderId, cartItems)
@@ -316,7 +338,7 @@ class PembayaranFragment : Fragment() {
         idOutlet: Int,
         metodePembayaran: String
     ) {
-        val order = Order(
+        val order = TransaksiOrder(
             grandtotal = grandTotal,
             bayar = bayar,
             kembalian = kembalian,

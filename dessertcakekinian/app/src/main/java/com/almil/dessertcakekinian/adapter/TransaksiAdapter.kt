@@ -22,7 +22,6 @@ class TransaksiAdapter(
     private var productList: List<ProdukDetail>,
     private val currentOutletId: Int,
     private val listener: OnTransaksiItemClickListener,
-    // UBAH: cartQuantities menjadi 'var' agar bisa diupdate secara eksternal
     private var cartQuantities: Map<Int, Int> = emptyMap()
 ) : RecyclerView.Adapter<TransaksiAdapter.TransaksiViewHolder>() {
 

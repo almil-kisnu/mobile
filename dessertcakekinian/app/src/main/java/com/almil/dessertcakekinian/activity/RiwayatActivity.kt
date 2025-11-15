@@ -1,34 +1,34 @@
 package com.almil.dessertcakekinian.activity
 
 import android.os.Bundle
-import android.widget.ImageButton
-import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.almil.dessertcakekinian.R
+import com.almil.dessertcakekinian.fragment.RiwayatTransaksiFragment
 
 class RiwayatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Langsung menggunakan layout Riwayat Transaksi sebagai layout utama Activity
-        setContentView(R.layout.fragment_riwayat_transaksi) // Perhatikan, ini layout fragment!
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_riwayat)
 
-        // Inisialisasi Tombol Kembali dan Judul dari layout fragment_riwayat_transaksi.xml
-        val btnBack = findViewById<ImageButton>(R.id.btnBackRiwayat)
-        val tvTitle = findViewById<TextView>(R.id.tvJudulRiwayat)
-
-        tvTitle.text = "Riwayat Transaksi" // Set teks judul (opsional, sudah di XML)
-
-        // Tambahkan listener untuk tombol kembali
-        btnBack.setOnClickListener {
-            onBackPressedDispatcher.onBackPressed() // Kembali ke activity sebelumnya
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, 0, systemBars.right, 0)
+            insets
         }
 
-        // TODO: Lanjutkan inisialisasi RecyclerView, EditText, dll. di sini
-        // Jika Anda memiliki logika untuk pencarian, filter, dan mengisi data
-        // ke RecyclerView, itu akan ditulis di dalam kelas RiwayatActivity ini.
-        // val etSearch = findViewById<EditText>(R.id.etSearchRiwayat)
-        // val cardFilter = findViewById<CardView>(R.id.cardFilterRiwayat)
-        // val btnFilter = findViewById<ImageButton>(R.id.btnFilterRiwayat)
-        // val rvRiwayat = findViewById<RecyclerView>(R.id.rvRiwayat)
+        // Cek apakah fragment sudah ada (misalnya, setelah rotasi layar)
+        if (savedInstanceState == null) {
+            val fragment = RiwayatTransaksiFragment()
+
+
+            // 2. Gunakan Fragment Manager untuk menambahkan fragment
+            supportFragmentManager.beginTransaction()
+                .add(R.id.fragment_container, fragment) // Ganti R.id.fragment_container dengan ID FrameLayout di activity_transaksi.xml
+                .commit()
+        }
     }
 }

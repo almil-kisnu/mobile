@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- ADD THIS -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -10,9 +10,6 @@
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
-    <!-- PINDAHKAN DUA BARIS INI KE SINI -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -27,6 +24,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Dessertcakekinian">
+        <activity
+            android:name=".activity.RequestActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Dessertcakekinian" />
         <activity
             android:name=".activity.AbsenPulangActivity"
             android:exported="false" />
@@ -69,7 +70,6 @@
         <activity
             android:name=".activity.MainActivity"
             android:exported="false" />
-        <!-- HAPUS DUA BARIS INI DARI DALAM APPLICATION -->
     </application>
 
 </manifest>

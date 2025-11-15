@@ -19,6 +19,15 @@ import com.almil.dessertcakekinian.activity.DiskonActivity
 import com.almil.dessertcakekinian.activity.RiwayatActivity
 import com.almil.dessertcakekinian.activity.TransaksiActivity
 import com.almil.dessertcakekinian.activity.presensiActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.almil.dessertcakekinian.adapter.OnlineAdapter
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
+import com.almil.dessertcakekinian.model.OrderWithDetails
 
 class HomePageFragment : Fragment() {
 
@@ -26,6 +35,8 @@ class HomePageFragment : Fragment() {
     private lateinit var tvStatusUtama: TextView
     private lateinit var tvStatusTimestamp: TextView
     private lateinit var btnAksiAbsen: Button
+    private lateinit var rvPesananOnline: RecyclerView
+    private lateinit var onlineAdapter: OnlineAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,6 +55,9 @@ class HomePageFragment : Fragment() {
             tvStatusUtama = view.findViewById(R.id.tvStatusUtama)
             tvStatusTimestamp = view.findViewById(R.id.tvStatusTimestamp)
             btnAksiAbsen = view.findViewById(R.id.btnAksiAbsen)
+            // Initialize RecyclerView
+            rvPesananOnline = view.findViewById(R.id.rvPesananOnline)
+            setupRecyclerView()
 
             // Set username from user session
             val userSession = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE)
@@ -76,6 +90,60 @@ class HomePageFragment : Fragment() {
             e.printStackTrace()
         }
     } // Tambahkan kurung kurawal penutup yang hilang di sini
+
+    private fun setupRecyclerView() {
+        try {
+            // Setup adapter dengan click listener
+            onlineAdapter = OnlineAdapter { orderWithDetails ->
+                // Navigate ke dtOnlineFragment sebagai dialog
+                navigateToDetail(orderWithDetails)
+            }
+
+            // Setup RecyclerView
+            rvPesananOnline.apply {
+                layoutManager = LinearLayoutManager(requireContext())
+                adapter = onlineAdapter
+            }
+
+            // Setup observer untuk data
+            setupOrderObserver()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun navigateToDetail(orderWithDetails: OrderWithDetails) {
+        val detailDialog = dtOnlineFragment.newInstance(orderWithDetails)
+        detailDialog.show(parentFragmentManager, "DetailOnlineDialog")
+    }
+
+    private fun setupOrderObserver() {
+        try {
+            val viewModel: com.almil.dessertcakekinian.model.OrderViewModel by viewModels()
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    viewModel.allOrders.collect { state ->
+                        when (state) {
+                            is com.almil.dessertcakekinian.model.OrderDataState.Success -> {
+                                onlineAdapter.submitFilteredList(state.orders, requireContext())
+                            }
+                            is com.almil.dessertcakekinian.model.OrderDataState.Error -> {
+                                if (state.cachedOrders.isNotEmpty()) {
+                                    onlineAdapter.submitFilteredList(state.cachedOrders, requireContext())
+                                }
+                            }
+                            else -> {
+                                // Loading state
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
     private fun setupMenuClickListeners(view: View) {
         try {

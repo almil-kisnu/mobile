@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.almil.dessertcakekinian.R
-import com.almil.dessertcakekinian.fragment.transaksiFragment // PENTING: Import fragment Anda
+import com.almil.dessertcakekinian.fragment.transaksiFragment
 
 class TransaksiActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,6 +24,7 @@ class TransaksiActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             // 1. Buat instance dari transaksiFragment
             val fragment = transaksiFragment()
+
 
             // 2. Gunakan Fragment Manager untuk menambahkan fragment
             supportFragmentManager.beginTransaction()

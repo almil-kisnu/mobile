@@ -1,5 +1,3 @@
-// File: com/almil/dessertcakekinian/fragment/loginFragment.kt
-
 package com.almil.dessertcakekinian.fragment
 
 import android.content.Context
@@ -19,16 +17,18 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.almil.dessertcakekinian.R
 import androidx.navigation.fragment.findNavController
+import com.almil.dessertcakekinian.R
 import com.almil.dessertcakekinian.activity.MainActivity
 import com.almil.dessertcakekinian.database.SupabaseClientProvider
 import com.almil.dessertcakekinian.model.User
+import com.almil.dessertcakekinian.model.Outlet
+import com.almil.dessertcakekinian.model.ProductRepository
+import com.almil.dessertcakekinian.model.OrderRepository
 import io.github.jan.supabase.postgrest.postgrest
-import kotlinx.coroutines.launch
 import io.github.jan.supabase.postgrest.rpc
+import kotlinx.coroutines.launch
 
-// TAG untuk Logcat agar mudah disaring
 private const val TAG = "LoginFragmentDebug"
 
 class loginFragment : Fragment() {
@@ -41,7 +41,10 @@ class loginFragment : Fragment() {
     private var isPasswordVisible: Boolean = false
     private lateinit var sharedPreferences: SharedPreferences
 
-    // Ambil client Supabase
+    // Repositories
+    private lateinit var productRepository: ProductRepository
+    private lateinit var orderRepository: OrderRepository
+
     private val supabase = SupabaseClientProvider.client
 
     override fun onCreateView(
@@ -55,6 +58,11 @@ class loginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         sharedPreferences = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE)
+
+        // Inisialisasi Repositories
+        productRepository = ProductRepository.getInstance(requireContext())
+        orderRepository = OrderRepository.getInstance(requireContext())
+
         checkUserSession()
 
         phoneEditText = view.findViewById(R.id.phone)
@@ -84,8 +92,7 @@ class loginFragment : Fragment() {
 
                 lifecycleScope.launch {
                     try {
-                        // 1. PANGGIL RPC (Remote Procedure Call)
-                        // Panggil fungsi SQL verify_password_match dengan parameter phone dan password
+                        // Step 1: Verify user credentials
                         val response = supabase.postgrest.rpc(
                             function = "verify_password_match",
                             parameters = mapOf(
@@ -95,12 +102,34 @@ class loginFragment : Fragment() {
                         ).decodeSingleOrNull<User>()
 
                         if (response != null) {
-                            // RPC berhasil mengembalikan pengguna -> Sandi dan Nomor Telepon benar
-                            saveUserSession(response)
+                            // Step 2: Fetch outlet data if exists
+                            val outlet = if (response.idOutlet != null) {
+                                try {
+                                    supabase.postgrest["outlet"]
+                                        .select {
+                                            filter {
+                                                eq("idoutlet", response.idOutlet)
+                                            }
+                                        }
+                                        .decodeSingleOrNull<Outlet>()
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Failed to fetch outlet data: ", e)
+                                    null
+                                }
+                            } else {
+                                null
+                            }
+
+                            // Step 3: Save user session
+                            saveUserSession(response, outlet)
+
+                            // Step 4: Sync all data from Supabase
+                            loginButton.text = "Syncing data..."
+                            syncAllDataOnLogin()
+
+                            // Step 5: Navigate to MainActivity
                             navigateToMainActivity()
                         } else {
-                            // RPC mengembalikan null -> Sandi atau Nomor Telepon salah
-                            // (Pesan generik disarankan untuk keamanan)
                             showError("Nomor telepon atau Password salah.")
                         }
 
@@ -118,18 +147,63 @@ class loginFragment : Fragment() {
         }
     }
 
-    // ... (Fungsi saveUserSession, validateInput, navigateToMainActivity, dan showError tetap sama) ...
-    private fun saveUserSession(user: User) {
+    private suspend fun syncAllDataOnLogin() {
+        try {
+            Log.d(TAG, "🔄 Starting login sync...")
+
+            // Sync product data
+            val productResult = productRepository.forceSync()
+            if (productResult.isFailure) {
+                Log.w(TAG, "⚠️ Product sync failed: ${productResult.exceptionOrNull()?.message}")
+            } else {
+                Log.d(TAG, "✅ Product sync completed")
+            }
+
+            // Sync order data
+            val orderResult = orderRepository.forceSync()
+            if (orderResult.isFailure) {
+                Log.w(TAG, "⚠️ Order sync failed: ${orderResult.exceptionOrNull()?.message}")
+            } else {
+                Log.d(TAG, "✅ Order sync completed")
+            }
+
+            Log.d(TAG, "✅ Login sync completed successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error during login sync", e)
+            // Tetap lanjutkan login meskipun sync gagal
+        }
+    }
+
+    private fun saveUserSession(user: User, outlet: Outlet?) {
         val editor = sharedPreferences.edit()
         editor.putBoolean("IS_LOGGED_IN", true)
         editor.putInt("USER_ID", user.idUser)
         editor.putString("USER_NAME", user.username)
         editor.putString("USER_PHONE", user.phone)
         editor.putString("USER_ROLE", user.role)
+
         val outletId = user.idOutlet ?: -1
         editor.putInt("USER_OUTLET_ID", outletId)
         editor.putString("USER_NIK", user.nik ?: "")
         editor.putString("USER_HIRED_DATE", user.hiredDate ?: "")
+
+        // Simpan data outlet
+        if (outlet != null) {
+            editor.putString("OUTLET_KODE", outlet.kodeOutlet)
+            editor.putString("OUTLET_NAMA", outlet.namaOutlet)
+            editor.putString("OUTLET_ALAMAT", outlet.alamat ?: "")
+            editor.putString("OUTLET_TELEPON", outlet.telepon ?: "")
+            editor.putBoolean("OUTLET_IS_ACTIVE", outlet.isActive)
+            Log.d(TAG, "Data Outlet Disimpan: Kode=${outlet.kodeOutlet}, Nama=${outlet.namaOutlet}")
+        } else {
+            // Clear outlet data jika tidak ada
+            editor.remove("OUTLET_KODE")
+            editor.remove("OUTLET_NAMA")
+            editor.remove("OUTLET_ALAMAT")
+            editor.remove("OUTLET_TELEPON")
+            editor.remove("OUTLET_IS_ACTIVE")
+        }
+
         Log.d(TAG, "Sesi Disimpan: User=${user.username}, Role=${user.role}, OutletID=$outletId")
         editor.apply()
     }
@@ -164,7 +238,6 @@ class loginFragment : Fragment() {
         }
     }
 
-    // --- Fungsi lainnya (setupPasswordToggle, setupNavigationToForgot, togglePasswordVisibility) ---
     private fun setupPasswordToggle() {
         passwordEditText.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {

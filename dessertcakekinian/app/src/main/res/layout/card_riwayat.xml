@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--card_riwayat.xml-->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -18,7 +19,7 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/tvNomorInvoice"
+            android:id="@+id/tvpelannggan"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -30,7 +31,7 @@
             app:layout_constraintEnd_toStartOf="@+id/tvTotalPrice"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="INV-20231027-005" />
+            tools:text="Almil" />
 
         <TextView
             android:id="@+id/tvTotalPrice"
@@ -40,7 +41,7 @@
             android:textColor="?attr/colorPrimary"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:layout_constraintBaseline_toBaselineOf="@id/tvNomorInvoice"
+            app:layout_constraintBaseline_toBaselineOf="@id/tvpelannggan"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="Rp 85.000" />
 
@@ -53,8 +54,8 @@
             android:textColor="#666666"
             android:textSize="12sp"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@id/tvNomorInvoice"
-            app:layout_constraintTop_toBottomOf="@id/tvNomorInvoice"
+            app:layout_constraintStart_toStartOf="@id/tvpelannggan"
+            app:layout_constraintTop_toBottomOf="@id/tvpelannggan"
             app:layout_constraintEnd_toStartOf="@+id/tvTanggal"
             tools:text="14:30 | Kasir: Budi" />
 

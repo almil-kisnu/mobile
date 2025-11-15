@@ -12,8 +12,6 @@ import kotlinx.coroutines.launch
 import android.widget.Toast
 import com.almil.dessertcakekinian.database.SupabaseClientProvider
 import io.github.jan.supabase.postgrest.from
-// Hapus: import io.github.jan.supabase.postgrest.query.filter.PostgrestFilterBuilder.eq
-// Karena sekarang menggunakan blok 'filter'
 import com.google.android.material.button.MaterialButton
 
 

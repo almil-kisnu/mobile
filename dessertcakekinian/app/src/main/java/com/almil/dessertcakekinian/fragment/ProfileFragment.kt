@@ -11,15 +11,18 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.almil.dessertcakekinian.R
 import com.almil.dessertcakekinian.activity.loginActivity
 import com.almil.dessertcakekinian.dialog.editUserFragment
 import com.almil.dessertcakekinian.dialog.ubahPassFragment
+import com.almil.dessertcakekinian.model.OrderRepository
+import com.almil.dessertcakekinian.model.ProductRepository
 import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
-// Implementasikan interface EditUserDialogListener dari dialog
 class ProfileFragment : Fragment(), editUserFragment.EditUserDialogListener {
 
     // View references
@@ -36,11 +39,14 @@ class ProfileFragment : Fragment(), editUserFragment.EditUserDialogListener {
 
     private lateinit var sharedPreferences: SharedPreferences
 
+    // Repositories
+    private lateinit var productRepository: ProductRepository
+    private lateinit var orderRepository: OrderRepository
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Asumsi R.layout.fragment_profile adalah layout dari kode 2
         return inflater.inflate(R.layout.fragment_profile, container, false)
     }
 
@@ -49,6 +55,10 @@ class ProfileFragment : Fragment(), editUserFragment.EditUserDialogListener {
 
         // Inisialisasi SharedPreferences
         sharedPreferences = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE)
+
+        // Inisialisasi Repositories
+        productRepository = ProductRepository.getInstance(requireContext())
+        orderRepository = OrderRepository.getInstance(requireContext())
 
         // Bind views
         bindViews(view)
@@ -73,13 +83,15 @@ class ProfileFragment : Fragment(), editUserFragment.EditUserDialogListener {
         btnLogout = view.findViewById(R.id.btnLogout)
     }
 
-    fun loadUserData() { // Ubah akses menjadi public agar bisa dipanggil dari callback
+    fun loadUserData() {
         val userName = sharedPreferences.getString("USER_NAME", "Pengguna")
         val userRole = sharedPreferences.getString("USER_ROLE", "Karyawan")
         val userPhone = sharedPreferences.getString("USER_PHONE", "-")
         val userNIK = sharedPreferences.getString("USER_NIK", "Tidak tersedia")
         val userHiredDate = sharedPreferences.getString("USER_HIRED_DATE", null)
         val outletId = sharedPreferences.getInt("USER_OUTLET_ID", -1)
+        val outletKode = sharedPreferences.getString("OUTLET_KODE", "")
+        val outletNama = sharedPreferences.getString("OUTLET_NAMA", "")
 
         // Tampilkan data
         tvUsername.text = userName
@@ -95,12 +107,12 @@ class ProfileFragment : Fragment(), editUserFragment.EditUserDialogListener {
 
         // Format Outlet
         tvOutlet.text = if (outletId != -1) {
-            "TK ${String.format("%02d", outletId)} - [Nama Outlet]" // Ganti dengan lookup jika ada
+            "$outletKode - $outletNama"
         } else {
             "Tidak terdaftar"
         }
 
-        // Format Tanggal Masuk (dari "2023-06-10" → "10 Juni 2023")
+        // Format Tanggal Masuk
         tvHiredDate.text = formatHiredDate(userHiredDate)
     }
 
@@ -112,7 +124,7 @@ class ProfileFragment : Fragment(), editUserFragment.EditUserDialogListener {
             val date = inputFormat.parse(dateStr)
             outputFormat.format(date!!)
         } catch (e: Exception) {
-            dateStr // fallback
+            dateStr
         }
     }
 
@@ -122,17 +134,15 @@ class ProfileFragment : Fragment(), editUserFragment.EditUserDialogListener {
         }
 
         btnChangePassword.setOnClickListener {
-            // Panggil showChangePasswordDialog
             showChangePasswordDialog()
         }
 
         btnLogout.setOnClickListener {
-            logout()
+            performLogout()
         }
     }
 
     private fun showChangePasswordDialog() {
-        // Ambil ID pengguna dari SharedPreferences
         val userId = sharedPreferences.getInt("USER_ID", 0)
 
         if (userId == 0) {
@@ -140,33 +150,22 @@ class ProfileFragment : Fragment(), editUserFragment.EditUserDialogListener {
             return
         }
 
-        // Buat instance dialog dengan ID pengguna
         val dialog = ubahPassFragment.newInstance(userId)
-
-        // Tampilkan dialog
         dialog.show(parentFragmentManager, "UbahPassDialog")
     }
 
     private fun showEditUserDialog() {
-        // Ambil 4 data kunci dari SharedPreferences
         val userId = sharedPreferences.getInt("USER_ID", 0)
         val userName = sharedPreferences.getString("USER_NAME", "") ?: ""
         val userPhone = sharedPreferences.getString("USER_PHONE", "") ?: ""
         val userNIK = sharedPreferences.getString("USER_NIK", "") ?: ""
 
-        // Buat instance dialog dengan data sesi
         val dialog = editUserFragment.newInstance(userId, userName, userPhone, userNIK)
-
-        // Atur target Fragment agar listener dapat dipanggil
         dialog.setTargetFragment(this, 0)
-
-        // Tampilkan dialog
         dialog.show(parentFragmentManager, "EditUserDialog")
     }
 
-    // ⭐ IMPLEMENTASI CALLBACK DARI DIALOG ⭐
     override fun onUserUpdated(userId: Int, username: String, phone: String, nik: String) {
-
         sharedPreferences.edit().apply {
             putString("USER_NAME", username)
             putString("USER_PHONE", phone)
@@ -176,16 +175,45 @@ class ProfileFragment : Fragment(), editUserFragment.EditUserDialogListener {
         loadUserData()
     }
 
-    private fun logout() {
-        // Hapus semua sesi
-        sharedPreferences.edit().clear().apply()
+    private fun performLogout() {
+        // Disable button untuk mencegah double click
+        btnLogout.isEnabled = false
+        btnLogout.text = "Logging out..."
 
-        // Pindah ke LoginActivity
-        val intent = Intent(requireActivity(), loginActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        requireActivity().finish()
+        lifecycleScope.launch {
+            try {
+                // Cleanup repositories
+                productRepository.cleanup()
+                orderRepository.cleanup()
 
-        Toast.makeText(requireContext(), "Berhasil keluar", Toast.LENGTH_SHORT).show()
+                // Clear all local data
+                productRepository.clearAllData()
+                orderRepository.clearAllData()
+
+                // Hapus semua sesi
+                sharedPreferences.edit().clear().apply()
+
+                // Pindah ke LoginActivity
+                val intent = Intent(requireActivity(), loginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                requireActivity().finish()
+
+                Toast.makeText(requireContext(), "Berhasil keluar", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                // Jika terjadi error, tetap logout dari UI
+                Toast.makeText(requireContext(), "Logout berhasil", Toast.LENGTH_SHORT).show()
+
+                sharedPreferences.edit().clear().apply()
+
+                val intent = Intent(requireActivity(), loginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                requireActivity().finish()
+            } finally {
+                btnLogout.isEnabled = true
+                btnLogout.text = "Keluar"
+            }
+        }
     }
 }

@@ -1,15 +1,17 @@
-// File: com.almil.dessertcakekinian.model/ProductViewModel.kt (PERBAIKAN ERROR 'Unresolved reference')
+// File: com.almil.dessertcakekinian.model/ProductViewModel.kt (UPDATED)
 
 package com.almil.dessertcakekinian.model
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
 
 sealed class ProductDataState {
     data object Loading : ProductDataState()
@@ -17,20 +19,23 @@ sealed class ProductDataState {
     data class Error(val message: String) : ProductDataState()
 }
 
-class ProductViewModel : ViewModel() {
+class ProductViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Akses Singleton
-    private val repository: ProductRepository = ProductRepository
+    private val repository: ProductRepository = ProductRepository.getInstance(application)
 
-    // STATE UTAMA - Mengamati Shared Flow dari Repository
     val allProducts: StateFlow<ProductDataState> = repository.getSharedProdukDetail()
-        .map<List<ProdukDetail>, ProductDataState> { ProductDataState.Success(it) }
+        .map<List<ProdukDetail>, ProductDataState> {
+            if (it.isEmpty()) {
+                ProductDataState.Loading
+            } else {
+                ProductDataState.Success(it)
+            }
+        }
         .catch { e ->
-            val errorMessage = "Gagal memuat atau streaming data dari Repository: ${e.message}"
+            val errorMessage = "Gagal memuat data: ${e.message}"
             Log.e("ProductViewModel", errorMessage, e)
             emit(ProductDataState.Error(errorMessage))
         }
-        // 💡 BARIS BERMASALAH DIHAPUS. Kita biarkan initialValue = Loading yang menangani state awal.
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -38,17 +43,35 @@ class ProductViewModel : ViewModel() {
         )
 
     /**
-     * Fungsi Reload (tetap seperti sebelumnya, hanya logging)
+     * Force refresh data dari server
+     * Dipanggil saat user melakukan pull-to-refresh
      */
-    fun reloadData() {
-        Log.w("ProductViewModel", "reloadData() dipanggil, tetapi SharedFlow yang menangani koneksi.")
+    fun forceRefresh() {
+        viewModelScope.launch {
+            try {
+                Log.d("ProductViewModel", "Force refresh dimulai...")
+                repository.forceSync()
+                Log.d("ProductViewModel", "Force refresh selesai")
+            } catch (e: Exception) {
+                Log.e("ProductViewModel", "Error saat force refresh: ${e.message}", e)
+            }
+        }
     }
 
-    // Fungsi getRawProductList tetap sama (Mengakses StateFlow internal ViewModel)
+    /**
+     * Get raw product list untuk keperluan internal
+     */
     fun getRawProductList(): List<ProdukDetail> {
         return when (val state = allProducts.value) {
             is ProductDataState.Success -> state.produkDetails
             else -> emptyList()
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.launch {
+            repository.cleanup()
         }
     }
 }

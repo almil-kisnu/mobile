@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--fragment_riwayat_transaksi.xml-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -61,7 +62,7 @@
         android:paddingVertical="12dp"
         android:drawableStart="@drawable/ic_searchbar"
         android:drawablePadding="8dp"
-
+        android:inputType="text"
         android:textColor="?attr/android:textColor"
         android:textColorHint="?android:attr/textColorHint"
         android:drawableTint="?android:attr/textColorHint"
@@ -108,7 +109,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etSearchRiwayat"
-        tools:listitem="@layout/fragment_item_riwayat_transaksi" />
+        app:layout_constraintTop_toBottomOf="@id/etSearchRiwayat" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

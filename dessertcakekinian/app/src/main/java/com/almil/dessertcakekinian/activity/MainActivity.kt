@@ -3,25 +3,35 @@
 package com.almil.dessertcakekinian.activity
 
 import android.os.Bundle
-import android.util.Log // 💡 Import Log
+import android.util.Log
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.activity.viewModels // 💡 Import viewModels
-import androidx.lifecycle.lifecycleScope // 💡 Import lifecycleScope
+import androidx.activity.viewModels
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.almil.dessertcakekinian.R
 import com.almil.dessertcakekinian.fragment.HomePageFragment
 import com.almil.dessertcakekinian.fragment.ProfileFragment
-import com.almil.dessertcakekinian.model.ProductViewModel // 💡 Import ProductViewModel
-import com.almil.dessertcakekinian.model.ProductDataState // 💡 Import ProductDataState
+import com.almil.dessertcakekinian.model.ProductViewModel
+import com.almil.dessertcakekinian.model.ProductDataState
+// START: Import dan ViewModel untuk Order
+import com.almil.dessertcakekinian.model.OrderViewModel
+import com.almil.dessertcakekinian.model.OrderDataState
+// END: Import dan ViewModel untuk Order
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import kotlinx.coroutines.launch // 💡 Import launch'
+import kotlinx.coroutines.launch
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var bottomNavigation: BottomNavigationView
+
     private val productViewModel: ProductViewModel by viewModels()
+    // Deklarasi OrderViewModel
+    private val orderViewModel: OrderViewModel by viewModels()
+    // Deklarasi DiskonViewModel
+
     private val homeFragment by lazy { HomePageFragment() }
     private val profileFragment by lazy { ProfileFragment() }
 
@@ -42,16 +52,25 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         bottomNavigation = findViewById(R.id.bottom_navigation)
+
+        // Inisialisasi DiskonViewModel
+
         requestCameraPermission()
         setupBottomNavigation()
         setupBackPress()
+
+        // Panggil observer data Produk
         observeProductData()
+        // Panggil observer data Order (Riwayat)
+        observeOrderData()
 
         if (savedInstanceState == null) {
             replaceFragment(homeFragment)
             bottomNavigation.selectedItemId = R.id.nav_home
         }
     }
+
+
 
     private fun requestCameraPermission() {
         when {
@@ -74,14 +93,40 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             productViewModel.allProducts.collect { state ->
                 when (state) {
-                    is ProductDataState.Loading -> Log.d("MainActivity", "Produk Stream: Loading...")
-                    is ProductDataState.Success -> Log.d("MainActivity", "Produk Stream: Berhasil dimuat & streaming aktif (${state.produkDetails.size} item)")
-                    is ProductDataState.Error -> Log.e("MainActivity", "Produk Stream: Gagal: ${state.message}")
+                    is ProductDataState.Loading -> {
+                        Log.d("MainActivity", "Produk Stream: Loading...")
+                    }
+                    is ProductDataState.Success -> {
+                        Log.d("MainActivity", "Produk Stream: Berhasil dimuat & streaming aktif (${state.produkDetails.size} item)")
+                    }
+                    is ProductDataState.Error -> {
+                        Log.e("MainActivity", "Produk Stream: Gagal: ${state.message}")
+                    }
                 }
             }
         }
     }
 
+    // Fungsi untuk mengamati Order Data
+    private fun observeOrderData() {
+        lifecycleScope.launch {
+            orderViewModel.allOrders.collect { state ->
+                when (state) {
+                    is OrderDataState.Loading -> {
+                        Log.d("MainActivity", "Order Stream: Loading...")
+                    }
+                    is OrderDataState.Success -> {
+                        Log.d("MainActivity", "Order Stream: Berhasil dimuat & streaming aktif (${state.orders.size} item)")
+                    }
+                    is OrderDataState.Error -> {
+                        Log.e("MainActivity", "Order Stream: Gagal: ${state.message}")
+                    }
+                }
+            }
+        }
+    }
+
+    // Fungsi Baru untuk mengamati Diskon Data
     private fun setupBottomNavigation() {
         bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -117,4 +162,5 @@ class MainActivity : AppCompatActivity() {
         }
         onBackPressedDispatcher.addCallback(this, callback)
     }
+
 }

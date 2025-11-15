@@ -9,6 +9,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
@@ -38,6 +40,7 @@ class DaftarProdukFragment : Fragment(), OnProductItemClickListener, ProductFilt
     private lateinit var adapter: ProductAdapter
     private lateinit var searchEditText: EditText
     private lateinit var filterButton: ImageButton
+    private lateinit var backButton: ImageButton
     private lateinit var textViewError: TextView
     private var cachedSemuaProduk: List<ProdukDetail> = emptyList()
     private var currentOutletId: Int = -1
@@ -80,6 +83,7 @@ class DaftarProdukFragment : Fragment(), OnProductItemClickListener, ProductFilt
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         searchEditText = view.findViewById(R.id.edit_text_search)
         filterButton = view.findViewById(R.id.button_filter)
+        backButton = view.findViewById(R.id.btnBack)
         textViewError = view.findViewById(R.id.textViewError)
 
         setupSearchListener()
@@ -137,11 +141,25 @@ class DaftarProdukFragment : Fragment(), OnProductItemClickListener, ProductFilt
             }
             override fun afterTextChanged(s: Editable?) {}
         })
+        searchEditText.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                // Sembunyikan keyboard
+                val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(v.windowToken, 0)
+                v.clearFocus()
+                true // Return true untuk consume event
+            } else {
+                false
+            }
+        }
     }
 
     private fun setupFilterButtonListener() {
         filterButton.setOnClickListener {
             showFilterBottomSheet()
+        }
+        backButton.setOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
     }
 

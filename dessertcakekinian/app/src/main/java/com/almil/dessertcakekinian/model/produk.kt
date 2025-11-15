@@ -34,7 +34,6 @@ data class ProdukDetail(
     val hargaGrosir: List<HargaGrosir> = emptyList(),
     val detailStok: List<DetailStok> = emptyList(),
 )
-
 data class CartItem(
     val produkDetail: ProdukDetail,
     var quantity: Int,
@@ -42,40 +41,125 @@ data class CartItem(
 )
 
 @Serializable
-data class Outlet(
-    @SerialName("idoutlet")
-    val idOutlet: Int, // Digunakan untuk menyimpan ke database pengguna
+data class EventDiskon(
+    @SerialName("id_diskon")
+    val idDiskon: Int = 0,
 
-    @SerialName("kode_outlet")
-    val kodeOutlet: String, // Digunakan untuk tampilan di Spinner
+    @SerialName("nama_diskon")
+    val namaDiskon: String,
 
-    @SerialName("nama_outlet")
-    val namaOutlet: String, // Digunakan untuk tampilan di Spinner
+    @SerialName("deskripsi")
+    val deskripsi: String? = null,
 
-    @SerialName("alamat")
-    val alamat: String? = null,
+    @SerialName("tanggal_mulai")
+    val tanggalMulai: String,
 
-    @SerialName("telepon")
-    val telepon: String? = null,
+    @SerialName("jam_mulai")
+    val jamMulai: String,
+
+    @SerialName("tanggal_selesai")
+    val tanggalSelesai: String,
+
+    @SerialName("jam_selesai")
+    val jamSelesai: String,
+
+    @SerialName("nilai_diskon")
+    val nilaiDiskon: Double,
+
+    @SerialName("berlaku_untuk")
+    val berlakuUntuk: String,
 
     @SerialName("is_active")
-    val isActive: Boolean? = true,
+    val isActive: Boolean = true,
 
     @SerialName("created_at")
     val createdAt: String? = null
 )
-@Serializable
-data class OutletInfo(
-    @SerialName("idoutlet")
-    val idOutlet: Int,
-    @SerialName("kode_outlet")
-    val kodeOutlet: String,
 
-    @SerialName("nama_outlet")
-    val namaOutlet: String
+// Model 2: Detail Diskon Produk
+@Serializable
+data class DetailDiskonProduk(
+    @SerialName("id_detail_diskon_produk")
+    val idDetailDiskonProduk: Int = 0,
+
+    @SerialName("id_diskon")
+    val idDiskon: Int,
+
+    @SerialName("idproduk")
+    val idproduk: Int
 )
-@Serializable // Wajib ada
+
+// Model 3: Joined Data (Diskon dengan Produk-produknya)
+data class DiskonWithProducts(
+    val diskon: EventDiskon,
+    val produkIds: List<Int>
+)
+
+@Serializable
 data class Order(
+    @SerialName("idorder")
+    val idorder: Int,
+
+    @SerialName("namapelanggan")
+    val namapelanggan: String,
+
+    @SerialName("grandtotal")
+    val grandtotal: Double,
+
+    @SerialName("bayar")
+    val bayar: Double,
+
+    @SerialName("kembalian")
+    val kembalian: Double,
+
+    @SerialName("tanggal")
+    val tanggal: String, // Format: YYYY-MM-DD
+
+    @SerialName("jam")
+    val jam: String, // Format: HH:MM
+
+    @SerialName("metode_pembayaran")
+    val metode_pembayaran: String,
+
+    @SerialName("status")
+    val status: String,
+
+    @SerialName("username")
+    val username: String? = null,
+
+    @SerialName("kode_outlet")
+    val kode_outlet: String? = null
+)
+@Serializable
+data class DetailOrder(
+    @SerialName("iddetail")
+    val iddetail: Int,
+
+    @SerialName("idorder")
+    val idorder: Int,
+
+    @SerialName("namaproduk")
+    val namaproduk: String,
+
+    @SerialName("harga")
+    val harga: Double,
+
+    @SerialName("jumlah")
+    val jumlah: Int,
+
+    @SerialName("subtotal")
+    val subtotal: Double
+)
+@Serializable
+data class OrderWithDetails(
+    val order: Order,
+    val details: List<DetailOrder>
+)
+
+
+// digunakan sebagai insert ke database
+@Serializable // Wajib ada
+data class TransaksiOrder(
     val grandtotal: Double,
     val bayar: Double,
     val kembalian: Double,
@@ -83,9 +167,8 @@ data class Order(
     val idoutlet: Int,
     val metode_pembayaran: String
 )
-
 @Serializable
-data class DetailOrder(
+data class TransaksiDetailOrder(
     val idorder: Int,
     val idproduk: Int,
     val harga: Double,
@@ -93,83 +176,60 @@ data class DetailOrder(
     val subtotal: Double
 )
 
-
 @Serializable
-data class Pengguna(
-    @SerialName("iduser")
-    val idUser: Int,
+data class TransferStock(
+    @SerialName("idtransfer")
+    val idtransfer: Int = 0,
 
-    @SerialName("nik")
-    val nik: String? = null,
+    @SerialName("idoutlet_asal")
+    val idoutletAsal: Int,
 
-    @SerialName("username")
-    val username: String,
+    @SerialName("idoutlet_tujuan")
+    val idoutletTujuan: Int,
 
-    @SerialName("password")
-    val password: String,
+    @SerialName("tanggal_transfer")
+    val tanggalTransfer: String? = null,
 
-    @SerialName("role")
-    val role: String,
+    @SerialName("tanggal_terima")
+    val tanggalTerima: String? = null,
 
-    @SerialName("phone")
-    val phone: String,
+    @SerialName("status")
+    val status: String = "pending", // pending, dikirim, diterima, dibatalkan
 
-    @SerialName("createdat")
-    val createdAt: String,
+    @SerialName("iduser_pengirim")
+    val iduserPengirim: Int,
 
-    @SerialName("is_active")
-    val isActive: Boolean = true,
+    @SerialName("iduser_penerima")
+    val iduserPenerima: Int? = null,
 
-    @SerialName("deactivated_at")
-    val deactivatedAt: String? = null,
-
-    @SerialName("deactivated_reason")
-    val deactivatedReason: String? = null,
-
-    @SerialName("hired_date")
-    val hiredDate: String? = null,
-
-    @SerialName("updated_at")
-    val updatedAt: String? = null,
-
-    @SerialName("idoutlet")
-    val idOutlet: Int? = null,
-
-    @SerialName("outlet")
-    val outlet: OutletInfo? = null
+    @SerialName("catatan")
+    val catatan: String? = null
 )
 
+// Model 2: Detail Transfer
 @Serializable
-data class Orders(
-    @SerialName("namapelanggan")
-    val namapelanggan: String,
+data class DetailTransfer(
+    @SerialName("iddetail_transfer")
+    val iddetailTransfer: Int = 0,
 
-    @SerialName("total")
-    val total: Double, // total before diskon (same as subtotal)
+    @SerialName("idtransfer")
+    val idtransfer: Int,
 
-    @SerialName("diskon")
-    val diskon: Double = 0.0,
+    @SerialName("idproduk")
+    val idproduk: Int,
 
-    @SerialName("grandtotal")
-    val grandtotal: Double, // final total after diskon (same as subtotal)
+    @SerialName("jumlah")
+    val jumlah: Int,
 
-    @SerialName("bayar")
-    val bayar: Double, // assuming cash payment or a placeholder
+    @SerialName("jumlah_diterima")
+    val jumlahDiterima: Int? = null,
 
-    @SerialName("kembalian")
-    val kembalian: Double,
-
-    @SerialName("metodebayar")
-    val metodebayar: String,
-
-    @SerialName("idkasir")
-    val idkasir: Int
-    // tanggalorder will be handled by the database
+    @SerialName("catatan")
+    val catatan: String? = null
 )
 
-@Serializable
-data class OrderId(
-    @SerialName("idorder")
-    val idorder: Int? = null
+// Model 3: Transfer dengan Details (Joined)
+data class TransferWithDetails(
+    val transfer: TransferStock,
+    val details: List<DetailTransfer>
 )
-// DetailOrder biasanya hanya digunakan untuk keperluan database/API, tidak perlu Parcelable

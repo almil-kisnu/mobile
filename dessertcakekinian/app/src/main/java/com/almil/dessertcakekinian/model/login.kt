@@ -36,15 +36,36 @@ data class User(
     @SerialName("hired_date")
     val hiredDate: String? = null,
 
-    // --- TAMBAHKAN BARIS INI ---
     @SerialName("updated_at")
-    val updatedAt: String? = null, // Kolom baru yang menyebabkan error
+    val updatedAt: String? = null,
 
     @SerialName("idoutlet")
     val idOutlet: Int? = null,
 
     @SerialName("nik")
     val nik: String? = null
+)
 
+@Serializable
+data class Outlet(
+    @SerialName("idoutlet")
+    val idOutlet: Int,
 
+    @SerialName("kode_outlet")
+    val kodeOutlet: String,
+
+    @SerialName("nama_outlet")
+    val namaOutlet: String,
+
+    @SerialName("alamat")
+    val alamat: String? = null,
+
+    @SerialName("telepon")
+    val telepon: String? = null,
+
+    @SerialName("is_active")
+    val isActive: Boolean = true,
+
+    @SerialName("created_at")
+    val createdAt: String? = null
 )

@@ -34,6 +34,8 @@ import java.util.Locale
 import android.widget.EditText
 import android.text.TextWatcher
 import android.text.Editable
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 
 class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
 
@@ -114,6 +116,8 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
 
 
         searchEditText = view.findViewById(R.id.searchEditText)
+
+
         setupScanner()
         setupTabSwitching()
         setupBottomSheet(view)
@@ -241,6 +245,18 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
                 filterProducts(s.toString())
             }
         })
+
+        searchEditText.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                // Sembunyikan keyboard
+                val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(v.windowToken, 0)
+                v.clearFocus()
+                true // Return true untuk consume event
+            } else {
+                false
+            }
+        }
     }
     private fun handleBarcodeScanned(barcode: String) {
         val productToUpdate = productViewModel.allProducts.value
