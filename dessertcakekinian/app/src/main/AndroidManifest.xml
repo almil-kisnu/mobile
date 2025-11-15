@@ -25,10 +25,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Dessertcakekinian">
         <activity
-            android:name=".activity.RequestActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Dessertcakekinian" />
-        <activity
             android:name=".activity.AbsenPulangActivity"
             android:exported="false" />
         <activity
@@ -48,12 +44,6 @@
             android:exported="false" />
         <activity
             android:name=".activity.DaftarProdukActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activity.addUserActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activity.EditUserActivity"
             android:exported="false" />
         <activity
             android:name=".activity.splashActivity"
