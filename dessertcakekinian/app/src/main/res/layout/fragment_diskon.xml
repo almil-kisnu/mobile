@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/android:windowBackground"
+    tools:context=".fragment.DiskonFragment">
+
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:elevation="4dp"
+        android:paddingHorizontal="16dp"
+        android:background="?attr/android:windowBackground"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_arrow_back"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="?attr/android:textColor"
+            android:contentDescription="Kembali" />
+
+        <TextView
+            android:id="@+id/tvJudul"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Daftar Diskon"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:textColor="?attr/android:textColor"
+            android:layout_marginStart="-56dp" />
+
+    </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_search"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="?attr/colorPrimaryVariant"
+        app:strokeWidth="1dp"
+        app:strokeColor="?attr/colorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout">
+
+        <EditText
+            android:id="@+id/edit_text_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Cari diskon..."
+            android:background="@android:color/transparent"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="14dp"
+            android:drawableStart="@drawable/ic_searchbar"
+            android:drawablePadding="12dp"
+            android:textColorHint="?android:attr/textColorHint"
+            android:textColor="?attr/android:textColor"
+            android:drawableTint="?android:attr/textColorHint"
+            android:textSize="14sp" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <HorizontalScrollView
+        android:id="@+id/horizontal_scroll_chips"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:layout_marginTop="16dp"
+        android:paddingHorizontal="12dp"
+        android:clipToPadding="false"
+        app:layout_constraintTop_toBottomOf="@id/card_search"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group_filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSemua"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="40dp"
+                android:text="Semua"
+                android:checked="true"
+                android:textColor="?attr/android:textColor"
+                app:chipBackgroundColor="?attr/colorPrimaryVariant"
+                app:chipStrokeWidth="1dp"
+                app:chipStrokeColor="?attr/colorPrimary" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipAktif"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="40dp"
+                android:text="Aktif"
+                android:textColor="?attr/android:textColor"
+                app:chipBackgroundColor="?attr/colorPrimaryVariant"
+                app:chipStrokeWidth="1dp"
+                app:chipStrokeColor="?attr/colorPrimary" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipAkanDatang"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="40dp"
+                android:text="Akan Datang"
+                android:textColor="?attr/android:textColor"
+                app:chipBackgroundColor="?attr/colorPrimaryVariant"
+                app:chipStrokeWidth="1dp"
+                app:chipStrokeColor="?attr/colorPrimary" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipBerakhir"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="40dp"
+                android:text="Berakhir"
+                android:textColor="?attr/android:textColor"
+                app:chipBackgroundColor="?attr/colorPrimaryVariant"
+                app:chipStrokeWidth="1dp"
+                app:chipStrokeColor="?attr/colorPrimary" />
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_diskon"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:clipToPadding="false"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="80dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/horizontal_scroll_chips"
+        tools:listitem="@layout/item_diskon" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
