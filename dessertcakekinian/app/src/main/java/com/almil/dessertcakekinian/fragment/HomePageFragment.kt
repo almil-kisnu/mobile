@@ -19,6 +19,7 @@ import com.almil.dessertcakekinian.activity.DiskonActivity
 import com.almil.dessertcakekinian.activity.RiwayatActivity
 import com.almil.dessertcakekinian.activity.TransaksiActivity
 import com.almil.dessertcakekinian.activity.presensiActivity
+import com.almil.dessertcakekinian.activity.JadwalActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.almil.dessertcakekinian.adapter.OnlineAdapter
@@ -184,6 +185,9 @@ class HomePageFragment : Fragment() {
 
             view.findViewById<LinearLayout>(R.id.menuDiskon)?.setOnClickListener {
                 startActivity(Intent(requireContext(), DiskonActivity::class.java))
+            }
+            view.findViewById<LinearLayout>(R.id.menujadwal)?.setOnClickListener {
+                startActivity(Intent(requireContext(), JadwalActivity::class.java))
             }
         } catch (e: Exception) {
             e.printStackTrace()

@@ -318,6 +318,32 @@
                         android:gravity="center" />
                 </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/menujadwal"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="12dp"
+                    android:layout_marginEnd="4dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?android:attr/selectableItemBackground">
+                    <ImageView
+                        android:layout_marginStart="5dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:src="@drawable/ic_schedule"
+                        android:contentDescription="requeststok" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Jadwal"
+                        android:textSize="12sp"
+                        android:layout_marginTop="6dp"
+                        android:gravity="center" />
+                </LinearLayout>
+
             </LinearLayout>
         </HorizontalScrollView>
     </com.google.android.material.card.MaterialCardView>
