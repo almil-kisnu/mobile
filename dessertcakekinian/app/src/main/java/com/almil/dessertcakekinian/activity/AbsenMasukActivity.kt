@@ -23,7 +23,6 @@ import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.almil.dessertcakekinian.R
-import com.almil.dessertcakekinian.database.PenggunaApi
 import com.almil.dessertcakekinian.database.SupabaseHelper
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -33,8 +32,8 @@ class AbsenMasukActivity : AppCompatActivity() {
 
     private companion object {
         const val LOCATION_PERMISSION_REQUEST_CODE = 1001
-        const val TARGET_LATITUDE = -8.157551
-        const val TARGET_LONGITUDE = 113.722800
+        const val TARGET_LATITUDE = -8.157510
+        const val TARGET_LONGITUDE = 113.722778
         const val RADIUS_METERS = 50.0f
     }
 
@@ -48,6 +47,7 @@ class AbsenMasukActivity : AppCompatActivity() {
     private var currentLatitude = 0.0
     private var currentLongitude = 0.0
     private var currentAddress = "Lokasi tidak diketahui"
+    private var isWithinLocation = false
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,9 +68,10 @@ class AbsenMasukActivity : AppCompatActivity() {
         resetAbsenStatusIfNeeded()
 
         // Untuk testing - enable dev mode (bisa absen di luar lokasi)
+        // TAPI disable dulu untuk testing real location
         getSharedPreferences("absen_data", Context.MODE_PRIVATE)
             .edit()
-            .putBoolean("dev_mode", true)
+            .putBoolean("dev_mode", false) // UBAH KE FALSE untuk testing real location
             .apply()
 
         // Set nama karyawan dari shared preferences
@@ -131,29 +132,34 @@ class AbsenMasukActivity : AppCompatActivity() {
             }
 
             if (currentLatitude != 0.0 && currentLongitude != 0.0) {
-                val allowOutside = prefs.getBoolean("dev_mode", true)
+                val allowOutside = prefs.getBoolean("dev_mode", false) // Default false
+
+                // CEK LOKASI DULU SEBELUM LANJUT
                 if (!isWithinTargetLocation(currentLatitude, currentLongitude)) {
                     showLocationError()
-                    if (!allowOutside) return@setOnClickListener
+                    if (!allowOutside) {
+                        // JIKA TIDAK DALAM LOKASI DAN BUKAN DEV MODE, BERHENTI DI SINI
+                        showToast("❌ Tidak bisa absen di luar lokasi TI Polije")
+                        return@setOnClickListener
+                    } else {
+                        // JIKA DEV MODE, TAMPILKAN PERINGATAN TAPI LANJUT
+                        showToast("⚠️ Dev Mode: Absen di luar lokasi diperbolehkan")
+                    }
                 }
+
+                // JIKA DALAM LOKASI ATAU DEV MODE, LANJUTKAN ABSEN
                 validateNamaThen(this::simpanAbsenMasuk)
             } else {
-                val allowOutside = prefs.getBoolean("dev_mode", true)
+                val allowOutside = prefs.getBoolean("dev_mode", false)
                 if (allowOutside) {
-                    showToast("Lokasi belum siap (dev_mode): lanjut simpan")
+                    showToast("⚠️ Dev Mode: Lokasi belum siap, lanjut simpan")
                     validateNamaThen(this::simpanAbsenMasuk)
                 } else {
-                    showToast("Mohon tunggu, sedang mengambil lokasi...")
-                    getCurrentLocation() // Coba ambil lokasi lagi
+                    showToast("❌ Lokasi tidak tersedia, tidak bisa absen")
+                    showToast("Mohon aktifkan GPS dan coba lagi")
 
-                    // Delay sebentar lalu coba lagi
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        if (currentLatitude != 0.0 && currentLongitude != 0.0) {
-                            validateNamaThen(this::simpanAbsenMasuk)
-                        } else {
-                            showToast("Gagal mengambil lokasi, coba lagi")
-                        }
-                    }, 3000)
+                    // Coba ambil lokasi lagi
+                    getCurrentLocation()
                 }
             }
         }
@@ -187,7 +193,8 @@ class AbsenMasukActivity : AppCompatActivity() {
             TARGET_LATITUDE, TARGET_LONGITUDE,
             results
         )
-        return results[0] <= RADIUS_METERS
+        isWithinLocation = results[0] <= RADIUS_METERS
+        return isWithinLocation
     }
 
     private fun showLocationError() {
@@ -204,7 +211,16 @@ class AbsenMasukActivity : AppCompatActivity() {
         val message = "❌ Absen hanya bisa dilakukan di Jurusan TI Polije\n" +
                 "Anda berada ${String.format(Locale.getDefault(), "%.1f", distanceInKm)} km dari lokasi\n" +
                 "Silahkan datang ke Jurusan TI Polije untuk absen"
-        showToast(message)
+
+        // Tampilkan dialog error yang lebih jelas
+        AlertDialog.Builder(this)
+            .setTitle("Lokasi Tidak Sesuai")
+            .setMessage(message)
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setCancelable(false)
+            .show()
     }
 
     private fun validateNamaThen(onValid: () -> Unit) {
@@ -241,10 +257,16 @@ class AbsenMasukActivity : AppCompatActivity() {
             return
         }
 
-        val allowOutside = getSharedPreferences("absen_data", Context.MODE_PRIVATE).getBoolean("dev_mode", true)
+        val allowOutside = getSharedPreferences("absen_data", Context.MODE_PRIVATE).getBoolean("dev_mode", false)
+
+        // VALIDASI LOKASI LAGI SEBELUM SIMPAN
         if (!isWithinTargetLocation(currentLatitude, currentLongitude)) {
-            showLocationError()
-            if (!allowOutside) return
+            if (!allowOutside) {
+                showToast("❌ Tidak bisa absen: Anda berada di luar lokasi TI Polije")
+                return
+            } else {
+                showToast("⚠️ Dev Mode: Absen di luar lokasi dicatat")
+            }
         }
 
         val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
@@ -264,8 +286,9 @@ class AbsenMasukActivity : AppCompatActivity() {
         editor.putString("last_absen_date", currentDate)
         val ok = editor.commit()
         println("[Masuk] saved key=$key, ok=$ok")
+
         try {
-            if (getSharedPreferences("absen_data", Context.MODE_PRIVATE).getBoolean("dev_mode", true)) {
+            if (getSharedPreferences("absen_data", Context.MODE_PRIVATE).getBoolean("dev_mode", false)) {
                 showToast("Masuk tersimpan lokal: $currentTime")
             }
         } catch (ignored: Exception) {}
@@ -277,9 +300,17 @@ class AbsenMasukActivity : AppCompatActivity() {
 
         setResult(RESULT_OK)
 
-        val message = "✅ Absen Masuk berhasil!\nWaktu: $currentTime" +
-                "\nLokasi: $currentAddress" +
-                "\n📍 Lokasi: Jurusan TI Polije ✅"
+        // Tampilkan pesan sukses berdasarkan lokasi
+        val message = if (isWithinLocation) {
+            "✅ Absen Masuk berhasil!\nWaktu: $currentTime" +
+                    "\nLokasi: $currentAddress" +
+                    "\n📍 Lokasi: Jurusan TI Polije ✅"
+        } else {
+            "⚠️ Absen Masuk berhasil (Dev Mode)!\nWaktu: $currentTime" +
+                    "\nLokasi: $currentAddress" +
+                    "\n❌ Lokasi: DI LUAR AREA TI Polije"
+        }
+
         showToast(message)
         finish()
     }
@@ -333,7 +364,7 @@ class AbsenMasukActivity : AppCompatActivity() {
                 .setTitle("Izin Lokasi Diperlukan untuk Absen")
                 .setMessage("Aplikasi MEMBUTUHKAN akses lokasi untuk memverifikasi bahwa Anda berada di:\n\n" +
                         "📍 Jurusan TI Polije\n" +
-                        "Lat: -8.157551, Long: 113.722800\n\n" +
+                        "Lat: -8.157518, Long: 113.722776\n\n" +
                         "Tanpa izin lokasi, Anda TIDAK BISA melakukan absen.\n\n" +
                         "Lokasi hanya digunakan untuk verifikasi kehadiran dan tidak disimpan secara permanen.")
                 .setPositiveButton("IZINKAN LOKASI") { _, _ ->
@@ -444,14 +475,17 @@ class AbsenMasukActivity : AppCompatActivity() {
                 tvLokasi.text = "Gagal mengambil lokasi"
                 showToast("Gagal mengambil lokasi. Coba nyalakan GPS atau periksa koneksi.")
 
-                // Untuk testing, lanjutkan dengan dev mode
+                // Untuk testing, TIDAK lanjutkan dengan dev mode (default false)
                 val prefs = getSharedPreferences("absen_data", Context.MODE_PRIVATE)
-                if (prefs.getBoolean("dev_mode", true)) {
+                if (prefs.getBoolean("dev_mode", false)) {
                     showToast("Dev mode: Lanjut tanpa lokasi")
                     currentLatitude = TARGET_LATITUDE
                     currentLongitude = TARGET_LONGITUDE
                     currentAddress = "Jurusan TI Polije (Dev Mode)"
                     tvLokasi.text = "📍 $currentAddress ✅"
+                } else {
+                    showToast("❌ Tidak bisa absen tanpa lokasi")
+                    btnKonfirmasi.isEnabled = false
                 }
             }
         }, 15000)
@@ -466,9 +500,20 @@ class AbsenMasukActivity : AppCompatActivity() {
             if (isWithinTargetLocation(currentLatitude, currentLongitude)) {
                 tvLokasi.text = "📍 Jurusan TI Polije ✅"
                 showToast("Lokasi berhasil didapatkan - Dalam area absen")
+                btnKonfirmasi.isEnabled = true
             } else {
                 tvLokasi.text = "❌ Diluar area TI Polije"
                 showToast("Lokasi berhasil didapatkan - Di luar area absen")
+
+                // Jika di luar lokasi, cek dev mode
+                val prefs = getSharedPreferences("absen_data", Context.MODE_PRIVATE)
+                if (prefs.getBoolean("dev_mode", false)) {
+                    showToast("Dev Mode: Tetap bisa absen")
+                    btnKonfirmasi.isEnabled = true
+                } else {
+                    showToast("❌ Tidak bisa absen di luar lokasi")
+                    btnKonfirmasi.isEnabled = false
+                }
             }
             getAddressFromLocation(location)
         }
