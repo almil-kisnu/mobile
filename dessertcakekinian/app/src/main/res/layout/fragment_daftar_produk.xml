@@ -59,6 +59,8 @@
         android:paddingVertical="12dp"
         android:drawableStart="@drawable/ic_searchbar"
         android:drawablePadding="8dp"
+        android:inputType="text"
+        android:imeOptions="actionDone"
 
         android:textColorHint="?android:attr/textColorHint"
         android:drawableTint="?android:attr/textColorHint"

@@ -25,7 +25,6 @@ class TransaksiActivity : AppCompatActivity() {
             // 1. Buat instance dari transaksiFragment
             val fragment = transaksiFragment()
 
-
             // 2. Gunakan Fragment Manager untuk menambahkan fragment
             supportFragmentManager.beginTransaction()
                 .add(R.id.fragment_container, fragment) // Ganti R.id.fragment_container dengan ID FrameLayout di activity_transaksi.xml

@@ -48,6 +48,8 @@ class dtOnlineFragment : DialogFragment() {
     private lateinit var tvTotalTagihan: TextView
     private lateinit var tvUangDibayar: TextView
     private lateinit var tvKembalian: TextView
+    private lateinit var tvStatusPesanan: TextView
+    private lateinit var tvNoTelepon: TextView
     private lateinit var btnDownload: Button
     private lateinit var btnPrint: Button
 
@@ -105,6 +107,8 @@ class dtOnlineFragment : DialogFragment() {
         tvKembalian = view.findViewById(R.id.tvKembalian)
         btnDownload = view.findViewById(R.id.btnDownload)
         btnPrint = view.findViewById(R.id.btnPrint)
+        tvStatusPesanan = view.findViewById(R.id.tvStatusPesanan)
+        tvNoTelepon = view.findViewById(R.id.tvNoTelepon)
     }
 
     private fun setupRecyclerView() {
@@ -198,6 +202,15 @@ class dtOnlineFragment : DialogFragment() {
             val waktuTransaksi = formatWaktuTransaksi(order.tanggal, order.jam)
             tvWaktuTransaksi.text = waktuTransaksi
 
+            tvStatusPesanan.text = order.status
+
+            // TAMBAHKAN: Set No Telepon (dengan handling jika null/kosong)
+            tvNoTelepon.text = if (!order.notelp.isNullOrEmpty()) {
+                order.notelp
+            } else {
+                "-"
+            }
+
             // Display metode pembayaran
             tvMetodePembayaran.text = order.metode_pembayaran
 
@@ -271,21 +284,56 @@ class dtOnlineFragment : DialogFragment() {
                 appendLine("═══════════════════════════")
             }
 
-            // Share via WhatsApp
-            val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                `package` = "com.whatsapp"
-                putExtra(android.content.Intent.EXTRA_TEXT, strukText)
-            }
+            // UBAH: Ambil nomor telepon dan format untuk WhatsApp
+            val phoneNumber = order.notelp
 
-            try {
-                startActivity(intent)
-            } catch (e: Exception) {
-                android.widget.Toast.makeText(
-                    requireContext(),
-                    "WhatsApp tidak ditemukan",
-                    android.widget.Toast.LENGTH_SHORT
-                ).show()
+            if (phoneNumber.isNullOrEmpty() || phoneNumber == "-") {
+                // Jika tidak ada nomor telepon, kirim tanpa nomor (buka WhatsApp biasa)
+                val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    `package` = "com.whatsapp"
+                    putExtra(android.content.Intent.EXTRA_TEXT, strukText)
+                }
+
+                try {
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    android.widget.Toast.makeText(
+                        requireContext(),
+                        "WhatsApp tidak ditemukan",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } else {
+                // Format nomor telepon untuk WhatsApp (hapus karakter non-digit)
+                val cleanPhone = phoneNumber.replace(Regex("[^0-9]"), "")
+
+                // Tambahkan kode negara jika belum ada (Indonesia = 62)
+                val formattedPhone = if (cleanPhone.startsWith("0")) {
+                    "62${cleanPhone.substring(1)}"
+                } else if (cleanPhone.startsWith("62")) {
+                    cleanPhone
+                } else {
+                    "62$cleanPhone"
+                }
+
+                // URL encode untuk message
+                val encodedMessage = android.net.Uri.encode(strukText)
+
+                // Buat WhatsApp intent dengan nomor spesifik
+                val whatsappUrl = "https://wa.me/$formattedPhone?text=$encodedMessage"
+                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
+                intent.setData(android.net.Uri.parse(whatsappUrl))
+
+                try {
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    android.widget.Toast.makeText(
+                        requireContext(),
+                        "WhatsApp tidak ditemukan atau nomor tidak valid",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }

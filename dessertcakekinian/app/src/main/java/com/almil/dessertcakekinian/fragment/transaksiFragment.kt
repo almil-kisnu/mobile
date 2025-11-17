@@ -54,11 +54,14 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
     private lateinit var indicatorProduk: View
     private lateinit var indicatorScan: View
     private lateinit var btnBeli: TextView
+    private lateinit var backButton: ImageButton
     private lateinit var tvTotalPrice: TextView
     private lateinit var transaksiAdapter: TransaksiAdapter
     private lateinit var cartAdapter: CartAdapter
     private var currentOutletId: Int = -1
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var tvBadgeNotif: TextView
+    private lateinit var tvKosongkanKeranjang: TextView
 
     private val currencyFormat = NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply {
         maximumFractionDigits = 0
@@ -97,10 +100,15 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         transaksiAdapter = TransaksiAdapter(emptyList(), currentOutletId, this, cartViewModel.getCartQuantitiesMap())
         recyclerView.adapter = transaksiAdapter
+        backButton = view.findViewById(R.id.btnBackTransaksi)
 
         recyclerViewCart.layoutManager = LinearLayoutManager(requireContext())
         cartAdapter = CartAdapter(requireContext(), cartViewModel.cartItems.value ?: emptyMap(), cartViewModel)
         recyclerViewCart.adapter = cartAdapter
+        tvBadgeNotif = view.findViewById(R.id.tvBadgeNotif)
+        tvKosongkanKeranjang = view.findViewById(R.id.tvKosongkanKeranjang)
+
+        updateNotificationBadge(0)
 
 
         observeProductData()
@@ -118,6 +126,7 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
         searchEditText = view.findViewById(R.id.searchEditText)
 
 
+
         setupScanner()
         setupTabSwitching()
         setupBottomSheet(view)
@@ -125,6 +134,27 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
         setupSearch()
     }
 
+
+    override fun onResume() {
+        super.onResume()
+
+        // Refresh badge count setiap kali fragment muncul
+        val sharedPref = requireActivity().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val count = sharedPref.getInt("pending_order_count", 0)
+        updateNotificationBadge(count)
+
+        Log.d("transaksiFragment", "Badge count on resume: $count")
+    }
+
+
+    private fun updateNotificationBadge(count: Int) {
+        if (count > 0) {
+            tvBadgeNotif.visibility = View.VISIBLE
+            tvBadgeNotif.text = if (count > 99) "99+" else count.toString()
+        } else {
+            tvBadgeNotif.visibility = View.GONE
+        }
+    }
     private fun setupPaymentButton() {
         btnBeli.setOnClickListener {
             val total = calculateTotalPrice()
@@ -141,6 +171,54 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
                 .addToBackStack(null)
                 .commit()
         }
+        backButton.setOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+        tvKosongkanKeranjang.setOnClickListener {
+            showClearCartDialog()
+        }
+    }
+    private fun showClearCartDialog() {
+        // Cek apakah keranjang kosong
+        val totalQty = calculateTotalQuantity()
+        if (totalQty == 0) {
+            android.widget.Toast.makeText(
+                requireContext(),
+                "Keranjang sudah kosong",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        // Tampilkan dialog konfirmasi
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Kosongkan Keranjang")
+            .setMessage("Apakah Anda yakin ingin mengosongkan semua produk di keranjang?")
+            .setPositiveButton("Ya") { dialog, _ ->
+                clearCart()
+                dialog.dismiss()
+            }
+            .setNegativeButton("Batal") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun clearCart() {
+        // Clear semua item di cart menggunakan CartViewModel
+        cartViewModel.clearCart()
+
+        // Tampilkan toast konfirmasi
+        android.widget.Toast.makeText(
+            requireContext(),
+            "Keranjang berhasil dikosongkan",
+            android.widget.Toast.LENGTH_SHORT
+        ).show()
+
+        // Update UI
+        updateTotalPriceUI()
+
+        Log.d("transaksiFragment", "Cart cleared successfully")
     }
 
     override fun onUpdateCartItem(produkDetail: ProdukDetail, quantity: Int) {

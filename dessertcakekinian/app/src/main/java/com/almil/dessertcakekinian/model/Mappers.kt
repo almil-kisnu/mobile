@@ -64,6 +64,8 @@ fun Order.toEntity() = OrderEntity(
     grandtotal = grandtotal,
     bayar = bayar,
     kembalian = kembalian,
+    notelp = notelp,                      // ✅ Field baru
+    alamat = alamat,                      // ✅ Field baru
     tanggal = tanggal,
     jam = jam,
     metode_pembayaran = metode_pembayaran,
@@ -72,12 +74,15 @@ fun Order.toEntity() = OrderEntity(
     kode_outlet = kode_outlet
 )
 
+// OrderEntity -> Order
 fun OrderEntity.toModel() = Order(
     idorder = idorder,
     namapelanggan = namapelanggan,
     grandtotal = grandtotal,
     bayar = bayar,
     kembalian = kembalian,
+    notelp = notelp,                      // ✅ Field baru
+    alamat = alamat,                      // ✅ Field baru
     tanggal = tanggal,
     jam = jam,
     metode_pembayaran = metode_pembayaran,

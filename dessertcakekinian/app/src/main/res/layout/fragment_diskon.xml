@@ -64,6 +64,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Cari diskon..."
+            android:inputType="text"
+            android:imeOptions="actionDone"
             android:background="@android:color/transparent"
             android:paddingHorizontal="16dp"
             android:paddingVertical="14dp"
@@ -91,6 +93,7 @@
             android:id="@+id/chip_group_filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             app:singleSelection="true">
 
             <com.google.android.material.chip.Chip
@@ -113,18 +116,6 @@
                 android:layout_height="wrap_content"
                 android:minHeight="40dp"
                 android:text="Aktif"
-                android:textColor="?attr/android:textColor"
-                app:chipBackgroundColor="?attr/colorPrimaryVariant"
-                app:chipStrokeWidth="1dp"
-                app:chipStrokeColor="?attr/colorPrimary" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipAkanDatang"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minHeight="40dp"
-                android:text="Akan Datang"
                 android:textColor="?attr/android:textColor"
                 app:chipBackgroundColor="?attr/colorPrimaryVariant"
                 app:chipStrokeWidth="1dp"
@@ -156,7 +147,19 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/horizontal_scroll_chips"
-        tools:listitem="@layout/item_diskon" />
+        app:layout_constraintTop_toBottomOf="@id/horizontal_scroll_chips" />
+    <!-- Tambahkan di fragment_diskon.xml, sebelum closing tag -->
+    <TextView
+        android:id="@+id/tv_empty_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tidak ada diskon ditemukan"
+        android:textColor="?android:attr/textColorHint"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

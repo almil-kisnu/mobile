@@ -26,6 +26,7 @@ class CartAdapter(
 
     private var cartItemList: List<CartItem> = ArrayList(cartItemsMap.values)
     private val decimalFormat = DecimalFormat("#,##0")
+
     fun updateData(newCartItemsMap: Map<Int, CartItem>) {
         this.cartItemList = ArrayList(newCartItemsMap.values)
         notifyDataSetChanged()
@@ -43,6 +44,11 @@ class CartAdapter(
 
         holder.tvNamaMenu.text = produk.namaproduk
         holder.imgMenu.setImageResource(R.drawable.ic_cake)
+        holder.etJumlah.isFocusable = false
+        holder.etJumlah.isFocusableInTouchMode = false
+        holder.etJumlah.isClickable = false
+        holder.etJumlah.isCursorVisible = false
+
         val hargaSatuan = cartItem.hargaSatuan
         val hargaTotal = cartItem.quantity * hargaSatuan
         val formattedHargaTotal = "Rp " + decimalFormat.format(hargaTotal)
@@ -53,30 +59,70 @@ class CartAdapter(
         }
         holder.tvHarga.text = hargaText
 
-        fun updateQuantity(newQty: Int, detail: ProdukDetail) {
-            val finalQty = if (newQty < 0) 0 else newQty
+        // TAMBAHKAN: Hitung max stok dari produkDetail
+        val maxStok = produkDetail.detailStok.sumOf { it.stok }
 
-            holder.isUpdatingText = true
-            holder.etJumlah.setText(finalQty.toString())
+        fun updateQuantity(newQty: Int, detail: ProdukDetail) {
+            val finalQty = when {
+                newQty < 0 -> 0
+                newQty > maxStok -> {
+                    android.widget.Toast.makeText(
+                        context,
+                        "Stok maksimal: $maxStok",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                    maxStok
+                }
+                else -> newQty
+            }
+
+            // Update UI hanya jika berbeda
+            if (holder.etJumlah.text.toString() != finalQty.toString()) {
+                holder.isUpdatingText = true
+                holder.etJumlah.setText(finalQty.toString())
+                holder.etJumlah.setSelection(holder.etJumlah.text.length)
+                holder.isUpdatingText = false
+            }
+
             holder.btnMinus.isEnabled = finalQty > 0
-            holder.isUpdatingText = false
-            cartViewModel.updateCart(detail.produk.idproduk, detail, finalQty)
+            holder.btnPlus.isEnabled = finalQty < maxStok
+
+            // Update cart
+            holder.itemView.post {
+                cartViewModel.updateCart(detail.produk.idproduk, detail, finalQty)
+            }
         }
 
         holder.isUpdatingText = true
         holder.etJumlah.setText(cartItem.quantity.toString())
         holder.btnMinus.isEnabled = cartItem.quantity > 0
+        // TAMBAHKAN: Set status btnPlus berdasarkan stok
+        holder.btnPlus.isEnabled = cartItem.quantity < maxStok
         holder.isUpdatingText = false
-        holder.btnPlus.setOnClickListener {
 
+        holder.btnPlus.setOnClickListener {
             val currentPos = holder.bindingAdapterPosition
+            if (currentPos == RecyclerView.NO_POSITION) return@setOnClickListener
+
             val item = cartItemList.getOrNull(currentPos) ?: return@setOnClickListener
             val latestQuantity = item.quantity
-            updateQuantity(latestQuantity + 1, item.produkDetail)
+
+            // TAMBAHKAN: Cek stok sebelum menambah
+            if (latestQuantity < maxStok) {
+                updateQuantity(latestQuantity + 1, item.produkDetail)
+            } else {
+                android.widget.Toast.makeText(
+                    context,
+                    "Stok maksimal: $maxStok",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
         }
 
         holder.btnMinus.setOnClickListener {
             val currentPos = holder.bindingAdapterPosition
+            if (currentPos == RecyclerView.NO_POSITION) return@setOnClickListener
+
             val item = cartItemList.getOrNull(currentPos) ?: return@setOnClickListener
             val latestQuantity = item.quantity
 
@@ -84,26 +130,47 @@ class CartAdapter(
                 updateQuantity(latestQuantity - 1, item.produkDetail)
             }
         }
-        holder.etJumlah.tag?.let {
-            holder.etJumlah.removeTextChangedListener(it as TextWatcher)
-        }
 
-        val textWatcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable) {
-                if (holder.isUpdatingText) return
-                val currentPos = holder.bindingAdapterPosition
-                val item = cartItemList.getOrNull(currentPos) ?: return
-                val text = s.toString()
-                val newQty = if (text.isEmpty()) 0 else text.toIntOrNull() ?: 0
-                if (newQty != item.quantity) {
-                    updateQuantity(newQty, item.produkDetail)
-                }
-            }
-        }
-        holder.etJumlah.addTextChangedListener(textWatcher)
-        holder.etJumlah.tag = textWatcher
+//        holder.etJumlah.tag?.let {
+//            holder.etJumlah.removeTextChangedListener(it as TextWatcher)
+//        }
+//
+//        val textWatcher = object : TextWatcher {
+//            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+//            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+//            override fun afterTextChanged(s: Editable) {
+//                if (holder.isUpdatingText) return
+//
+//                val currentPos = holder.bindingAdapterPosition
+//                if (currentPos == RecyclerView.NO_POSITION) return
+//
+//                val item = cartItemList.getOrNull(currentPos) ?: return
+//                val text = s.toString()
+//                val newQty = if (text.isEmpty()) 0 else text.toIntOrNull() ?: 0
+//
+//                // TAMBAHKAN: Validasi terhadap maxStok
+//                if (newQty > maxStok) {
+//                    holder.isUpdatingText = true
+//                    holder.etJumlah.setText(maxStok.toString())
+//                    holder.etJumlah.setSelection(holder.etJumlah.text.length)
+//                    holder.isUpdatingText = false
+//
+//                    android.widget.Toast.makeText(
+//                        context,
+//                        "Stok maksimal: $maxStok",
+//                        android.widget.Toast.LENGTH_SHORT
+//                    ).show()
+//
+//                    if (maxStok != item.quantity) {
+//                        updateQuantity(maxStok, item.produkDetail)
+//                    }
+//                } else if (newQty != item.quantity) {
+//                    updateQuantity(newQty, item.produkDetail)
+//                }
+//            }
+//        }
+//        holder.etJumlah.addTextChangedListener(textWatcher)
+//        holder.etJumlah.tag = textWatcher
     }
 
     override fun getItemCount(): Int = cartItemList.size

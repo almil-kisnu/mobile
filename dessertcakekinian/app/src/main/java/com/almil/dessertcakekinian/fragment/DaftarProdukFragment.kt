@@ -18,7 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.fragment.app.activityViewModels // Menggunakan activityViewModels untuk akses data bersama
+import androidx.fragment.app.activityViewModels
 import com.almil.dessertcakekinian.BottomSheet.SearchProdukFragment
 import com.almil.dessertcakekinian.R
 import com.almil.dessertcakekinian.adapter.ProductAdapter

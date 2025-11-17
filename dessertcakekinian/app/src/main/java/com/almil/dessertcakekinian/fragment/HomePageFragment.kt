@@ -94,10 +94,16 @@ class HomePageFragment : Fragment() {
     private fun setupRecyclerView() {
         try {
             // Setup adapter dengan click listener
-            onlineAdapter = OnlineAdapter { orderWithDetails ->
-                // Navigate ke dtOnlineFragment sebagai dialog
-                navigateToDetail(orderWithDetails)
-            }
+            onlineAdapter = OnlineAdapter(
+                onOrderClick = { orderWithDetails ->
+                    // Navigate ke dtOnlineFragment sebagai dialog
+                    navigateToDetail(orderWithDetails)
+                },
+                onBadgeCountChanged = { count ->
+                    // TAMBAHKAN: Simpan count ke SharedPreferences
+                    updateBadgeCount(count)
+                }
+            )
 
             // Setup RecyclerView
             rvPesananOnline.apply {
@@ -107,6 +113,19 @@ class HomePageFragment : Fragment() {
 
             // Setup observer untuk data
             setupOrderObserver()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun updateBadgeCount(count: Int) {
+        try {
+            // Simpan count ke SharedPreferences untuk dibaca TransaksiFragment
+            val sharedPref = requireActivity().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            sharedPref.edit().putInt("pending_order_count", count).apply()
+
+            // Log untuk debug
+            android.util.Log.d("HomePageFragment", "Badge count updated and saved: $count")
         } catch (e: Exception) {
             e.printStackTrace()
         }

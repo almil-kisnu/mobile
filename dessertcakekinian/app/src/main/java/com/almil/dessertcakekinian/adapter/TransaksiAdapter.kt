@@ -54,10 +54,14 @@ class TransaksiAdapter(
         holder.ivProductImage.setImageResource(R.drawable.ic_cake)
         holder.tvProductName.text = produk.namaproduk
 
+        // Hitung total stok
         val totalStok = currentDetail.detailStok
             .filter { it.idoutlet == currentOutletId }
             .sumOf { it.stok }
         holder.tvStockValue.text = totalStok.toString()
+
+        // TAMBAHKAN: Set max quantity ke QuantitySelector
+        holder.quantitySelector.maxQuantity = totalStok
 
         holder.tvPriceValue.text = produk.harga_eceran?.takeIf { it > 0 }
             ?.let { currencyFormat.format(it) } ?: "Rp 0"
@@ -65,7 +69,7 @@ class TransaksiAdapter(
         if (initialQuantity > 0) {
             holder.btnTambahAwal.visibility = View.GONE
             holder.quantitySelector.visibility = View.VISIBLE
-            holder.quantitySelector.setQuantity(initialQuantity) // Set kuantitas dari keranjang
+            holder.quantitySelector.setQuantity(initialQuantity)
         } else {
             holder.btnTambahAwal.visibility = View.VISIBLE
             holder.quantitySelector.visibility = View.GONE
@@ -73,24 +77,33 @@ class TransaksiAdapter(
         }
 
         holder.btnTambahAwal.setOnClickListener {
-            holder.btnTambahAwal.visibility = View.GONE
-            holder.quantitySelector.visibility = View.VISIBLE
-            holder.quantitySelector.setQuantity(1)
-            listener.onUpdateCartItem(currentDetail, 1) // Panggil listener saat pertama kali ditambahkan
+            // TAMBAHKAN: Cek stok sebelum menambahkan
+            if (totalStok > 0) {
+                holder.btnTambahAwal.visibility = View.GONE
+                holder.quantitySelector.visibility = View.VISIBLE
+                holder.quantitySelector.setQuantity(1)
+                listener.onUpdateCartItem(currentDetail, 1)
+            } else {
+                // Toast jika stok habis
+                android.widget.Toast.makeText(
+                    holder.itemView.context,
+                    "Stok habis",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
         }
+
         holder.quantitySelector.setOnQuantityChangeListener(null)
 
-        // Listener untuk perubahan kuantitas pada QuantitySelector
         holder.quantitySelector.setOnQuantityChangeListener { qty ->
             if (qty <= 0) {
                 holder.btnTambahAwal.visibility = View.VISIBLE
                 holder.quantitySelector.visibility = View.GONE
             }
-
             listener.onUpdateCartItem(currentDetail, qty)
         }
 
-        holder.itemView.setOnClickListener {
+        holder.ivProductImage.setOnClickListener {
             if (currentDetail.hargaGrosir.isNotEmpty()) {
                 listener.onShowHargaGrosir(currentDetail)
             }

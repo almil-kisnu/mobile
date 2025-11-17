@@ -36,8 +36,7 @@
         android:imeOptions="actionDone"
         android:text="0"
         android:textSize="15sp"
-        android:textStyle="bold"
-        android:maxLength="3" />
+        android:textStyle="bold" />
 
     <!-- Tombol Plus -->
     <com.google.android.material.button.MaterialButton

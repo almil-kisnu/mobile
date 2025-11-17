@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import java.util.Collections.emptyMap
 
 class CartViewModel(application: Application) : AndroidViewModel(application) {
     private val _cartItems = MutableLiveData<MutableMap<Int, CartItem>>()
@@ -189,7 +190,7 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun clearCart() {
-        _cartItems.value = mutableMapOf()
+        _cartItems.value = emptyMap()
     }
 
     fun getCartQuantitiesMap(): Map<Int, Int> {

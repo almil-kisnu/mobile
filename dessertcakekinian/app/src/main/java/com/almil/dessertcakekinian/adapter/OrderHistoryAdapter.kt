@@ -95,7 +95,9 @@ class OrderHistoryAdapter(
 
             // Set tanggal dengan format lebih readable
             tvTanggal.text = formatTanggal(order.tanggal)
-            tvStatus.text = "Selesai"
+            tvStatus.text = "" +
+                    "" +
+                    "sai"
 
             val context = itemView.context
 

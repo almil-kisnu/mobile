@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="?attr/android:windowBackground"
     android:fillViewport="true"
-    tools:context=".activity.DiskonActivity">
+    tools:context=".fragment.dtDiskonFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -231,11 +231,11 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Outlet Berlaku"
+                        android:text="belaku untuk"
                         android:textSize="12sp"
                         android:textColor="?android:attr/textColorHint" />
                     <TextView
-                        android:id="@+id/tv_outlet_berlaku"
+                        android:id="@+id/tv_berlaku"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
@@ -264,9 +264,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:nestedScrollingEnabled="false"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_produk_berlaku"
-            tools:itemCount="3" />
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

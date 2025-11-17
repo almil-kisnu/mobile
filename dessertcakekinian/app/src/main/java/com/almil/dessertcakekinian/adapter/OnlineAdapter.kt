@@ -18,7 +18,8 @@ import android.graphics.Color
 import android.util.Log
 
 class OnlineAdapter(
-    private val onOrderClick: (OrderWithDetails) -> Unit
+    private val onOrderClick: (OrderWithDetails) -> Unit,
+    private val onBadgeCountChanged: ((Int) -> Unit)? = null
 ) : ListAdapter<OrderWithDetails, OnlineAdapter.OrderViewHolder>(OrderDiffCallback()) {
 
     companion object {
@@ -56,6 +57,7 @@ class OnlineAdapter(
 
         // Submit ke adapter
         submitList(filteredList)
+        onBadgeCountChanged?.invoke(filteredList.size)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderViewHolder {

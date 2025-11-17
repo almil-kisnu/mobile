@@ -18,6 +18,18 @@ public class QuantitySelector extends LinearLayout {
     private EditText etJumlah; // Sekarang EditText
     private int quantity = 0;
     private OnQuantityChangeListener listener;
+    private int maxQuantity = Integer.MAX_VALUE;
+    private boolean isUpdatingText = false;
+    private boolean shouldNotifyExternal = true; // Tambahkan setelah maxQuantity
+
+
+    public void setMaxQuantity(int max) {
+        this.maxQuantity = max;
+    }
+
+    public int getMaxQuantity() {
+        return maxQuantity;
+    }
 
     public interface OnQuantityChangeListener {
         void onQuantityChanged(int quantity);
@@ -45,19 +57,26 @@ public class QuantitySelector extends LinearLayout {
         // Inisialisasi view
         btnPlus = findViewById(R.id.btnPlus);
         btnMinus = findViewById(R.id.btnMinus);
-        // Menggunakan ID tvJumlah, tetapi di-cast ke EditText
         etJumlah = findViewById(R.id.tvJumlah);
-
-        // --- LOGIKA TOMBOL DELETE DIHAPUS SESUAI PERMINTAAN ---
+        etJumlah.setFocusable(false);
+        etJumlah.setFocusableInTouchMode(false);
+        etJumlah.setClickable(false);
+        etJumlah.setCursorVisible(false);
 
         // Set tampilan awal
         updateUI();
 
         // Tombol +
         btnPlus.setOnClickListener(v -> {
-            quantity++;
-            updateUI();
-            notifyQuantityChange();
+            if (quantity < maxQuantity) {
+                quantity++;
+                updateUI();
+                notifyQuantityChange();
+            } else {
+                android.widget.Toast.makeText(context,
+                        "Stok maksimal: " + maxQuantity,
+                        android.widget.Toast.LENGTH_SHORT).show();
+            }
         });
 
         // Tombol -
@@ -67,61 +86,114 @@ public class QuantitySelector extends LinearLayout {
                 updateUI();
                 notifyQuantityChange();
             }
-            // Tombol minus akan otomatis dinonaktifkan ketika quantity = 0 (dikelola di updateButtonState)
         });
 
-        // Listener untuk Input Manual pada EditText
-        etJumlah.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { /* Kosong */ }
+        // TAMBAHKAN: OnFocusChangeListener untuk select all saat diklik
+//        etJumlah.setOnFocusChangeListener((v, hasFocus) -> {
+//            if (hasFocus) {
+//                // Saat mendapat focus, select semua teks agar langsung terganti saat user mengetik
+//                etJumlah.post(() -> etJumlah.selectAll());
+//            }
+//        });
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Jika teks dihapus, ini akan di-trigger
-                if (s.length() == 0) {
-                    quantity = 0;
-                    updateButtonState(); // Nonaktifkan minus segera
-                }
-            }
+        // TAMBAHKAN: OnClickListener untuk select all saat diklik (jika sudah fokus)
+//        etJumlah.setOnClickListener(v -> {
+//            etJumlah.selectAll();
+//        });
 
-            @Override
-            public void afterTextChanged(Editable s) {
-                String text = s.toString();
-                if (!text.isEmpty()) {
-                    try {
-                        int newQuantity = Integer.parseInt(text);
-                        // Cek apakah ada perubahan. Jika ya, update quantity.
-                        if (newQuantity != quantity) {
-                            quantity = Math.max(0, newQuantity); // Pastikan tidak negatif
-                            notifyQuantityChange();
-                        }
-                    } catch (NumberFormatException e) {
-                        // Jika input bukan angka valid, biarkan saja (harusnya dicegah oleh inputType="number" di XML)
-                    }
-                } else {
-                    // Ketika input dikosongkan, kirim notifikasi 0
-                    if (quantity != 0) {
-                        quantity = 0;
-                        notifyQuantityChange();
-                    }
-                }
-                updateButtonState(); // Pastikan state tombol diperbarui
-            }
-        });
-
-        // Listener untuk menyelesaikan input (optional, tapi membantu)
-        etJumlah.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                // Pastikan nilai di EditText dikonversi dan diset lagi
-                if (v.getText().toString().isEmpty()) {
-                    setQuantity(0);
-                } else {
-                    setQuantity(Integer.parseInt(v.getText().toString()));
-                }
-                return false; // Membiarkan keyboard ditutup
-            }
-            return false;
-        });
+//        // Listener untuk Input Manual pada EditText
+//        etJumlah.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) { /* Kosong */ }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                if (s.length() == 0) {
+//                    quantity = 0;
+//                    updateButtonState();
+//                }
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//                if (isUpdatingText) {
+//                    return;
+//                }
+//
+//                String text = s.toString();
+//
+//                if (text.isEmpty()) {
+//                    quantity = 0;
+//                    updateButtonState();
+//                    // JANGAN notify saat user sedang ngetik
+//                    shouldNotifyExternal = false;
+//                    notifyQuantityChange();
+//                    shouldNotifyExternal = true;
+//                    return;
+//                }
+//
+//                try {
+//                    int newQuantity = Integer.parseInt(text);
+//
+//                    if (newQuantity > maxQuantity) {
+//                        isUpdatingText = true;
+//                        s.replace(0, s.length(), String.valueOf(maxQuantity));
+//                        isUpdatingText = false;
+//
+//                        quantity = maxQuantity;
+//                        android.widget.Toast.makeText(context,
+//                                "Stok maksimal: " + maxQuantity,
+//                                android.widget.Toast.LENGTH_SHORT).show();
+//                        // Notify karena ada koreksi otomatis
+//                        notifyQuantityChange();
+//                    } else if (newQuantity >= 0 && newQuantity != quantity) {
+//                        quantity = newQuantity;
+//                        // JANGAN notify saat user sedang ngetik
+//                        shouldNotifyExternal = false;
+//                        notifyQuantityChange();
+//                        shouldNotifyExternal = true;
+//                    }
+//                } catch (NumberFormatException e) {
+//                    // Biarkan user melanjutkan input
+//                }
+//
+//                updateButtonState();
+//            }
+//        });
+//
+//        // UBAH: Listener untuk menyelesaikan input - tambahkan clearFocus
+//        etJumlah.setOnEditorActionListener((v, actionId, event) -> {
+//            if (actionId == EditorInfo.IME_ACTION_DONE) {
+//                String text = v.getText().toString();
+//
+//                if (text.isEmpty()) {
+//                    setQuantity(0);
+//                } else {
+//                    try {
+//                        int value = Integer.parseInt(text);
+//                        // Set tanpa notify dulu
+//                        shouldNotifyExternal = false;
+//                        setQuantity(value);
+//                        shouldNotifyExternal = true;
+//                    } catch (NumberFormatException e) {
+//                        setQuantity(0);
+//                    }
+//                }
+//
+//                // BARU: Notify setelah user selesai edit
+//                notifyQuantityChange();
+//
+//                etJumlah.clearFocus();
+//                android.view.inputmethod.InputMethodManager imm =
+//                        (android.view.inputmethod.InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+//                if (imm != null) {
+//                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+//                }
+//
+//                return true;
+//            }
+//            return false;
+//        });
     }
 
     private void updateUI() {
@@ -147,15 +219,22 @@ public class QuantitySelector extends LinearLayout {
     }
 
     private void notifyQuantityChange() {
-        if (listener != null) {
+        if (listener != null && shouldNotifyExternal) {
             listener.onQuantityChanged(quantity);
         }
     }
 
     // ===== PUBLIC METHODS =====
     public void setQuantity(int quantity) {
-        // Pastikan kuantitas tidak negatif
-        this.quantity = Math.max(0, quantity);
+        // Pastikan kuantitas tidak negatif dan tidak melebihi max
+        if (quantity > maxQuantity) {
+            this.quantity = maxQuantity;
+            android.widget.Toast.makeText(getContext(),
+                    "Stok maksimal: " + maxQuantity,
+                    android.widget.Toast.LENGTH_SHORT).show();
+        } else {
+            this.quantity = Math.max(0, quantity);
+        }
         updateUI();
         notifyQuantityChange();
     }

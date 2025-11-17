@@ -14,7 +14,7 @@ import androidx.room.TypeConverters
         OrderEntity::class,
         DetailOrderEntity::class
     ],
-    version = 2, // Update versi database dari 2 ke 3
+    version = 3, // Update versi database dari 2 ke 3
     exportSchema = false
 )
 @TypeConverters(Converters::class)

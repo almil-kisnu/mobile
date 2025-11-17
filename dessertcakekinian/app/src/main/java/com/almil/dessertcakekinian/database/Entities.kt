@@ -3,8 +3,6 @@ package com.almil.dessertcakekinian.database
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.ColumnInfo
-import androidx.room.ForeignKey
-import androidx.room.Index
 
 @Entity(tableName = "produk_kategori")
 data class ProdukKategoriEntity(
@@ -64,6 +62,8 @@ data class OrderEntity(
     val grandtotal: Double,
     val bayar: Double,
     val kembalian: Double,
+    val notelp: String? = null,
+    val alamat: String? = null,
     val tanggal: String,
     val jam: String,
     val metode_pembayaran: String,

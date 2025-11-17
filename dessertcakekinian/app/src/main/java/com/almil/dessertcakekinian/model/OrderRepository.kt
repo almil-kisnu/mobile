@@ -178,7 +178,11 @@ class OrderRepository private constructor(private val context: Context) {
             if (subscribed) {
                 orderChannel = channel
                 isOrderRealtimeActive = true
+
+                // Hitung jumlah data orders
+                val orderCount = orderDao.getOrderCount()
                 Log.d(TAG, "✅ Order realtime ACTIVE")
+                Log.d(TAG, "📊 Total Orders in Database: $orderCount")
             } else {
                 orderRealtimeJob?.cancel()
                 orderRealtimeJob = null
@@ -443,16 +447,41 @@ class OrderRepository private constructor(private val context: Context) {
 
 @Serializable
 data class RawOrder(
-    @SerialName("idorder") val idorder: Int,
-    @SerialName("namapelanggan") val namapelanggan: String? = null,
-    @SerialName("grandtotal") val grandtotal: Double? = null,
-    @SerialName("bayar") val bayar: Double? = null,
-    @SerialName("kembalian") val kembalian: Double? = null,
-    @SerialName("idkasir") val idkasir: Int? = null,
-    @SerialName("tanggalorder") val tanggalorder: String? = null,
-    @SerialName("idoutlet") val idoutlet: Int = 1,
-    @SerialName("metode_pembayaran") val metode_pembayaran: String? = null,
-    @SerialName("status") val status: String? = null
+    @SerialName("idorder")
+    val idorder: Int,
+
+    @SerialName("namapelanggan")
+    val namapelanggan: String? = null,
+
+    @SerialName("grandtotal")
+    val grandtotal: Double? = null,
+
+    @SerialName("bayar")
+    val bayar: Double? = null,
+
+    @SerialName("kembalian")
+    val kembalian: Double? = null,
+
+    @SerialName("notelp")
+    val notelp: String? = null,
+
+    @SerialName("alamat")
+    val alamat: String? = null,
+
+    @SerialName("idkasir")
+    val idkasir: Int? = null,
+
+    @SerialName("tanggalorder")
+    val tanggalorder: String? = null,
+
+    @SerialName("idoutlet")
+    val idoutlet: Int = 1,
+
+    @SerialName("metode_pembayaran")
+    val metode_pembayaran: String? = null,
+
+    @SerialName("status")
+    val status: String? = null
 )
 
 @Serializable

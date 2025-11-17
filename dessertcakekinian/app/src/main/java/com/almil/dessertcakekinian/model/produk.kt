@@ -74,7 +74,7 @@ data class EventDiskon(
 
     @SerialName("created_at")
     val createdAt: String? = null
-)
+): java.io.Serializable
 
 // Model 2: Detail Diskon Produk
 @Serializable
@@ -112,11 +112,26 @@ data class Order(
     @SerialName("kembalian")
     val kembalian: Double,
 
+    @SerialName("notelp")
+    val notelp: String? = null,
+
+    @SerialName("alamat")
+    val alamat: String? = null,
+
+    @SerialName("idkasir")          // ✅ TAMBAHKAN INI
+    val idkasir: Int? = null,       // ✅ TAMBAHKAN INI
+
     @SerialName("tanggal")
-    val tanggal: String, // Format: YYYY-MM-DD
+    val tanggal: String,
 
     @SerialName("jam")
-    val jam: String, // Format: HH:MM
+    val jam: String,
+
+    @SerialName("tanggalorder")     // ✅ Tambahkan juga karena ada di view
+    val tanggalorder: String? = null, // ✅ Tambahkan juga karena ada di view
+
+    @SerialName("idoutlet")         // ✅ Tambahkan juga
+    val idoutlet: Int? = null,      // ✅ Tambahkan juga
 
     @SerialName("metode_pembayaran")
     val metode_pembayaran: String,
@@ -130,6 +145,7 @@ data class Order(
     @SerialName("kode_outlet")
     val kode_outlet: String? = null
 )
+
 @Serializable
 data class DetailOrder(
     @SerialName("iddetail")
@@ -150,6 +166,8 @@ data class DetailOrder(
     @SerialName("subtotal")
     val subtotal: Double
 )
+
+
 @Serializable
 data class OrderWithDetails(
     val order: Order,
