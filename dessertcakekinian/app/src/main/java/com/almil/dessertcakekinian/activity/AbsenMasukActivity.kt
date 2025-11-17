@@ -35,7 +35,7 @@ class AbsenMasukActivity : AppCompatActivity() {
         const val LOCATION_PERMISSION_REQUEST_CODE = 1001
         const val TARGET_LATITUDE = -8.157551
         const val TARGET_LONGITUDE = 113.722800
-        const val RADIUS_METERS = 100.0f
+        const val RADIUS_METERS = 50.0f
     }
 
     private lateinit var tvNamaKaryawan: TextView
@@ -64,6 +64,9 @@ class AbsenMasukActivity : AppCompatActivity() {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
+        // Reset status absen jika sudah hari baru
+        resetAbsenStatusIfNeeded()
+
         // Untuk testing - enable dev mode (bisa absen di luar lokasi)
         getSharedPreferences("absen_data", Context.MODE_PRIVATE)
             .edit()
@@ -85,6 +88,24 @@ class AbsenMasukActivity : AppCompatActivity() {
         requestLocationPermission()
     }
 
+    private fun resetAbsenStatusIfNeeded() {
+        val prefs = getSharedPreferences("absen_data", Context.MODE_PRIVATE)
+        val lastAbsenDate = prefs.getString("last_absen_date", "")
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+
+        // Jika tanggal terakhir absen berbeda dengan hari ini, reset status
+        if (lastAbsenDate != currentDate) {
+            val editor = prefs.edit()
+            editor.putString("status_absen", "BELUM_ABSEN")
+            editor.putString("jam_masuk_hari_ini", "")
+            editor.putString("lokasi_masuk_hari_ini", "")
+            editor.putString("jam_pulang_hari_ini", "")
+            editor.putString("lokasi_pulang_hari_ini", "")
+            editor.apply()
+            println("🔄 Status absen direset untuk hari baru - Masuk")
+        }
+    }
+
     private fun setupButtonListeners() {
         // Tombol Back
         btnBack.setOnClickListener {
@@ -97,8 +118,15 @@ class AbsenMasukActivity : AppCompatActivity() {
             val status = prefs.getString("status_absen", "BELUM_ABSEN")
 
             if (status == "SUDAH_MASUK" || status == "SUDAH_PULANG") {
-                Toast.makeText(this, "❌ Anda sudah absen masuk hari ini", Toast.LENGTH_SHORT).show()
+                showToast("❌ Anda sudah absen masuk hari ini")
                 finish()
+                return@setOnClickListener
+            }
+
+            // CEK DULU APAKAH PERMISSION SUDAH DIBERIKAN
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                showToast("❌ Izin lokasi belum diberikan")
+                requestLocationPermission()
                 return@setOnClickListener
             }
 
@@ -112,11 +140,20 @@ class AbsenMasukActivity : AppCompatActivity() {
             } else {
                 val allowOutside = prefs.getBoolean("dev_mode", true)
                 if (allowOutside) {
-                    Toast.makeText(this, "Lokasi belum siap (dev_mode): lanjut simpan", Toast.LENGTH_SHORT).show()
+                    showToast("Lokasi belum siap (dev_mode): lanjut simpan")
                     validateNamaThen(this::simpanAbsenMasuk)
                 } else {
-                    Toast.makeText(this, "Mohon tunggu, sedang mengambil lokasi...", Toast.LENGTH_SHORT).show()
-                    requestLocationPermission()
+                    showToast("Mohon tunggu, sedang mengambil lokasi...")
+                    getCurrentLocation() // Coba ambil lokasi lagi
+
+                    // Delay sebentar lalu coba lagi
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        if (currentLatitude != 0.0 && currentLongitude != 0.0) {
+                            validateNamaThen(this::simpanAbsenMasuk)
+                        } else {
+                            showToast("Gagal mengambil lokasi, coba lagi")
+                        }
+                    }, 3000)
                 }
             }
         }
@@ -167,7 +204,7 @@ class AbsenMasukActivity : AppCompatActivity() {
         val message = "❌ Absen hanya bisa dilakukan di Jurusan TI Polije\n" +
                 "Anda berada ${String.format(Locale.getDefault(), "%.1f", distanceInKm)} km dari lokasi\n" +
                 "Silahkan datang ke Jurusan TI Polije untuk absen"
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        showToast(message)
     }
 
     private fun validateNamaThen(onValid: () -> Unit) {
@@ -181,7 +218,7 @@ class AbsenMasukActivity : AppCompatActivity() {
 
         if (nama.isEmpty()) {
             println("❌ validateNamaThen: Nama KOSONG - tidak bisa lanjut")
-            Toast.makeText(this, "Error: Nama pengguna tidak ditemukan", Toast.LENGTH_SHORT).show()
+            showToast("Error: Nama pengguna tidak ditemukan")
             return
         }
 
@@ -199,7 +236,7 @@ class AbsenMasukActivity : AppCompatActivity() {
         val status = prefs.getString("status_absen", "BELUM_ABSEN")
 
         if (status == "SUDAH_MASUK" || status == "SUDAH_PULANG") {
-            Toast.makeText(this, "❌ Anda sudah absen masuk hari ini", Toast.LENGTH_SHORT).show()
+            showToast("❌ Anda sudah absen masuk hari ini")
             finish()
             return
         }
@@ -229,7 +266,7 @@ class AbsenMasukActivity : AppCompatActivity() {
         println("[Masuk] saved key=$key, ok=$ok")
         try {
             if (getSharedPreferences("absen_data", Context.MODE_PRIVATE).getBoolean("dev_mode", true)) {
-                Toast.makeText(this, "Masuk tersimpan lokal: $currentTime", Toast.LENGTH_SHORT).show()
+                showToast("Masuk tersimpan lokal: $currentTime")
             }
         } catch (ignored: Exception) {}
 
@@ -243,7 +280,7 @@ class AbsenMasukActivity : AppCompatActivity() {
         val message = "✅ Absen Masuk berhasil!\nWaktu: $currentTime" +
                 "\nLokasi: $currentAddress" +
                 "\n📍 Lokasi: Jurusan TI Polije ✅"
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        showToast(message)
         finish()
     }
 
@@ -269,7 +306,7 @@ class AbsenMasukActivity : AppCompatActivity() {
                     println("✅ simpanKeDatabaseOnline: BERHASIL - $message")
                     runOnUiThread {
                         println("✅ Database Online: $message")
-                        Toast.makeText(this@AbsenMasukActivity, "Cloud: $message", Toast.LENGTH_SHORT).show()
+                        showToast("Cloud: $message")
                     }
                 }
 
@@ -277,7 +314,7 @@ class AbsenMasukActivity : AppCompatActivity() {
                     println("❌ simpanKeDatabaseOnline: ERROR - $error")
                     runOnUiThread {
                         println("⚠️ Database Offline: $error")
-                        Toast.makeText(this@AbsenMasukActivity, "Cloud error: $error", Toast.LENGTH_LONG).show()
+                        showToast("Cloud error: $error")
                     }
                 }
             })
@@ -291,31 +328,35 @@ class AbsenMasukActivity : AppCompatActivity() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            // Tampilkan dialog penjelasan sebelum minta permission
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                // Jelaskan kenapa butuh lokasi
-                AlertDialog.Builder(this)
-                    .setTitle("Izin Lokasi Diperlukan")
-                    .setMessage("Aplikasi membutuhkan akses lokasi untuk memastikan Anda berada di Jurusan TI Polije saat absen.")
-                    .setPositiveButton("OK") { _, _ ->
-                        // Minta permission setelah user paham
-                        ActivityCompat.requestPermissions(this,
-                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
-                            LOCATION_PERMISSION_REQUEST_CODE
-                        )
-                    }
-                    .setNegativeButton("Batal") { _, _ ->
-                        Toast.makeText(this, "Tidak bisa absen tanpa izin lokasi", Toast.LENGTH_LONG).show()
-                        finish()
-                    }
-                    .show()
-            } else {
-                // Langsung minta permission
-                ActivityCompat.requestPermissions(this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
-                    LOCATION_PERMISSION_REQUEST_CODE
-                )
-            }
+            // Tampilkan dialog penjelasan YANG LEBIH JELAS kenapa butuh lokasi
+            AlertDialog.Builder(this)
+                .setTitle("Izin Lokasi Diperlukan untuk Absen")
+                .setMessage("Aplikasi MEMBUTUHKAN akses lokasi untuk memverifikasi bahwa Anda berada di:\n\n" +
+                        "📍 Jurusan TI Polije\n" +
+                        "Lat: -8.157551, Long: 113.722800\n\n" +
+                        "Tanpa izin lokasi, Anda TIDAK BISA melakukan absen.\n\n" +
+                        "Lokasi hanya digunakan untuk verifikasi kehadiran dan tidak disimpan secara permanen.")
+                .setPositiveButton("IZINKAN LOKASI") { _, _ ->
+                    // Minta permission setelah user paham
+                    ActivityCompat.requestPermissions(this,
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                        LOCATION_PERMISSION_REQUEST_CODE
+                    )
+                }
+                .setNegativeButton("TOLAK") { _, _ ->
+                    // Jika user tetap menolak, tampilkan pesan dan tutup activity
+                    AlertDialog.Builder(this)
+                        .setTitle("Tidak Bisa Absen")
+                        .setMessage("Anda tidak dapat melakukan absen tanpa izin lokasi.\n\n" +
+                                "Silakan berikan izin lokasi di pengaturan aplikasi jika ingin absen.")
+                        .setPositiveButton("OK") { _, _ ->
+                            finish()
+                        }
+                        .setCancelable(false)
+                        .show()
+                }
+                .setCancelable(false) // User harus memilih, tidak bisa tekan back
+                .show()
         } else {
             // Permission sudah diberikan, ambil lokasi
             getCurrentLocation()
@@ -327,24 +368,27 @@ class AbsenMasukActivity : AppCompatActivity() {
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission diberikan, ambil lokasi
+                showToast("Izin lokasi diberikan, mengambil lokasi...")
                 getCurrentLocation()
             } else {
                 // Permission ditolak
                 tvLokasi.text = "Izin lokasi ditolak"
-                Toast.makeText(this, "Tidak bisa absen tanpa izin lokasi. Silakan berikan izin lokasi di pengaturan.", Toast.LENGTH_LONG).show()
 
-                // Beri opsi ke pengaturan
+                // Tampilkan dialog penjelasan lagi
                 AlertDialog.Builder(this)
                     .setTitle("Izin Lokasi Ditolak")
-                    .setMessage("Untuk dapat absen, Anda perlu memberikan izin lokasi. Buka pengaturan aplikasi?")
-                    .setPositiveButton("Buka Pengaturan") { _, _ ->
+                    .setMessage("Anda menolak izin lokasi. Untuk dapat absen, Anda HARUS memberikan izin lokasi.\n\n" +
+                            "Apakah Anda ingin membuka pengaturan untuk memberikan izin?")
+                    .setPositiveButton("BUKA PENGATURAN") { _, _ ->
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         intent.data = Uri.parse("package:$packageName")
                         startActivity(intent)
+                        finish() // Tutup activity setelah ke pengaturan
                     }
-                    .setNegativeButton("Nanti") { _, _ ->
+                    .setNegativeButton("TUTUP APLIKASI") { _, _ ->
                         finish()
                     }
+                    .setCancelable(false)
                     .show()
             }
         }
@@ -465,6 +509,7 @@ class AbsenMasukActivity : AppCompatActivity() {
         }
     }
 
+    // FUNGSI showToast
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }

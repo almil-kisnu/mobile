@@ -34,9 +34,9 @@ class AbsenPulangActivity : AppCompatActivity() {
 
     private companion object {
         const val LOCATION_PERMISSION_REQUEST_CODE = 1002
-        const val TARGET_LATITUDE = -8.157551
-        const val TARGET_LONGITUDE = 113.722800
-        const val RADIUS_METERS = 100.0f
+        const val TARGET_LATITUDE = -8.157518
+        const val TARGET_LONGITUDE = 113.722776
+        const val RADIUS_METERS = 50.0f
     }
 
     private lateinit var tvNamaKaryawan: TextView
@@ -65,6 +65,9 @@ class AbsenPulangActivity : AppCompatActivity() {
         btnBack = findViewById(R.id.btnBack)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        // Reset status absen jika sudah hari baru
+        resetAbsenStatusIfNeeded()
 
         // Untuk testing - enable dev mode (bisa absen di luar lokasi)
         getSharedPreferences("absen_data", Context.MODE_PRIVATE)
@@ -101,6 +104,24 @@ class AbsenPulangActivity : AppCompatActivity() {
 
         // Request location permission
         requestLocationPermission()
+    }
+
+    private fun resetAbsenStatusIfNeeded() {
+        val prefs = getSharedPreferences("absen_data", Context.MODE_PRIVATE)
+        val lastAbsenDate = prefs.getString("last_absen_date", "")
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+
+        // Jika tanggal terakhir absen berbeda dengan hari ini, reset status
+        if (lastAbsenDate != currentDate) {
+            val editor = prefs.edit()
+            editor.putString("status_absen", "BELUM_ABSEN")
+            editor.putString("jam_masuk_hari_ini", "")
+            editor.putString("lokasi_masuk_hari_ini", "")
+            editor.putString("jam_pulang_hari_ini", "")
+            editor.putString("lokasi_pulang_hari_ini", "")
+            editor.apply()
+            println("🔄 Status absen direset untuk hari baru - Pulang")
+        }
     }
 
     private fun setupButtonListeners() {
@@ -496,6 +517,7 @@ class AbsenPulangActivity : AppCompatActivity() {
         }
     }
 
+    // FUNGSI showToast YANG DITAMBAHKAN
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }

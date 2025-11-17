@@ -17,6 +17,7 @@ import com.almil.dessertcakekinian.adapter.RiwayatAdapter
 import com.almil.dessertcakekinian.dialog.dialog_ajukan_izin
 import com.google.android.material.button.MaterialButton
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -28,6 +29,8 @@ class PresensiFragment : Fragment() {
     private lateinit var btnAjukanIzin: MaterialButton
     private lateinit var btnBack: ImageButton
     private lateinit var tvToolbarTitle: TextView
+    private lateinit var linearLayoutManager: LinearLayoutManager
+    private var allRiwayatList = listOf<RiwayatPresensi>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -60,9 +63,10 @@ class PresensiFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        val riwayatList = getRiwayatPresensi()
-        val adapter = RiwayatAdapter(riwayatList)
-        rvRiwayat.layoutManager = LinearLayoutManager(requireContext())
+        allRiwayatList = getRiwayatPresensi()
+        val adapter = RiwayatAdapter(allRiwayatList)
+        linearLayoutManager = LinearLayoutManager(requireContext())
+        rvRiwayat.layoutManager = linearLayoutManager
         rvRiwayat.adapter = adapter
     }
 
@@ -72,7 +76,7 @@ class PresensiFragment : Fragment() {
         }
 
         btnKalender.setOnClickListener {
-            showToast("Fitur kalender akan segera hadir")
+            showDatePickerDialog()
         }
 
         btnAjukanIzin.setOnClickListener {
@@ -86,6 +90,67 @@ class PresensiFragment : Fragment() {
 
             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
         }
+    }
+
+    private fun showDatePickerDialog() {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val datePickerDialog = android.app.DatePickerDialog(
+            requireContext(),
+            { _, selectedYear, selectedMonth, selectedDay ->
+                // Format tanggal yang dipilih
+                val selectedDate = Calendar.getInstance()
+                selectedDate.set(selectedYear, selectedMonth, selectedDay)
+
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val formattedDate = dateFormat.format(selectedDate.time)
+
+                // Format untuk display
+                val displayFormat = SimpleDateFormat("EEEE, dd MMMM yyyy", Locale("id", "ID"))
+                val displayDate = displayFormat.format(selectedDate.time)
+
+                showToast("Menuju ke tanggal: $displayDate")
+                scrollToDate(formattedDate)
+            },
+            year,
+            month,
+            day
+        )
+
+        datePickerDialog.show()
+    }
+
+    private fun scrollToDate(selectedDate: String) {
+        // Cari posisi item dengan tanggal yang dipilih
+        val position = allRiwayatList.indexOfFirst { it.tanggal == selectedDate }
+
+        if (position != -1) {
+            // Scroll ke posisi tanggal yang dipilih
+            linearLayoutManager.scrollToPositionWithOffset(position, 0)
+            showToast("Menampilkan riwayat tanggal terpilih")
+
+            // Optional: Highlight item yang dipilih
+            highlightSelectedItem(position)
+        } else {
+            // Jika tidak ada riwayat di tanggal tersebut, tampilkan semua dan beri pesan
+            val adapter = rvRiwayat.adapter as? RiwayatAdapter
+            adapter?.updateData(allRiwayatList)
+            showToast("Tidak ada riwayat absen pada tanggal terpilih")
+        }
+    }
+
+    private fun highlightSelectedItem(position: Int) {
+        // Beri delay sedikit agar smooth scroll selesai dulu
+        rvRiwayat.postDelayed({
+            val adapter = rvRiwayat.adapter as? RiwayatAdapter
+            adapter?.setSelectedPosition(position)
+
+            // Optional: Scroll lagi untuk memastikan item terlihat
+            linearLayoutManager.scrollToPositionWithOffset(position, 0)
+        }, 300)
     }
 
     private fun showAjukanIzinDialog() {
@@ -170,14 +235,24 @@ class PresensiFragment : Fragment() {
                 latitude = -8.157551,
                 longitude = 113.722800,
                 jenisAbsen = "MASUK"
+            ),
+            RiwayatPresensi(
+                id = "3",
+                tanggal = "2024-11-12",
+                jamMasuk = "07:55",
+                jamPulang = "17:10",
+                status = "Hadir",
+                lokasi = "Jurusan TI Polije",
+                latitude = -8.157551,
+                longitude = 113.722800,
+                jenisAbsen = "MASUK"
             )
         )
     }
 
     private fun filterRiwayatByStatus(status: String) {
-        val allRiwayat = getRiwayatPresensi()
         val adapter = rvRiwayat.adapter as? RiwayatAdapter
-        adapter?.updateData(allRiwayat)
+        adapter?.updateData(allRiwayatList)
         adapter?.filterByStatus(status)
     }
 
@@ -197,3 +272,5 @@ class PresensiFragment : Fragment() {
         val jenisAbsen: String
     )
 }
+
+private fun RiwayatAdapter?.setSelectedPosition(position: Int) {}
