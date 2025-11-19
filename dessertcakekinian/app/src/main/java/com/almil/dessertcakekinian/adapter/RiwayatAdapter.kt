@@ -1,5 +1,6 @@
 package com.almil.dessertcakekinian.adapter
 
+import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +17,7 @@ import kotlin.collections.ArrayList
 class RiwayatAdapter(private var riwayatList: List<PresensiFragment.RiwayatPresensi>) : RecyclerView.Adapter<RiwayatAdapter.ViewHolder>() {
 
     private var riwayatListFiltered: MutableList<PresensiFragment.RiwayatPresensi> = ArrayList(riwayatList)
+    private var selectedPosition = -1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -27,16 +29,19 @@ class RiwayatAdapter(private var riwayatList: List<PresensiFragment.RiwayatPrese
         try {
             val data = riwayatListFiltered[position]
 
+            // TAMPILKAN USERNAME - menggunakan string resource
+            holder.tvUsername.text = holder.itemView.context.getString(R.string.username_format, data.username)
+
             // Format tanggal menjadi format Indonesia
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val displayDateFormat = SimpleDateFormat("EEEE, dd MMMM yyyy", Locale("id", "ID"))
 
             val date = dateFormat.parse(data.tanggal)
 
-            // Set data ke view sesuai dengan XML kamu
+            // TANGGAL NORMAL
             holder.tvTanggal.text = date?.let { displayDateFormat.format(it) } ?: data.tanggal
 
-            // Set status badge - HANYA HADIR dan IZIN
+            // Set status badge
             holder.tvStatusBadge.text = data.status
             setStatusBadge(holder.tvStatusBadge, data.status)
 
@@ -48,23 +53,27 @@ class RiwayatAdapter(private var riwayatList: List<PresensiFragment.RiwayatPrese
             val totalJam = computeWorkDuration(data.jamMasuk, data.jamPulang)
             holder.tvTotalJam.text = totalJam
 
-            // Hitung jam terhutang (default 0 jika tidak ada hutang)
-            val jamTerhutang = calculateJamTerhutang(data.jamMasuk, data.jamPulang)
-            holder.tvJamTerhutang.text = jamTerhutang
+            // Set jam terhutang dari data yang sudah dihitung di PresensiFragment
+            holder.tvJamTerhutang.text = data.utangJam
 
-            // Set warna jam terhutang - PAKAI WARNA ANDROID
-            if (jamTerhutang.contains("-")) {
+            // Set warna jam terhutang
+            if (data.utangJam.isNotEmpty() && data.utangJam != "0j") {
                 holder.tvJamTerhutang.setTextColor(ContextCompat.getColor(holder.itemView.context, android.R.color.holo_red_dark))
             } else {
                 holder.tvJamTerhutang.setTextColor(ContextCompat.getColor(holder.itemView.context, android.R.color.holo_green_dark))
+            }
+
+            // Highlight item jika dipilih (untuk fitur kalender)
+            if (position == selectedPosition) {
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, R.color.primary_light))
+            } else {
+                holder.itemView.setBackgroundColor(Color.TRANSPARENT)
             }
 
         } catch (e: Exception) {
             Log.e("RiwayatAdapter", "onBindViewHolder error at pos=$position", e)
         }
     }
-
-
 
     private fun computeWorkDuration(jamMasuk: String, jamPulang: String): String {
         return try {
@@ -81,49 +90,37 @@ class RiwayatAdapter(private var riwayatList: List<PresensiFragment.RiwayatPrese
 
             val hours = diff / (60 * 60 * 1000)
             val minutes = (diff % (60 * 60 * 1000)) / (60 * 1000)
-            "$hours Jam $minutes Menit"
+
+            if (hours > 0 && minutes > 0) {
+                "${hours}j ${minutes}m"
+            } else if (hours > 0) {
+                "${hours}j"
+            } else {
+                "${minutes}m"
+            }
         } catch (e: Exception) {
             "-"
         }
     }
 
-    private fun calculateJamTerhutang(jamMasuk: String, jamPulang: String): String {
-        return try {
-            if (jamMasuk == "-" || jamPulang == "-") return "0 Jam"
-
-            val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
-            val tIn = sdf.parse(jamMasuk)
-            val tOut = sdf.parse(jamPulang)
-
-            if (tIn == null || tOut == null) return "0 Jam"
-
-            var diff = tOut.time - tIn.time
-            if (diff < 0) diff += 24 * 60 * 60 * 1000
-
-            val totalJam = diff / (60 * 60 * 1000)
-
-            // Asumsi jam kerja normal adalah 8 jam
-            val jamNormal = 8
-            val selisih = totalJam - jamNormal
-
-            return if (selisih < 0) {
-                "$selisih Jam"
-            } else if (selisih > 0) {
-                "+$selisih Jam"
-            } else {
-                "0 Jam"
-            }
-        } catch (e: Exception) {
-            "0 Jam"
-        }
-    }
-
     private fun setStatusBadge(tvStatusBadge: TextView, status: String) {
         when (status.lowercase(Locale.getDefault())) {
-            "hadir" -> tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_hadir)
-            "izin" -> tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_izin)
-            // Hanya Hadir dan Izin saja, lainnya pakai default hadir
-            else -> tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_hadir)
+            "hadir" -> {
+                tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_hadir)
+                tvStatusBadge.setTextColor(ContextCompat.getColor(tvStatusBadge.context, android.R.color.white))
+            }
+            "izin" -> {
+                tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_izin)
+                tvStatusBadge.setTextColor(ContextCompat.getColor(tvStatusBadge.context, android.R.color.white))
+            }
+            "telat" -> {
+                tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_telat)
+                tvStatusBadge.setTextColor(ContextCompat.getColor(tvStatusBadge.context, android.R.color.white))
+            }
+            else -> {
+                tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_hadir)
+                tvStatusBadge.setTextColor(ContextCompat.getColor(tvStatusBadge.context, android.R.color.white))
+            }
         }
     }
 
@@ -137,10 +134,14 @@ class RiwayatAdapter(private var riwayatList: List<PresensiFragment.RiwayatPrese
         riwayatListFiltered.clear()
 
         for (riwayat in riwayatList) {
-            // Filter hanya untuk Hadir dan Izin
-            val matchesStatus = selectedStatus == "Semua Status" ||
-                    selectedStatus == "Hadir" && riwayat.status == "Hadir" ||
-                    selectedStatus == "Izin" && riwayat.status == "Izin"
+            val matchesStatus = when (selectedStatus) {
+                "Semua Status" -> true
+                "Hadir" -> riwayat.status == "Hadir"
+                "Izin" -> riwayat.status == "Izin"
+                "Telat" -> riwayat.status == "Telat"
+                "Utang Jam" -> riwayat.utangJam.isNotEmpty() && riwayat.utangJam != "0j"
+                else -> true
+            }
 
             if (matchesStatus) {
                 riwayatListFiltered.add(riwayat)
@@ -161,7 +162,16 @@ class RiwayatAdapter(private var riwayatList: List<PresensiFragment.RiwayatPrese
         notifyDataSetChanged()
     }
 
+    // FUNGSI BARU: Untuk highlight item yang dipilih dari kalender
+    fun setSelectedPosition(position: Int) {
+        val previousPosition = selectedPosition
+        selectedPosition = position
+        if (previousPosition != -1) notifyItemChanged(previousPosition)
+        if (position != -1) notifyItemChanged(position)
+    }
+
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val tvUsername: TextView = itemView.findViewById(R.id.tvUsername)
         val tvTanggal: TextView = itemView.findViewById(R.id.tvTanggal)
         val tvStatusBadge: TextView = itemView.findViewById(R.id.tvStatusBadge)
         val tvWaktuClockIn: TextView = itemView.findViewById(R.id.tvWaktuClockIn)

@@ -17,15 +17,33 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- TAMBAH TEXTVIEW USERNAME DI SINI -->
+        <TextView
+            android:id="@+id/tvUsername"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Amil"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorPrimary"
+            android:ellipsize="end"
+            android:maxLines="1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/tvStatusBadge"
+            tools:text="Almil" />
+
         <TextView
             android:id="@+id/tvTanggal"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="16sp"
             android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/tvUsername"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/tvStatusBadge"
             tools:text="Selasa, 17 Oktober 2023" />
 
         <TextView
@@ -52,7 +70,6 @@
             app:layout_constraintTop_toBottomOf="@id/tvTanggal"
             app:tint="?android:attr/textColorSecondary" />
 
-        <!-- TAMBAH ID DI SINI -->
         <TextView
             android:id="@+id/tvLabelClockIn"
             android:layout_width="wrap_content"
@@ -64,7 +81,6 @@
             app:layout_constraintStart_toEndOf="@id/iconClockIn"
             app:layout_constraintTop_toTopOf="@id/iconClockIn" />
 
-        <!-- TAMBAH ID DI SINI -->
         <TextView
             android:id="@+id/tvWaktuClockIn"
             android:layout_width="wrap_content"
@@ -85,7 +101,6 @@
             app:layout_constraintTop_toBottomOf="@id/iconClockIn"
             app:tint="?android:attr/textColorSecondary" />
 
-        <!-- TAMBAH ID DI SINI -->
         <TextView
             android:id="@+id/tvLabelClockOut"
             android:layout_width="wrap_content"
@@ -97,7 +112,6 @@
             app:layout_constraintStart_toEndOf="@id/iconClockOut"
             app:layout_constraintTop_toTopOf="@id/iconClockOut" />
 
-        <!-- TAMBAH ID DI SINI -->
         <TextView
             android:id="@+id/tvWaktuClockOut"
             android:layout_width="wrap_content"
@@ -118,7 +132,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvWaktuClockOut" />
 
-        <!-- TAMBAH ID DI SINI -->
         <TextView
             android:id="@+id/tvLabelTotalJam"
             android:layout_width="wrap_content"
@@ -129,7 +142,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/separator" />
 
-        <!-- TAMBAH ID DI SINI -->
         <TextView
             android:id="@+id/tvTotalJam"
             android:layout_width="wrap_content"
@@ -140,7 +152,6 @@
             app:layout_constraintTop_toTopOf="@id/tvLabelTotalJam"
             tools:text="9 Jam 4 Menit" />
 
-        <!-- TAMBAH ID DI SINI -->
         <TextView
             android:id="@+id/tvLabelJamTerhutang"
             android:layout_width="wrap_content"
@@ -151,7 +162,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvLabelTotalJam" />
 
-        <!-- TAMBAH ID DI SINI -->
         <TextView
             android:id="@+id/tvJamTerhutang"
             android:layout_width="wrap_content"

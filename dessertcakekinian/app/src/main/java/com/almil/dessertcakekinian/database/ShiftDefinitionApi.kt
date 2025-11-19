@@ -179,7 +179,7 @@ class ShiftDefinitionApi {
         }
     }
 
-    private fun mapShift(o: JSONObject): ShiftDefinition {
+    fun mapShift(o: JSONObject): ShiftDefinition {
         val id = o.optInt("id_shift_def", 0)
         val nama = o.optString("nama_shift", "")
         val mulai = o.optString("jam_mulai", "")

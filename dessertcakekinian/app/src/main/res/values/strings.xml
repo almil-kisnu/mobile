@@ -8,6 +8,10 @@
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
+    <string name="username_format">%s</string>
+    <string name="duration_format_hours_minutes">%dj %dm</string>
+    <string name="duration_format_hours">%dj</string>
+    <string name="duration_format_minutes">%dm</string>
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris

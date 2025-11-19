@@ -17,9 +17,7 @@ import com.almil.dessertcakekinian.adapter.RiwayatAdapter
 import com.almil.dessertcakekinian.dialog.dialog_ajukan_izin
 import com.google.android.material.button.MaterialButton
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 class PresensiFragment : Fragment() {
 
@@ -31,6 +29,7 @@ class PresensiFragment : Fragment() {
     private lateinit var tvToolbarTitle: TextView
     private lateinit var linearLayoutManager: LinearLayoutManager
     private var allRiwayatList = listOf<RiwayatPresensi>()
+    private var currentUsername: String = "User"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,12 +37,19 @@ class PresensiFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_presensi, container, false)
 
+        currentUsername = getUsernameFromSession()
+
         initViews(view)
         setupSpinner()
         setupRecyclerView()
         setupClickListeners()
 
         return view
+    }
+
+    private fun getUsernameFromSession(): String {
+        val userSession = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE)
+        return userSession.getString("USER_NAME", "User") ?: "User"
     }
 
     private fun initViews(view: View) {
@@ -56,7 +62,7 @@ class PresensiFragment : Fragment() {
     }
 
     private fun setupSpinner() {
-        val statusList = arrayOf("Semua Status", "Hadir", "Izin")
+        val statusList = arrayOf("Semua Status", "Hadir", "Izin", "Telat", "Utang Jam")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, statusList)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerStatus.adapter = adapter
@@ -101,14 +107,12 @@ class PresensiFragment : Fragment() {
         val datePickerDialog = android.app.DatePickerDialog(
             requireContext(),
             { _, selectedYear, selectedMonth, selectedDay ->
-                // Format tanggal yang dipilih
                 val selectedDate = Calendar.getInstance()
                 selectedDate.set(selectedYear, selectedMonth, selectedDay)
 
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 val formattedDate = dateFormat.format(selectedDate.time)
 
-                // Format untuk display
                 val displayFormat = SimpleDateFormat("EEEE, dd MMMM yyyy", Locale("id", "ID"))
                 val displayDate = displayFormat.format(selectedDate.time)
 
@@ -124,18 +128,14 @@ class PresensiFragment : Fragment() {
     }
 
     private fun scrollToDate(selectedDate: String) {
-        // Cari posisi item dengan tanggal yang dipilih
         val position = allRiwayatList.indexOfFirst { it.tanggal == selectedDate }
 
         if (position != -1) {
-            // Scroll ke posisi tanggal yang dipilih
             linearLayoutManager.scrollToPositionWithOffset(position, 0)
             showToast("Menampilkan riwayat tanggal terpilih")
 
-            // Optional: Highlight item yang dipilih
             highlightSelectedItem(position)
         } else {
-            // Jika tidak ada riwayat di tanggal tersebut, tampilkan semua dan beri pesan
             val adapter = rvRiwayat.adapter as? RiwayatAdapter
             adapter?.updateData(allRiwayatList)
             showToast("Tidak ada riwayat absen pada tanggal terpilih")
@@ -143,12 +143,10 @@ class PresensiFragment : Fragment() {
     }
 
     private fun highlightSelectedItem(position: Int) {
-        // Beri delay sedikit agar smooth scroll selesai dulu
         rvRiwayat.postDelayed({
             val adapter = rvRiwayat.adapter as? RiwayatAdapter
             adapter?.setSelectedPosition(position)
 
-            // Optional: Scroll lagi untuk memastikan item terlihat
             linearLayoutManager.scrollToPositionWithOffset(position, 0)
         }, 300)
     }
@@ -156,6 +154,153 @@ class PresensiFragment : Fragment() {
     private fun showAjukanIzinDialog() {
         val dialog = dialog_ajukan_izin()
         dialog.show(parentFragmentManager, "AjukanIzinDialog")
+    }
+
+    // FUNGSI BARU: Ambil shift user untuk tanggal tertentu
+    private fun getShiftForDate(tanggal: String): String {
+        val userSession = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
+        val userName = userSession.getString("USER_NAME", "") ?: ""
+
+        if (userName.isEmpty()) return "Pagi"
+
+        try {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val date = dateFormat.parse(tanggal) ?: return "Pagi"
+
+            val calendar = Calendar.getInstance()
+            calendar.time = date
+            val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+
+            return when (dayOfWeek) {
+                Calendar.SATURDAY, Calendar.SUNDAY -> "Siang"
+                else -> "Pagi"
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return "Pagi"
+        }
+    }
+
+    // FUNGSI BARU: Hitung keterlambatan berdasarkan shift
+    private fun calculateKeterlambatanByShift(jamMasuk: String, shift: String): Int {
+        if (jamMasuk == "-") return 0
+
+        try {
+            val format = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val jamMasukDate = format.parse(jamMasuk)
+
+            val jamMulaiShift = when (shift) {
+                "Pagi" -> format.parse("07:00")
+                "Siang" -> format.parse("13:00")
+                "Malam" -> format.parse("18:00")
+                else -> format.parse("07:00")
+            }
+
+            if (jamMasukDate != null && jamMulaiShift != null) {
+                val selisihMenit = (jamMasukDate.time - jamMulaiShift.time) / (60 * 1000)
+                return if (selisihMenit > 0) selisihMenit.toInt() else 0
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return 0
+    }
+
+    // FUNGSI BARU: Hitung jam kerja aktual
+    private fun calculateJamKerjaAktual(riwayat: RiwayatPresensi): String {
+        if (riwayat.jamMasuk == "-" || riwayat.jamPulang == "-") return "0j 0m"
+
+        try {
+            val format = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val jamMasuk = format.parse(riwayat.jamMasuk)
+            val jamPulang = format.parse(riwayat.jamPulang)
+
+            if (jamMasuk != null && jamPulang != null) {
+                val selisihMs = jamPulang.time - jamMasuk.time
+                val totalMenit = selisihMs / (60 * 1000)
+
+                val jam = totalMenit / 60
+                val menit = totalMenit % 60
+
+                return if (jam > 0 && menit > 0) "${jam}j ${menit}m"
+                else if (jam > 0) "${jam}j"
+                else "${menit}m"
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return "0j 0m"
+    }
+
+    // FUNGSI BARU: Tentukan status berdasarkan logika baru
+    private fun determineStatusNewLogic(riwayat: RiwayatPresensi): String {
+        if (riwayat.status != "Hadir") return riwayat.status
+
+        val telatMenit = calculateKeterlambatanByShift(riwayat.jamMasuk, riwayat.shift)
+        val hasIzin = hasIzinForDate(riwayat.tanggal)
+
+        // LOGIKA BARU: Cek apakah ada izin setelah absen
+        val hasIzinSetelahAbsen = hasIzin && riwayat.jamMasuk != "-"
+
+        return when {
+            hasIzinSetelahAbsen -> "Izin"  // Izin setelah sudah absen
+            telatMenit > 0 -> "Telat"      // Hanya telat, tidak ada izin
+            else -> "Hadir"                // Tepat waktu
+        }
+    }
+
+    // FUNGSI BARU: Hitung jam terhutang berdasarkan logika baru
+    private fun calculateUtangJamNewLogic(riwayat: RiwayatPresensi): String {
+        // Hanya untuk status "Izin" - TELAT tidak punya jam terhutang
+        if (riwayat.status != "Izin") return ""
+
+        // Ambil data jam terhutang dari izin_data
+        val jamTerhutang = getJamTerhutangFromIzinData(riwayat.tanggal)
+        if (jamTerhutang.isNotEmpty()) {
+            return jamTerhutang
+        }
+
+        // Fallback jika tidak ada data izin
+        val shift = riwayat.shift
+        return when (shift) {
+            "Pagi" -> "5j"
+            "Siang" -> "4j"
+            "Malam" -> "4j"
+            else -> "5j"
+        }
+    }
+
+    // FUNGSI BARU: Ambil jam terhutang dari izin_data
+    private fun getJamTerhutangFromIzinData(tanggal: String): String {
+        val prefs = requireContext().getSharedPreferences("izin_data", Context.MODE_PRIVATE)
+        val allEntries = prefs.all
+
+        for ((_, value) in allEntries) {
+            if (value is String) {
+                val data = value.split("|")
+                if (data.size >= 8) {
+                    val izinTanggal = data[1]
+                    try {
+                        val inputFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        val date = inputFormat.parse(izinTanggal)
+                        val formattedIzinTanggal = outputFormat.format(date ?: Date())
+
+                        if (formattedIzinTanggal == tanggal) {
+                            return data[6] // jamTerhutang
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+        return ""
+    }
+
+    private fun hasIzinForDate(tanggal: String): Boolean {
+        val prefs = requireContext().getSharedPreferences("absen_data", Context.MODE_PRIVATE)
+        return prefs.getBoolean("izin_$tanggal", false)
     }
 
     private fun getRiwayatPresensi(): List<RiwayatPresensi> {
@@ -185,7 +330,10 @@ class PresensiFragment : Fragment() {
                         }
                         existingEntry.lokasi = lokasi
                     } else {
-                        riwayatMap[tanggal] = RiwayatPresensi(
+                        // Tentukan shift untuk tanggal ini
+                        val shift = getShiftForDate(tanggal)
+
+                        val newEntry = RiwayatPresensi(
                             id = key,
                             tanggal = tanggal,
                             jamMasuk = if (jenis == "MASUK") jam else "-",
@@ -194,8 +342,19 @@ class PresensiFragment : Fragment() {
                             lokasi = lokasi,
                             latitude = latitude,
                             longitude = longitude,
-                            jenisAbsen = jenis
+                            jenisAbsen = jenis,
+                            utangJam = "",
+                            username = currentUsername,
+                            shift = shift,
+                            jamKerjaAktual = ""
                         )
+
+                        // PAKAI LOGIKA BARU:
+                        newEntry.status = determineStatusNewLogic(newEntry)
+                        newEntry.jamKerjaAktual = calculateJamKerjaAktual(newEntry)
+                        newEntry.utangJam = calculateUtangJamNewLogic(newEntry)
+
+                        riwayatMap[tanggal] = newEntry
                     }
                 }
             }
@@ -218,34 +377,46 @@ class PresensiFragment : Fragment() {
                 id = "1",
                 tanggal = "2024-11-14",
                 jamMasuk = "08:00",
-                jamPulang = "17:00",
-                status = "Hadir",
+                jamPulang = "12:00",
+                status = "Telat",
                 lokasi = "Jurusan TI Polije",
                 latitude = -8.157551,
                 longitude = 113.722800,
-                jenisAbsen = "MASUK"
+                jenisAbsen = "MASUK",
+                utangJam = "", // TELAT: jam terhutang KOSONG
+                username = currentUsername,
+                shift = "Pagi",
+                jamKerjaAktual = "4j" // Kerja 4 jam (08:00-12:00)
             ),
             RiwayatPresensi(
                 id = "2",
                 tanggal = "2024-11-13",
-                jamMasuk = "08:15",
-                jamPulang = "16:45",
-                status = "Hadir",
+                jamMasuk = "07:00",
+                jamPulang = "17:00",
+                status = "Izin",
                 lokasi = "Jurusan TI Polije",
                 latitude = -8.157551,
                 longitude = 113.722800,
-                jenisAbsen = "MASUK"
+                jenisAbsen = "MASUK",
+                utangJam = "3j", // IZIN: hutang 3 jam (09:00-12:00)
+                username = currentUsername,
+                shift = "Pagi",
+                jamKerjaAktual = "2j" // Kerja 2 jam (07:00-09:00)
             ),
             RiwayatPresensi(
                 id = "3",
                 tanggal = "2024-11-12",
-                jamMasuk = "07:55",
-                jamPulang = "17:10",
+                jamMasuk = "07:00",
+                jamPulang = "12:00",
                 status = "Hadir",
                 lokasi = "Jurusan TI Polije",
                 latitude = -8.157551,
                 longitude = 113.722800,
-                jenisAbsen = "MASUK"
+                jenisAbsen = "MASUK",
+                utangJam = "", // HADIR: tidak ada hutang
+                username = currentUsername,
+                shift = "Pagi",
+                jamKerjaAktual = "5j" // Kerja 5 jam penuh
             )
         )
     }
@@ -265,11 +436,15 @@ class PresensiFragment : Fragment() {
         val tanggal: String,
         var jamMasuk: String,
         var jamPulang: String,
-        val status: String,
+        var status: String,
         var lokasi: String,
         val latitude: Double,
         val longitude: Double,
-        val jenisAbsen: String
+        val jenisAbsen: String,
+        var utangJam: String = "",
+        val username: String = "User",
+        var shift: String = "Pagi",
+        var jamKerjaAktual: String = ""
     )
 }
 

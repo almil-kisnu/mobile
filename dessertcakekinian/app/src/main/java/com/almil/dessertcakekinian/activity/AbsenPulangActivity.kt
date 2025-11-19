@@ -25,11 +25,12 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.almil.dessertcakekinian.R
+import com.almil.dessertcakekinian.database.JadwalMingguanApi
+import com.almil.dessertcakekinian.database.ShiftDefinitionApi
 import com.almil.dessertcakekinian.database.PenggunaApi
 import com.almil.dessertcakekinian.database.SupabaseHelper
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 class AbsenPulangActivity : AppCompatActivity() {
 
@@ -45,6 +46,14 @@ class AbsenPulangActivity : AppCompatActivity() {
     private var currentLongitude: Double = 0.0
     private var currentAddress: String = "Lokasi tidak diketahui"
     private var pendingPulang: Boolean = false
+
+    // Variabel untuk shift
+    private var userShift: String = "Pagi"
+    private var userShiftStart: String = "07:00"
+    private var userShiftEnd: String = "12:00"
+    private var currentHour: Int = 0
+    private var currentMinute: Int = 0
+    private var isShiftValid: Boolean = false
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1002
@@ -64,6 +73,8 @@ class AbsenPulangActivity : AppCompatActivity() {
         enableDevMode()
         setUserData()
         setCurrentDateTime()
+        // Ambil data shift user SEBELUM check absen status
+        getUserShiftFromJadwal()
         checkAbsenStatus()
         setupButtonListeners()
         requestLocationPermission()
@@ -113,6 +124,150 @@ class AbsenPulangActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    // FUNGSI BARU: Ambil shift user dari jadwal
+    private fun getUserShiftFromJadwal() {
+        val userSession = getSharedPreferences("user_session", Context.MODE_PRIVATE)
+        val userName = userSession.getString("USER_NAME", "") ?: ""
+
+        if (userName.isEmpty()) {
+            println("❌ Tidak bisa ambil shift: nama user kosong")
+            showShiftError("Tidak bisa mengambil data shift")
+            return
+        }
+
+        // Ambil data shift definitions dulu
+        ShiftDefinitionApi().listAll(object : ShiftDefinitionApi.ShiftListCallback {
+            override fun onSuccess(shiftList: List<ShiftDefinitionApi.ShiftDefinition>) {
+                println("✅ Dapat ${shiftList.size} shift definitions")
+
+                // Setelah dapat shift definitions, ambil jadwal user
+                JadwalMingguanApi().listAllWithDetails(object : JadwalMingguanApi.JadwalListCallback {
+                    override fun onSuccess(list: List<JadwalMingguanApi.JadwalMingguan>) {
+                        val today = SimpleDateFormat("EEEE", Locale("id", "ID")).format(Date()).lowercase()
+                        println("📅 Hari ini: $today")
+
+                        val userJadwal = list.find { it.nama_pengguna == userName }
+
+                        if (userJadwal != null) {
+                            // Dapatkan nama shift user untuk hari ini
+                            userShift = when (today) {
+                                "senin" -> userJadwal.shift_senin ?: "Pagi"
+                                "selasa" -> userJadwal.shift_selasa ?: "Pagi"
+                                "rabu" -> userJadwal.shift_rabu ?: "Pagi"
+                                "kamis" -> userJadwal.shift_kamis ?: "Pagi"
+                                "jumat" -> userJadwal.shift_jumat ?: "Pagi"
+                                "sabtu" -> userJadwal.shift_sabtu ?: "Pagi"
+                                "minggu" -> userJadwal.shift_minggu ?: "Pagi"
+                                else -> "Pagi"
+                            }
+
+                            // Cari jam shift dari shift definitions
+                            val shiftDefinition = shiftList.find {
+                                it.nama_shift.equals(userShift, ignoreCase = true)
+                            }
+
+                            if (shiftDefinition != null) {
+                                userShiftStart = shiftDefinition.jam_mulai
+                                userShiftEnd = shiftDefinition.jam_selesai
+                                println("✅ Shift $userName: $userShift ($userShiftStart - $userShiftEnd)")
+
+                                // Validasi waktu shift
+                                validateShiftTime()
+                            } else {
+                                showShiftError("Shift $userShift tidak ditemukan")
+                            }
+                        } else {
+                            println("❌ Jadwal tidak ditemukan untuk user: $userName")
+                            showShiftError("Jadwal tidak ditemukan")
+                        }
+                    }
+
+                    override fun onError(error: String) {
+                        println("❌ Error ambil jadwal: $error")
+                        showShiftError("Gagal mengambil jadwal: $error")
+                    }
+                })
+            }
+
+            override fun onError(error: String) {
+                println("❌ Error ambil shift definitions: $error")
+                showShiftError("Gagal mengambil data shift: $error")
+            }
+        })
+    }
+
+    // FUNGSI BARU: Validasi waktu shift
+    private fun validateShiftTime() {
+        val calendar = Calendar.getInstance()
+        currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+        currentMinute = calendar.get(Calendar.MINUTE)
+
+        val currentTime = "$currentHour:$currentMinute"
+        isShiftValid = isWithinShiftTime(currentTime, userShiftStart, userShiftEnd)
+
+        runOnUiThread {
+            if (!isShiftValid) {
+                if (btnKonfirmasi != null) {
+                    btnKonfirmasi!!.isEnabled = false
+                    btnKonfirmasi!!.text = "Tidak Dalam Shift"
+                }
+
+                AlertDialog.Builder(this)
+                    .setTitle("⏰ Bukan Waktu Shift Anda")
+                    .setMessage("Shift $userShift Anda: $userShiftStart - $userShiftEnd\n" +
+                            "Sekarang jam: ${String.format("%02d:%02d", currentHour, currentMinute)}\n\n" +
+                            "Silakan absen pulang pada jam shift Anda.")
+                    .setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                        finish()
+                    }
+                    .setCancelable(false)
+                    .show()
+            } else {
+                if (btnKonfirmasi != null) {
+                    btnKonfirmasi!!.isEnabled = true
+                    btnKonfirmasi!!.text = "KONFIRMASI ABSEN PULANG"
+                }
+                println("✅ Validasi shift: $userShift ($userShiftStart-$userShiftEnd) - Jam $currentHour:$currentMinute - DIPERBOLEHKAN")
+            }
+        }
+    }
+
+    // FUNGSI BARU: Cek apakah dalam waktu shift
+    private fun isWithinShiftTime(currentTime: String, shiftStart: String, shiftEnd: String): Boolean {
+        try {
+            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val current = timeFormat.parse(currentTime)
+            val start = timeFormat.parse(shiftStart)
+            val end = timeFormat.parse(shiftEnd)
+
+            return current in start..end
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return true // Fallback jika parsing error
+        }
+    }
+
+    // FUNGSI BARU: Tampilkan error shift
+    private fun showShiftError(message: String) {
+        runOnUiThread {
+            if (btnKonfirmasi != null) {
+                btnKonfirmasi!!.isEnabled = false
+                btnKonfirmasi!!.text = "Error Shift"
+            }
+
+            AlertDialog.Builder(this)
+                .setTitle("❌ Error Shift")
+                .setMessage("$message\n\nTidak bisa melakukan absen pulang.")
+                .setPositiveButton("OK") { dialog, _ ->
+                    dialog.dismiss()
+                    finish()
+                }
+                .setCancelable(false)
+                .show()
         }
     }
 
@@ -197,6 +352,12 @@ class AbsenPulangActivity : AppCompatActivity() {
             return
         }
 
+        // CEK SHIFT DULU SEBELUM LANJUT
+        if (!isShiftValid) {
+            showToast("❌ Bukan waktu shift $userShift Anda ($userShiftStart-$userShiftEnd)")
+            return
+        }
+
         if (currentLatitude != 0.0 && currentLongitude != 0.0) {
             val allowOutside = getSharedPreferences("absen_data", Context.MODE_PRIVATE).getBoolean("dev_mode", true)
             val withinLocation = isWithinTargetLocation(currentLatitude, currentLongitude)
@@ -268,6 +429,12 @@ class AbsenPulangActivity : AppCompatActivity() {
             return
         }
 
+        // VALIDASI SHIFT LAGI SEBELUM SIMPAN
+        if (!isShiftValid) {
+            showToast("❌ Bukan waktu shift $userShift Anda ($userShiftStart-$userShiftEnd)")
+            return
+        }
+
         val allowOutside = getSharedPreferences("absen_data", Context.MODE_PRIVATE).getBoolean("dev_mode", true)
         val withinLocation = isWithinTargetLocation(currentLatitude, currentLongitude)
         if (!withinLocation) {
@@ -277,16 +444,16 @@ class AbsenPulangActivity : AppCompatActivity() {
             }
         }
 
-        val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+        val currentTimeFormatted = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
         val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-        simpanKeDatabaseOnline(currentDate, currentTime, currentAddress)
+        simpanKeDatabaseOnline(currentDate, currentTimeFormatted, currentAddress)
 
         val editor = prefs.edit()
-        val absenData = "PULANG|$currentTime|$currentDate|$currentAddress|$currentLatitude|$currentLongitude"
+        val absenData = "PULANG|$currentTimeFormatted|$currentDate|$currentAddress|$currentLatitude|$currentLongitude"
         val key = "riwayat_${System.currentTimeMillis()}"
         editor.putString(key, absenData)
-        editor.putString("jam_pulang_hari_ini", currentTime)
+        editor.putString("jam_pulang_hari_ini", currentTimeFormatted)
         editor.putString("lokasi_pulang_hari_ini", currentAddress)
         editor.putString("status_absen", "SUDAH_PULANG")
         editor.putString("last_absen_date", currentDate)
@@ -296,7 +463,7 @@ class AbsenPulangActivity : AppCompatActivity() {
         try {
             val devMode = getSharedPreferences("absen_data", Context.MODE_PRIVATE).getBoolean("dev_mode", true)
             if (devMode) {
-                showToast("Pulang tersimpan lokal: $currentTime")
+                showToast("Pulang tersimpan lokal: $currentTimeFormatted")
             }
         } catch (ignored: Exception) {}
 
@@ -306,7 +473,7 @@ class AbsenPulangActivity : AppCompatActivity() {
 
         setResult(RESULT_OK)
 
-        val message = "✅ Absen Pulang berhasil!\nWaktu: $currentTime" +
+        val message = "✅ Absen Pulang berhasil!\nWaktu: $currentTimeFormatted" +
                 "\nLokasi: $currentAddress" +
                 "\n📍 Lokasi: Jurusan TI Polije ✅"
         showToast(message)

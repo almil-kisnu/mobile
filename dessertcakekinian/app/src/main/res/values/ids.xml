@@ -47,4 +47,17 @@
     <item name="nav_jadwal" type="id"/>
     <item name="fragment_container_main" type="id"/>
     <item name="tv_jam_sekarang" type="id"/>
+    <item name="tv_siklus" type="id"/>
+    <item name="tv_pengguna" type="id"/>
+    <item name="tv_senin" type="id"/>
+    <item name="tv_selasa" type="id"/>
+    <item name="tv_rabu" type="id"/>
+    <item name="tv_kamis" type="id"/>
+    <item name="tv_jumat" type="id"/>
+    <item name="tv_sabtu" type="id"/>
+    <item name="tv_minggu" type="id"/>
+    <item name="tv_shift_header" type="id"/>
+    <item name="tv_nama_shift" type="id"/>
+    <item name="tv_jam_shift" type="id"/>
+    <item name="tv_karyawan" type="id"/>
 </resources>

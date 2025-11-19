@@ -23,10 +23,11 @@ import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.almil.dessertcakekinian.R
+import com.almil.dessertcakekinian.database.JadwalMingguanApi
+import com.almil.dessertcakekinian.database.ShiftDefinitionApi
 import com.almil.dessertcakekinian.database.SupabaseHelper
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 class AbsenMasukActivity : AppCompatActivity() {
 
@@ -49,12 +50,20 @@ class AbsenMasukActivity : AppCompatActivity() {
     private var currentAddress = "Lokasi tidak diketahui"
     private var isWithinLocation = false
 
+    // Variabel untuk shift
+    private var userShift: String = "Pagi"
+    private var userShiftStart: String = "07:00"
+    private var userShiftEnd: String = "12:00"
+    private var currentHour: Int = 0
+    private var currentMinute: Int = 0
+    private var isShiftValid: Boolean = false
+
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_absen_masuk)
 
-        // Initialize views dengan ID yang sesuai dari XML
+        // Initialize views
         tvNamaKaryawan = findViewById(R.id.tvNamaKaryawan)
         tvLokasi = findViewById(R.id.tvLokasi)
         tvJamRealTime = findViewById(R.id.tvJamRealTime)
@@ -67,11 +76,10 @@ class AbsenMasukActivity : AppCompatActivity() {
         // Reset status absen jika sudah hari baru
         resetAbsenStatusIfNeeded()
 
-        // Untuk testing - enable dev mode (bisa absen di luar lokasi)
-        // TAPI disable dulu untuk testing real location
+        // Untuk testing - enable dev mode
         getSharedPreferences("absen_data", Context.MODE_PRIVATE)
             .edit()
-            .putBoolean("dev_mode", false) // UBAH KE FALSE untuk testing real location
+            .putBoolean("dev_mode", false)
             .apply()
 
         // Set nama karyawan dari shared preferences
@@ -85,8 +93,149 @@ class AbsenMasukActivity : AppCompatActivity() {
         // Setup button listeners
         setupButtonListeners()
 
+        // Ambil data shift user - TAMBAH INI
+        getUserShiftFromJadwal()
+
         // Request location permission
         requestLocationPermission()
+    }
+
+    // FUNGSI BARU: Ambil shift user dari jadwal
+    private fun getUserShiftFromJadwal() {
+        val userSession = getSharedPreferences("user_session", Context.MODE_PRIVATE)
+        val userName = userSession.getString("USER_NAME", "") ?: ""
+
+        if (userName.isEmpty()) {
+            println("❌ Tidak bisa ambil shift: nama user kosong")
+            showShiftError("Tidak bisa mengambil data shift")
+            return
+        }
+
+        // Ambil data shift definitions dulu
+        ShiftDefinitionApi().listAll(object : ShiftDefinitionApi.ShiftListCallback {
+            override fun onSuccess(shiftList: List<ShiftDefinitionApi.ShiftDefinition>) {
+                println("✅ Dapat ${shiftList.size} shift definitions")
+
+                // Setelah dapat shift definitions, ambil jadwal user
+                JadwalMingguanApi().listAllWithDetails(object : JadwalMingguanApi.JadwalListCallback {
+                    override fun onSuccess(list: List<JadwalMingguanApi.JadwalMingguan>) {
+                        val today = SimpleDateFormat("EEEE", Locale("id", "ID")).format(Date()).lowercase()
+                        println("📅 Hari ini: $today")
+
+                        val userJadwal = list.find { it.nama_pengguna == userName }
+
+                        if (userJadwal != null) {
+                            // Dapatkan nama shift user untuk hari ini
+                            userShift = when (today) {
+                                "senin" -> userJadwal.shift_senin ?: "Pagi"
+                                "selasa" -> userJadwal.shift_selasa ?: "Pagi"
+                                "rabu" -> userJadwal.shift_rabu ?: "Pagi"
+                                "kamis" -> userJadwal.shift_kamis ?: "Pagi"
+                                "jumat" -> userJadwal.shift_jumat ?: "Pagi"
+                                "sabtu" -> userJadwal.shift_sabtu ?: "Pagi"
+                                "minggu" -> userJadwal.shift_minggu ?: "Pagi"
+                                else -> "Pagi"
+                            }
+
+                            // Cari jam shift dari shift definitions
+                            val shiftDefinition = shiftList.find {
+                                it.nama_shift.equals(userShift, ignoreCase = true)
+                            }
+
+                            if (shiftDefinition != null) {
+                                userShiftStart = shiftDefinition.jam_mulai
+                                userShiftEnd = shiftDefinition.jam_selesai
+                                println("✅ Shift $userName: $userShift ($userShiftStart - $userShiftEnd)")
+
+                                // Validasi waktu shift
+                                validateShiftTime()
+                            } else {
+                                showShiftError("Shift $userShift tidak ditemukan")
+                            }
+                        } else {
+                            println("❌ Jadwal tidak ditemukan untuk user: $userName")
+                            showShiftError("Jadwal tidak ditemukan")
+                        }
+                    }
+
+                    override fun onError(error: String) {
+                        println("❌ Error ambil jadwal: $error")
+                        showShiftError("Gagal mengambil jadwal: $error")
+                    }
+                })
+            }
+
+            override fun onError(error: String) {
+                println("❌ Error ambil shift definitions: $error")
+                showShiftError("Gagal mengambil data shift: $error")
+            }
+        })
+    }
+
+    // FUNGSI BARU: Validasi waktu shift
+    private fun validateShiftTime() {
+        val calendar = Calendar.getInstance()
+        currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+        currentMinute = calendar.get(Calendar.MINUTE)
+
+        val currentTime = "$currentHour:$currentMinute"
+        isShiftValid = isWithinShiftTime(currentTime, userShiftStart, userShiftEnd)
+
+        runOnUiThread {
+            if (!isShiftValid) {
+                btnKonfirmasi.isEnabled = false
+                btnKonfirmasi.text = "Tidak Dalam Shift"
+
+                AlertDialog.Builder(this)
+                    .setTitle("⏰ Bukan Waktu Shift Anda")
+                    .setMessage("Shift $userShift Anda: $userShiftStart - $userShiftEnd\n" +
+                            "Sekarang jam: ${String.format("%02d:%02d", currentHour, currentMinute)}\n\n" +
+                            "Silakan absen pada jam shift Anda.")
+                    .setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                        finish()
+                    }
+                    .setCancelable(false)
+                    .show()
+            } else {
+                btnKonfirmasi.isEnabled = true
+                btnKonfirmasi.text = "KONFIRMASI ABSEN MASUK"
+                println("✅ Validasi shift: $userShift ($userShiftStart-$userShiftEnd) - Jam $currentHour:$currentMinute - DIPERBOLEHKAN")
+            }
+        }
+    }
+
+    // FUNGSI BARU: Cek apakah dalam waktu shift
+    private fun isWithinShiftTime(currentTime: String, shiftStart: String, shiftEnd: String): Boolean {
+        try {
+            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val current = timeFormat.parse(currentTime)
+            val start = timeFormat.parse(shiftStart)
+            val end = timeFormat.parse(shiftEnd)
+
+            return current in start..end
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return true // Fallback jika parsing error
+        }
+    }
+
+    // FUNGSI BARU: Tampilkan error shift
+    private fun showShiftError(message: String) {
+        runOnUiThread {
+            btnKonfirmasi.isEnabled = false
+            btnKonfirmasi.text = "Error Shift"
+
+            AlertDialog.Builder(this)
+                .setTitle("❌ Error Shift")
+                .setMessage("$message\n\nTidak bisa melakukan absen.")
+                .setPositiveButton("OK") { dialog, _ ->
+                    dialog.dismiss()
+                    finish()
+                }
+                .setCancelable(false)
+                .show()
+        }
     }
 
     private fun resetAbsenStatusIfNeeded() {
@@ -94,7 +243,6 @@ class AbsenMasukActivity : AppCompatActivity() {
         val lastAbsenDate = prefs.getString("last_absen_date", "")
         val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-        // Jika tanggal terakhir absen berbeda dengan hari ini, reset status
         if (lastAbsenDate != currentDate) {
             val editor = prefs.edit()
             editor.putString("status_absen", "BELUM_ABSEN")
@@ -108,12 +256,10 @@ class AbsenMasukActivity : AppCompatActivity() {
     }
 
     private fun setupButtonListeners() {
-        // Tombol Back
         btnBack.setOnClickListener {
             finish()
         }
 
-        // Tombol Konfirmasi
         btnKonfirmasi.setOnClickListener {
             val prefs = getSharedPreferences("absen_data", Context.MODE_PRIVATE)
             val status = prefs.getString("status_absen", "BELUM_ABSEN")
@@ -124,7 +270,13 @@ class AbsenMasukActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // CEK DULU APAKAH PERMISSION SUDAH DIBERIKAN
+            // CEK SHIFT DULU SEBELUM LANJUT - TAMBAH VALIDASI INI
+            if (!isShiftValid) {
+                showToast("❌ Bukan waktu shift $userShift Anda ($userShiftStart-$userShiftEnd)")
+                return@setOnClickListener
+            }
+
+            // CEK PERMISSION LOCATION
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 showToast("❌ Izin lokasi belum diberikan")
                 requestLocationPermission()
@@ -132,22 +284,18 @@ class AbsenMasukActivity : AppCompatActivity() {
             }
 
             if (currentLatitude != 0.0 && currentLongitude != 0.0) {
-                val allowOutside = prefs.getBoolean("dev_mode", false) // Default false
+                val allowOutside = prefs.getBoolean("dev_mode", false)
 
-                // CEK LOKASI DULU SEBELUM LANJUT
                 if (!isWithinTargetLocation(currentLatitude, currentLongitude)) {
                     showLocationError()
                     if (!allowOutside) {
-                        // JIKA TIDAK DALAM LOKASI DAN BUKAN DEV MODE, BERHENTI DI SINI
                         showToast("❌ Tidak bisa absen di luar lokasi TI Polije")
                         return@setOnClickListener
                     } else {
-                        // JIKA DEV MODE, TAMPILKAN PERINGATAN TAPI LANJUT
                         showToast("⚠️ Dev Mode: Absen di luar lokasi diperbolehkan")
                     }
                 }
 
-                // JIKA DALAM LOKASI ATAU DEV MODE, LANJUTKAN ABSEN
                 validateNamaThen(this::simpanAbsenMasuk)
             } else {
                 val allowOutside = prefs.getBoolean("dev_mode", false)
@@ -157,8 +305,6 @@ class AbsenMasukActivity : AppCompatActivity() {
                 } else {
                     showToast("❌ Lokasi tidak tersedia, tidak bisa absen")
                     showToast("Mohon aktifkan GPS dan coba lagi")
-
-                    // Coba ambil lokasi lagi
                     getCurrentLocation()
                 }
             }
@@ -170,6 +316,11 @@ class AbsenMasukActivity : AppCompatActivity() {
             }
         })
     }
+
+    // ... (FUNGSI LAINNYA TETAP SAMA: setCurrentDateTime, isWithinTargetLocation, showLocationError,
+    // validateNamaThen, simpanAbsenMasuk, simpanKeDatabaseOnline, requestLocationPermission,
+    // onRequestPermissionsResult, getCurrentLocation, requestNewLocation, processLocation,
+    // getAddressFromLocation, showToast) ...
 
     private fun setCurrentDateTime() {
         try {
@@ -212,7 +363,6 @@ class AbsenMasukActivity : AppCompatActivity() {
                 "Anda berada ${String.format(Locale.getDefault(), "%.1f", distanceInKm)} km dari lokasi\n" +
                 "Silahkan datang ke Jurusan TI Polije untuk absen"
 
-        // Tampilkan dialog error yang lebih jelas
         AlertDialog.Builder(this)
             .setTitle("Lokasi Tidak Sesuai")
             .setMessage(message)
@@ -226,7 +376,6 @@ class AbsenMasukActivity : AppCompatActivity() {
     private fun validateNamaThen(onValid: () -> Unit) {
         val prefs = getSharedPreferences("absen_data", Context.MODE_PRIVATE)
 
-        // Ambil nama dari user_session (login) bukan dari absen_data
         val userSession = getSharedPreferences("user_session", Context.MODE_PRIVATE)
         val nama = userSession.getString("USER_NAME", "")?.trim() ?: ""
 
@@ -238,12 +387,10 @@ class AbsenMasukActivity : AppCompatActivity() {
             return
         }
 
-        // Simpan nama ke absen_data untuk digunakan nanti
         prefs.edit().putString("nama_pengguna", nama).apply()
 
         println("🔍 validateNamaThen: Langsung lanjut tanpa validasi Supabase - Nama: '$nama'")
 
-        // Langsung lanjut tanpa validasi Supabase (karena sudah login)
         runOnUiThread(onValid)
     }
 
@@ -257,9 +404,14 @@ class AbsenMasukActivity : AppCompatActivity() {
             return
         }
 
+        // VALIDASI SHIFT LAGI SEBELUM SIMPAN
+        if (!isShiftValid) {
+            showToast("❌ Bukan waktu shift $userShift Anda ($userShiftStart-$userShiftEnd)")
+            return
+        }
+
         val allowOutside = getSharedPreferences("absen_data", Context.MODE_PRIVATE).getBoolean("dev_mode", false)
 
-        // VALIDASI LOKASI LAGI SEBELUM SIMPAN
         if (!isWithinTargetLocation(currentLatitude, currentLongitude)) {
             if (!allowOutside) {
                 showToast("❌ Tidak bisa absen: Anda berada di luar lokasi TI Polije")
@@ -269,18 +421,18 @@ class AbsenMasukActivity : AppCompatActivity() {
             }
         }
 
-        val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+        val currentTimeFormatted = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
         val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-        simpanKeDatabaseOnline(currentDate, currentTime, currentAddress)
+        simpanKeDatabaseOnline(currentDate, currentTimeFormatted, currentAddress)
 
         val editor = prefs.edit()
 
-        val absenData = "MASUK|$currentTime|$currentDate|$currentAddress|$currentLatitude|$currentLongitude"
+        val absenData = "MASUK|$currentTimeFormatted|$currentDate|$currentAddress|$currentLatitude|$currentLongitude"
 
         val key = "riwayat_${System.currentTimeMillis()}"
         editor.putString(key, absenData)
-        editor.putString("jam_masuk_hari_ini", currentTime)
+        editor.putString("jam_masuk_hari_ini", currentTimeFormatted)
         editor.putString("lokasi_masuk_hari_ini", currentAddress)
         editor.putString("status_absen", "SUDAH_MASUK")
         editor.putString("last_absen_date", currentDate)
@@ -289,7 +441,7 @@ class AbsenMasukActivity : AppCompatActivity() {
 
         try {
             if (getSharedPreferences("absen_data", Context.MODE_PRIVATE).getBoolean("dev_mode", false)) {
-                showToast("Masuk tersimpan lokal: $currentTime")
+                showToast("Masuk tersimpan lokal: $currentTimeFormatted")
             }
         } catch (ignored: Exception) {}
 
@@ -300,13 +452,12 @@ class AbsenMasukActivity : AppCompatActivity() {
 
         setResult(RESULT_OK)
 
-        // Tampilkan pesan sukses berdasarkan lokasi
         val message = if (isWithinLocation) {
-            "✅ Absen Masuk berhasil!\nWaktu: $currentTime" +
+            "✅ Absen Masuk berhasil!\nWaktu: $currentTimeFormatted" +
                     "\nLokasi: $currentAddress" +
                     "\n📍 Lokasi: Jurusan TI Polije ✅"
         } else {
-            "⚠️ Absen Masuk berhasil (Dev Mode)!\nWaktu: $currentTime" +
+            "⚠️ Absen Masuk berhasil (Dev Mode)!\nWaktu: $currentTimeFormatted" +
                     "\nLokasi: $currentAddress" +
                     "\n❌ Lokasi: DI LUAR AREA TI Polije"
         }
@@ -359,7 +510,6 @@ class AbsenMasukActivity : AppCompatActivity() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            // Tampilkan dialog penjelasan YANG LEBIH JELAS kenapa butuh lokasi
             AlertDialog.Builder(this)
                 .setTitle("Izin Lokasi Diperlukan untuk Absen")
                 .setMessage("Aplikasi MEMBUTUHKAN akses lokasi untuk memverifikasi bahwa Anda berada di:\n\n" +
@@ -368,14 +518,12 @@ class AbsenMasukActivity : AppCompatActivity() {
                         "Tanpa izin lokasi, Anda TIDAK BISA melakukan absen.\n\n" +
                         "Lokasi hanya digunakan untuk verifikasi kehadiran dan tidak disimpan secara permanen.")
                 .setPositiveButton("IZINKAN LOKASI") { _, _ ->
-                    // Minta permission setelah user paham
                     ActivityCompat.requestPermissions(this,
                         arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
                         LOCATION_PERMISSION_REQUEST_CODE
                     )
                 }
                 .setNegativeButton("TOLAK") { _, _ ->
-                    // Jika user tetap menolak, tampilkan pesan dan tutup activity
                     AlertDialog.Builder(this)
                         .setTitle("Tidak Bisa Absen")
                         .setMessage("Anda tidak dapat melakukan absen tanpa izin lokasi.\n\n" +
@@ -386,10 +534,9 @@ class AbsenMasukActivity : AppCompatActivity() {
                         .setCancelable(false)
                         .show()
                 }
-                .setCancelable(false) // User harus memilih, tidak bisa tekan back
+                .setCancelable(false)
                 .show()
         } else {
-            // Permission sudah diberikan, ambil lokasi
             getCurrentLocation()
         }
     }
@@ -398,14 +545,11 @@ class AbsenMasukActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission diberikan, ambil lokasi
                 showToast("Izin lokasi diberikan, mengambil lokasi...")
                 getCurrentLocation()
             } else {
-                // Permission ditolak
                 tvLokasi.text = "Izin lokasi ditolak"
 
-                // Tampilkan dialog penjelasan lagi
                 AlertDialog.Builder(this)
                     .setTitle("Izin Lokasi Ditolak")
                     .setMessage("Anda menolak izin lokasi. Untuk dapat absen, Anda HARUS memberikan izin lokasi.\n\n" +
@@ -414,7 +558,7 @@ class AbsenMasukActivity : AppCompatActivity() {
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         intent.data = Uri.parse("package:$packageName")
                         startActivity(intent)
-                        finish() // Tutup activity setelah ke pengaturan
+                        finish()
                     }
                     .setNegativeButton("TUTUP APLIKASI") { _, _ ->
                         finish()
@@ -433,19 +577,15 @@ class AbsenMasukActivity : AppCompatActivity() {
 
         showToast("Mengambil lokasi...")
 
-        // Coba ambil last location dulu (lebih cepat)
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location ->
                 if (location != null) {
-                    // Berhasil dapat lokasi dari cache
                     processLocation(location)
                 } else {
-                    // Jika last location null, request location baru
                     requestNewLocation()
                 }
             }
             .addOnFailureListener { e ->
-                // Jika gagal, request location baru
                 requestNewLocation()
             }
     }
@@ -465,17 +605,14 @@ class AbsenMasukActivity : AppCompatActivity() {
             }
         }
 
-        // Request location dengan timeout
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
 
-        // Timeout setelah 15 detik
         Handler(Looper.getMainLooper()).postDelayed({
             fusedLocationClient.removeLocationUpdates(locationCallback)
             if (currentLatitude == 0.0 && currentLongitude == 0.0) {
                 tvLokasi.text = "Gagal mengambil lokasi"
                 showToast("Gagal mengambil lokasi. Coba nyalakan GPS atau periksa koneksi.")
 
-                // Untuk testing, TIDAK lanjutkan dengan dev mode (default false)
                 val prefs = getSharedPreferences("absen_data", Context.MODE_PRIVATE)
                 if (prefs.getBoolean("dev_mode", false)) {
                     showToast("Dev mode: Lanjut tanpa lokasi")
@@ -495,21 +632,20 @@ class AbsenMasukActivity : AppCompatActivity() {
         currentLatitude = location.latitude
         currentLongitude = location.longitude
 
-        // Update UI di main thread
         runOnUiThread {
             if (isWithinTargetLocation(currentLatitude, currentLongitude)) {
                 tvLokasi.text = "📍 Jurusan TI Polije ✅"
                 showToast("Lokasi berhasil didapatkan - Dalam area absen")
-                btnKonfirmasi.isEnabled = true
+                // Hanya enable tombol jika shift juga valid
+                btnKonfirmasi.isEnabled = isShiftValid
             } else {
                 tvLokasi.text = "❌ Diluar area TI Polije"
                 showToast("Lokasi berhasil didapatkan - Di luar area absen")
 
-                // Jika di luar lokasi, cek dev mode
                 val prefs = getSharedPreferences("absen_data", Context.MODE_PRIVATE)
                 if (prefs.getBoolean("dev_mode", false)) {
                     showToast("Dev Mode: Tetap bisa absen")
-                    btnKonfirmasi.isEnabled = true
+                    btnKonfirmasi.isEnabled = isShiftValid
                 } else {
                     showToast("❌ Tidak bisa absen di luar lokasi")
                     btnKonfirmasi.isEnabled = false
@@ -554,7 +690,6 @@ class AbsenMasukActivity : AppCompatActivity() {
         }
     }
 
-    // FUNGSI showToast
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
