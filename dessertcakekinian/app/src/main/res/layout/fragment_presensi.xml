@@ -90,7 +90,6 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvRiwayat"
         android:layout_width="0dp"
@@ -119,4 +118,5 @@
         app:icon="@drawable/ic_ajukan_izin"
         app:iconTint="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" /> </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintEnd_toEndOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

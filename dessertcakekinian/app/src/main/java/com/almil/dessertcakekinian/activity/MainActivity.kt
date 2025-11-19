@@ -22,6 +22,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
+import android.content.Context
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -59,6 +63,9 @@ class MainActivity : AppCompatActivity() {
         setupBottomNavigation()
         setupBackPress()
 
+        // Reset status absen setiap hari (TAMBAHAN BARU)
+        checkAndResetDailyAbsen()
+
         // Panggil observer data Produk
         observeProductData()
         // Panggil observer data Order (Riwayat)
@@ -70,7 +77,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // FUNGSI BARU: Reset status absen setiap hari
+    private fun checkAndResetDailyAbsen() {
+        val prefs = getSharedPreferences("absen_data", Context.MODE_PRIVATE)
+        val lastAbsenDate = prefs.getString("last_absen_date", "")
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
+        // Jika tanggal terakhir absen berbeda dengan hari ini, reset status
+        if (lastAbsenDate != currentDate) {
+            val editor = prefs.edit()
+            editor.putString("status_absen", "BELUM_ABSEN")
+            editor.putString("jam_masuk_hari_ini", "")
+            editor.putString("lokasi_masuk_hari_ini", "")
+            editor.putString("jam_pulang_hari_ini", "")
+            editor.putString("lokasi_pulang_hari_ini", "")
+            editor.apply()
+            println("🔄 MainActivity: Status absen direset untuk hari baru")
+            Log.d("MainActivity", "Status absen direset - Hari baru: $currentDate")
+        } else {
+            Log.d("MainActivity", "Status absen tidak perlu direset - Masih hari yang sama: $currentDate")
+        }
+    }
 
     private fun requestCameraPermission() {
         when {

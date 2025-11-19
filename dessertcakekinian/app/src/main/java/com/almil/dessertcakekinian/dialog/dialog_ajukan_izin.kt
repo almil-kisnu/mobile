@@ -33,6 +33,7 @@ class dialog_ajukan_izin : DialogFragment() {
     private lateinit var layoutAlasanIzin: TextInputLayout
 
     private val calendar = Calendar.getInstance()
+    private var userShift: String = "Pagi"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -73,6 +74,72 @@ class dialog_ajukan_izin : DialogFragment() {
 
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale("id", "ID"))
         etTanggalIzin.setText(dateFormat.format(Date()))
+
+        userShift = getShiftForDate(etTanggalIzin.text.toString())
+    }
+
+    private fun getShiftForDate(tanggal: String): String {
+        val userSession = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
+        val userName = userSession.getString("USER_NAME", "") ?: ""
+
+        if (userName.isEmpty()) return "Pagi"
+
+        try {
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val date = dateFormat.parse(tanggal) ?: return "Pagi"
+
+            val calendar = Calendar.getInstance()
+            calendar.time = date
+            val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+
+            return when (dayOfWeek) {
+                Calendar.SATURDAY, Calendar.SUNDAY -> "Siang"
+                else -> "Pagi"
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return "Pagi"
+        }
+    }
+
+    // FUNGSI BARU: Hitung jam terhutang berdasarkan shift
+    private fun calculateJamTerhutang(jamMulai: String, jamSelesai: String, shift: String): String {
+        if (jamMulai.isEmpty() || jamSelesai.isEmpty()) return "0j 0m"
+
+        try {
+            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val startTime = timeFormat.parse(jamMulai)
+            val endTime = timeFormat.parse(jamSelesai)
+
+            if (startTime != null && endTime != null) {
+                // Tentukan jam shift normal
+                val (shiftStart, shiftEnd) = when (shift) {
+                    "Pagi" -> Pair(timeFormat.parse("07:00"), timeFormat.parse("12:00"))
+                    "Siang" -> Pair(timeFormat.parse("13:00"), timeFormat.parse("17:00"))
+                    "Malam" -> Pair(timeFormat.parse("18:00"), timeFormat.parse("22:00"))
+                    else -> Pair(timeFormat.parse("07:00"), timeFormat.parse("12:00"))
+                }
+
+                if (shiftStart != null && shiftEnd != null) {
+                    // Hitung overlap antara jam izin dan jam shift
+                    val izinStart = maxOf(startTime.time, shiftStart.time)
+                    val izinEnd = minOf(endTime.time, shiftEnd.time)
+
+                    if (izinStart < izinEnd) {
+                        val jamTerhutangMenit = (izinEnd - izinStart) / (60 * 1000)
+                        val jam = jamTerhutangMenit / 60
+                        val menit = jamTerhutangMenit % 60
+
+                        return if (jam > 0 && menit > 0) "${jam}j ${menit}m"
+                        else if (jam > 0) "${jam}j"
+                        else "${menit}m"
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return "0j 0m"
     }
 
     private fun setupClickListeners() {
@@ -97,6 +164,13 @@ class dialog_ajukan_izin : DialogFragment() {
                 kirimPermintaanIzin()
             }
         }
+
+        // Update shift ketika tanggal berubah
+        etTanggalIzin.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                userShift = getShiftForDate(etTanggalIzin.text.toString())
+            }
+        }
     }
 
     private fun showDatePicker() {
@@ -108,6 +182,9 @@ class dialog_ajukan_izin : DialogFragment() {
             calendar.set(selectedYear, selectedMonth, selectedDay)
             val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale("id", "ID"))
             etTanggalIzin.setText(dateFormat.format(calendar.time))
+
+            // Update shift ketika tanggal dipilih
+            userShift = getShiftForDate(etTanggalIzin.text.toString())
         }, year, month, day)
 
         datePicker.datePicker.minDate = System.currentTimeMillis() - 1000
@@ -188,16 +265,37 @@ class dialog_ajukan_izin : DialogFragment() {
         val jamSelesai = etJamSelesai.text.toString()
         val alasan = etAlasanIzin.text.toString()
 
-        // Simpan ke SharedPreferences sementara
+        // Hitung jam terhutang berdasarkan shift
+        val jamTerhutang = calculateJamTerhutang(jamMulai, jamSelesai, userShift)
+
+        // Simpan ke SharedPreferences
         val prefs = requireContext().getSharedPreferences("izin_data", Context.MODE_PRIVATE)
         val editor = prefs.edit()
         val izinId = "izin_${System.currentTimeMillis()}"
 
-        val izinData = "$nama|$tanggal|$jamMulai|$jamSelesai|$alasan|PENDING"
+        // Format: nama|tanggal|jamMulai|jamSelesai|alasan|status|jamTerhutang|shift
+        val izinData = "$nama|$tanggal|$jamMulai|$jamSelesai|$alasan|PENDING|$jamTerhutang|$userShift"
         editor.putString(izinId, izinData)
         editor.apply()
 
-        Toast.makeText(requireContext(), "Permintaan izin berhasil dikirim!", Toast.LENGTH_SHORT).show()
+        // Juga simpan flag izin untuk tanggal tersebut di absen_data
+        val absenPrefs = requireContext().getSharedPreferences("absen_data", Context.MODE_PRIVATE)
+        val absenEditor = absenPrefs.edit()
+
+        // Convert tanggal dari dd/MM/yyyy ke yyyy-MM-dd
+        try {
+            val inputFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val date = inputFormat.parse(tanggal)
+            val formattedTanggal = outputFormat.format(date ?: Date())
+
+            absenEditor.putBoolean("izin_$formattedTanggal", true)
+            absenEditor.apply()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        Toast.makeText(requireContext(), "Permintaan izin berhasil dikirim!\nJam terhutang: $jamTerhutang", Toast.LENGTH_LONG).show()
         dismiss()
     }
 }
