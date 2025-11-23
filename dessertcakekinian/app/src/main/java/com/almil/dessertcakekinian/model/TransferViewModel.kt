@@ -56,6 +56,21 @@ class TransferViewModel(application: Application) : AndroidViewModel(application
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList()
             )
+    val allPengguna: StateFlow<List<Penggunakeseluruhan>> =
+        repository.penggunaFlow
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+
+    val allOutlet: StateFlow<List<outletkeseluruhan>> =
+        repository.outletFlow
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
 
     // Data state (Loading/Success/Error)
     val dataState: StateFlow<TransferDataState> =
@@ -145,6 +160,25 @@ class TransferViewModel(application: Application) : AndroidViewModel(application
     fun getTotalDiterimaInTransfer(idtransfer: Int): Flow<Int> {
         return getDetailsByTransferId(idtransfer).map { details ->
             details.sumOf { it.jumlahDiterima ?: 0 }
+        }
+    }
+    fun getPenggunaById(iduser: Int): Flow<Penggunakeseluruhan?> {
+        return repository.penggunaFlow.map { penggunaList ->
+            penggunaList.find { it.iduser == iduser }
+        }
+    }
+
+    // Get outlet by ID
+    fun getOutletById(idoutlet: Int): Flow<outletkeseluruhan?> {
+        return repository.outletFlow.map { outletList ->
+            outletList.find { it.idoutlet == idoutlet }
+        }
+    }
+
+    // Get pengguna by outlet
+    fun getPenggunaByOutlet(idoutlet: Int): Flow<List<Penggunakeseluruhan>> {
+        return repository.penggunaFlow.map { penggunaList ->
+            penggunaList.filter { it.idoutlet == idoutlet }
         }
     }
 

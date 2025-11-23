@@ -78,9 +78,10 @@ class HargaGrosirDialog : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        dialog?.window?.apply {
-            setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            setBackgroundDrawableResource(android.R.color.transparent)
-        }
+        dialog?.window?.setLayout(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
     }
 }

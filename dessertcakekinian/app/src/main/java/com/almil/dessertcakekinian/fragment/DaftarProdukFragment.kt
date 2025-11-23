@@ -202,20 +202,27 @@ class DaftarProdukFragment : Fragment(), OnProductItemClickListener, ProductFilt
             }
 
             if (currentNearExpFilter) {
-                val stockInfo = produk.detailStok.find { it.idoutlet == currentOutletId }
-                val tglKadaluarsa = stockInfo?.tglKadaluarsa
+                val outletStokList = produk.detailStok.filter { it.idoutlet == currentOutletId && it.stok > 0 } // Filter stok > 0
 
-                if (tglKadaluarsa == null) return@filter false
+                if (outletStokList.isEmpty()) return@filter false // Jika tidak ada stok, skip produk ini
 
-                try {
-                    val expDate = LocalDate.parse(tglKadaluarsa, DateTimeFormatter.ISO_LOCAL_DATE)
-                    val daysUntilExp = ChronoUnit.DAYS.between(LocalDate.now(), expDate)
-                    val isNearExp = daysUntilExp <= 30 && daysUntilExp >= 0
-                    if (!isNearExp) return@filter false
-                } catch (e: Exception) {
-                    Log.e("FilterProduk", "Error parsing date: $tglKadaluarsa", e)
-                    return@filter false
-                }
+                val nearestExpiryDate = outletStokList
+                    .mapNotNull { detail ->
+                        detail.tglKadaluarsa?.let {
+                            try {
+                                LocalDate.parse(it, DateTimeFormatter.ISO_LOCAL_DATE)
+                            } catch (e: Exception) {
+                                null
+                            }
+                        }
+                    }
+                    .minOrNull()
+
+                if (nearestExpiryDate == null) return@filter false
+
+                val daysUntilExp = ChronoUnit.DAYS.between(LocalDate.now(), nearestExpiryDate)
+                val isNearExp = daysUntilExp <= 30 && daysUntilExp >= 0
+                if (!isNearExp) return@filter false
             }
             true
         }

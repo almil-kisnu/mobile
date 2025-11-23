@@ -28,6 +28,11 @@ class TransferRepository private constructor(context: Context) {
     // Flow untuk data status (Success/Error/Loading)
     private val _dataState = MutableStateFlow<TransferDataState>(TransferDataState.Loading)
     val dataState: StateFlow<TransferDataState> = _dataState.asStateFlow()
+    private val _penggunaFlow = MutableStateFlow<List<Penggunakeseluruhan>>(emptyList())
+    val penggunaFlow: StateFlow<List<Penggunakeseluruhan>> = _penggunaFlow.asStateFlow()
+
+    private val _outletFlow = MutableStateFlow<List<outletkeseluruhan>>(emptyList())
+    val outletFlow: StateFlow<List<outletkeseluruhan>> = _outletFlow.asStateFlow()
 
     // Flow untuk Joined Data
     val transferWithDetailsFlow: StateFlow<List<TransferWithDetails>> = combine(
@@ -91,6 +96,19 @@ class TransferRepository private constructor(context: Context) {
 
             Log.d(TAG, "✅ Detail Transfer fetched: ${details.size} records")
 
+            val pengguna = client.from("pengguna")
+                .select()
+                .decodeList<Penggunakeseluruhan>()
+
+            Log.d(TAG, "✅ Pengguna fetched: ${pengguna.size} records")
+
+            // Fetch outlet
+            val outlet = client.from("outlet")
+                .select()
+                .decodeList<outletkeseluruhan>()
+
+            Log.d(TAG, "✅ Outlet fetched: ${outlet.size} records")
+
             // Log detail per transfer
             if (details.isNotEmpty()) {
                 val detailsByTransfer = details.groupingBy { it.idtransfer }.eachCount()
@@ -106,6 +124,8 @@ class TransferRepository private constructor(context: Context) {
             // Update flows
             _transferStockFlow.value = transfers
             _detailTransferFlow.value = details
+            _penggunaFlow.value = pengguna      // TAMBAHKAN
+            _outletFlow.value = outlet
 
             // Summary logging
             val pendingCount = transfers.count { it.status == "pending" }

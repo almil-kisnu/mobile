@@ -6,6 +6,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.almil.dessertcakekinian.model.ProdukKategori
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -67,6 +68,20 @@ class ProductViewModel(application: Application) : AndroidViewModel(application)
             else -> emptyList()
         }
     }
+
+    fun getNamaProdukById(idproduk: Int) = allProducts.map { state ->
+        when (state) {
+            is ProductDataState.Success -> {
+                state.produkDetails
+                    .find { it.produk.idproduk == idproduk }
+                    ?.produk
+                    ?.namaproduk
+            }
+            else -> null
+        }
+    }
+
+
 
     override fun onCleared() {
         super.onCleared()

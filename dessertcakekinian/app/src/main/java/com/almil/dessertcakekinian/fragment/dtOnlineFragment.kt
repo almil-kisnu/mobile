@@ -24,6 +24,23 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import io.github.jan.supabase.postgrest.postgrest
 import android.util.Log
+// TAMBAHKAN di bagian import
+import android.Manifest
+import android.content.ContentValues
+import android.content.pm.PackageManager
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.pdf.PdfDocument
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import java.io.File
+import java.io.FileOutputStream
+import java.util.Date
 
 class dtOnlineFragment : DialogFragment() {
 
@@ -90,9 +107,13 @@ class dtOnlineFragment : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
+
+        val displayMetrics = resources.displayMetrics
+        val maxHeight = (displayMetrics.heightPixels * 0.7).toInt() // 80% tinggi layar
+
         dialog?.window?.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
+            maxHeight
         )
         dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
     }
@@ -136,6 +157,21 @@ class dtOnlineFragment : DialogFragment() {
             updateStatusToAman {
                 printReceipt()
             }
+        }
+    }
+
+    // TAMBAHKAN setelah deklarasi variabel orderWithDetails
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            generateAndSavePdf()
+        } else {
+            android.widget.Toast.makeText(
+                requireContext(),
+                "Permission ditolak. Tidak dapat menyimpan file.",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -241,101 +277,279 @@ class dtOnlineFragment : DialogFragment() {
         return "Rp ${String.format("%,.0f", amount).replace(",", ".")}"
     }
 
+    // HAPUS method shareToWhatsApp() lama
+// GANTI dengan 3 method ini:
+
     private fun shareToWhatsApp() {
+        checkPermissionAndDownload()
+    }
+
+    private fun checkPermissionAndDownload() {
+        // Android 10+ tidak perlu permission untuk MediaStore
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            generateAndSavePdf()
+            return
+        }
+
+        // Android 9 ke bawah perlu WRITE_EXTERNAL_STORAGE
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                generateAndSavePdf()
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
+                android.widget.Toast.makeText(
+                    requireContext(),
+                    "Permission dibutuhkan untuk menyimpan file PDF",
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
+                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+            else -> {
+                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }
+    }
+
+    private fun generateAndSavePdf() {
         orderWithDetails?.let { data ->
             val order = data.order
             val details = data.details
 
-            // Build struk text
-            val strukText = buildString {
-                appendLine("═══════════════════════════")
-                appendLine("        STRUK PEMBELIAN")
-                appendLine("═══════════════════════════")
-                appendLine()
-                appendLine("Pelanggan: ${order.namapelanggan}")
-                appendLine("Tanggal: ${order.tanggal}")
-                appendLine("Jam: ${order.jam}")
-                appendLine("Kasir: ${order.username ?: "Unknown"}")
-                appendLine("Outlet: ${order.kode_outlet ?: "-"}")
-                appendLine()
-                appendLine("═══════════════════════════")
-                appendLine("DETAIL PEMBELIAN:")
-                appendLine("═══════════════════════════")
+            try {
+                val pdfDocument = PdfDocument()
+                val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
+                val page = pdfDocument.startPage(pageInfo)
+                val canvas = page.canvas
+                val paint = Paint()
 
-                details.forEachIndexed { index, detail ->
-                    appendLine()
-                    appendLine("${index + 1}. ${detail.namaproduk}")
-                    appendLine("   ${detail.jumlah} x ${formatCurrency(detail.harga)}")
-                    appendLine("   Subtotal: ${formatCurrency(detail.subtotal)}")
+                var yPos = 50f
+                val leftMargin = 50f
+                val rightMargin = 545f
+                val pageWidth = 595f
+
+                // Ambil data outlet dari SharedPreferences
+                val sharedPreferences = requireActivity().getSharedPreferences("user_session", android.content.Context.MODE_PRIVATE)
+                val alamatOutlet = sharedPreferences.getString("OUTLET_ALAMAT", "Alamat tidak tersedia") ?: "Alamat tidak tersedia"
+                val teleponOutlet = sharedPreferences.getString("OUTLET_TELEPON", "Telepon tidak tersedia") ?: "Telepon tidak tersedia"
+
+                // Header - Nama Toko (Tengah)
+                paint.textSize = 24f
+                paint.color = Color.BLACK
+                paint.isFakeBoldText = true
+                val namaTokoText = "Sweetbake"
+                val namaTokoWidth = paint.measureText(namaTokoText)
+                canvas.drawText(namaTokoText, (pageWidth - namaTokoWidth) / 2, yPos, paint)
+                yPos += 30f
+
+                // Alamat (Tengah)
+                paint.textSize = 12f
+                paint.isFakeBoldText = false
+                paint.color = Color.GRAY
+                val alamatWidth = paint.measureText(alamatOutlet)
+                canvas.drawText(alamatOutlet, (pageWidth - alamatWidth) / 2, yPos, paint)
+                yPos += 20f
+
+                // Telepon (Tengah)
+                val teleponWidth = paint.measureText(teleponOutlet)
+                canvas.drawText(teleponOutlet, (pageWidth - teleponWidth) / 2, yPos, paint)
+                yPos += 30f
+
+                // Garis pemisah
+                drawDashedLine(canvas, leftMargin, yPos, rightMargin, yPos)
+                yPos += 30f
+
+                // Info Transaksi
+                paint.color = Color.BLACK
+                paint.textSize = 12f
+                canvas.drawText("Tanggal: ${order.tanggal}", leftMargin, yPos, paint)
+                yPos += 20f
+                canvas.drawText("Waktu: ${order.jam}", leftMargin, yPos, paint)
+                yPos += 20f
+                canvas.drawText("Kasir: ${order.username ?: "Unknown"}", leftMargin, yPos, paint)
+                yPos += 20f
+                canvas.drawText("Pelanggan: ${order.namapelanggan}", leftMargin, yPos, paint)
+                yPos += 30f
+
+                drawDashedLine(canvas, leftMargin, yPos, rightMargin, yPos)
+                yPos += 30f
+
+                // Daftar Belanja
+                paint.textSize = 14f
+                paint.isFakeBoldText = true
+                canvas.drawText("Daftar Belanja", leftMargin, yPos, paint)
+                yPos += 30f
+
+                paint.textSize = 12f
+                paint.isFakeBoldText = false
+
+                // Header tabel
+                canvas.drawText("Item", leftMargin, yPos, paint)
+                canvas.drawText("Qty", leftMargin + 250f, yPos, paint)
+                canvas.drawText("Harga", leftMargin + 320f, yPos, paint)
+                canvas.drawText("Total", leftMargin + 420f, yPos, paint)
+                yPos += 25f
+
+                // Items
+                details.forEach { detail ->
+                    val itemName = if (detail.namaproduk.length > 20) {
+                        detail.namaproduk.substring(0, 20) + "..."
+                    } else {
+                        detail.namaproduk
+                    }
+
+                    canvas.drawText(itemName, leftMargin, yPos, paint)
+                    canvas.drawText(detail.jumlah.toString(), leftMargin + 250f, yPos, paint)
+                    canvas.drawText(formatRupiah(detail.harga.toInt()), leftMargin + 320f, yPos, paint)
+                    canvas.drawText(formatRupiah(detail.subtotal.toInt()), leftMargin + 420f, yPos, paint)
+                    yPos += 25f
                 }
 
-                appendLine()
-                appendLine("═══════════════════════════")
-                appendLine("RINGKASAN PEMBAYARAN:")
-                appendLine("═══════════════════════════")
-                appendLine("Total Tagihan: ${formatCurrency(order.grandtotal)}")
-                appendLine("Metode: ${order.metode_pembayaran}")
-                appendLine("Bayar: ${formatCurrency(order.bayar)}")
-                appendLine("Kembalian: ${formatCurrency(order.kembalian)}")
-                appendLine()
-                appendLine("═══════════════════════════")
-                appendLine("   Terima kasih atas")
-                appendLine("   kunjungan Anda!")
-                appendLine("═══════════════════════════")
+                yPos += 10f
+                drawDashedLine(canvas, leftMargin, yPos, rightMargin, yPos)
+                yPos += 30f
+
+                // Total, Bayar, Kembalian
+                paint.isFakeBoldText = true
+                canvas.drawText("Total:", leftMargin, yPos, paint)
+                val totalText = formatCurrency(order.grandtotal)
+                canvas.drawText(totalText, rightMargin - paint.measureText(totalText), yPos, paint)
+                yPos += 25f
+
+                canvas.drawText("Bayar:", leftMargin, yPos, paint)
+                val bayarText = formatCurrency(order.bayar)
+                canvas.drawText(bayarText, rightMargin - paint.measureText(bayarText), yPos, paint)
+                yPos += 25f
+
+                canvas.drawText("Kembalian:", leftMargin, yPos, paint)
+                val kembalianText = formatCurrency(order.kembalian)
+                canvas.drawText(kembalianText, rightMargin - paint.measureText(kembalianText), yPos, paint)
+                yPos += 30f
+
+                // Metode Pembayaran
+                paint.isFakeBoldText = false
+                canvas.drawText("Metode Pembayaran:", leftMargin, yPos, paint)
+                val metodeText = order.metode_pembayaran
+                canvas.drawText(metodeText, rightMargin - paint.measureText(metodeText), yPos, paint)
+                yPos += 40f
+
+                drawDashedLine(canvas, leftMargin, yPos, rightMargin, yPos)
+                yPos += 30f
+
+                // Footer
+                paint.color = Color.GRAY
+                val footerText = "Terima kasih telah berbelanja!"
+                canvas.drawText(footerText, (pageWidth - paint.measureText(footerText)) / 2, yPos, paint)
+
+                pdfDocument.finishPage(page)
+
+                // Simpan dan share
+                savePdfToStorage(pdfDocument, order.idorder, order.notelp)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                android.widget.Toast.makeText(
+                    requireContext(),
+                    "Error: ${e.message}",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun savePdfToStorage(pdfDocument: PdfDocument, orderId: Int, phoneNumber: String?) {
+        try {
+            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val fileName = "Struk_${orderId}_${timestamp}.pdf"
+
+            val savedUri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val resolver = requireContext().contentResolver
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                    put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                }
+
+                val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                uri?.let {
+                    resolver.openOutputStream(it)?.use { outputStream ->
+                        pdfDocument.writeTo(outputStream)
+                        pdfDocument.close()
+                    }
+                }
+                uri
+            } else {
+                val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                if (!downloadsDir.exists()) {
+                    downloadsDir.mkdirs()
+                }
+                val file = File(downloadsDir, fileName)
+                FileOutputStream(file).use { outputStream ->
+                    pdfDocument.writeTo(outputStream)
+                    pdfDocument.close()
+                }
+                Uri.fromFile(file)
             }
 
-            // UBAH: Ambil nomor telepon dan format untuk WhatsApp
-            val phoneNumber = order.notelp
+            if (savedUri != null) {
+                android.widget.Toast.makeText(
+                    requireContext(),
+                    "✓ Struk berhasil disimpan!\nMengirim lewat WhatsApp...",
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
 
-            if (phoneNumber.isNullOrEmpty() || phoneNumber == "-") {
-                // Jika tidak ada nomor telepon, kirim tanpa nomor (buka WhatsApp biasa)
-                val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    `package` = "com.whatsapp"
-                    putExtra(android.content.Intent.EXTRA_TEXT, strukText)
-                }
-
+                // Share ke WhatsApp
                 try {
+                    val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                        type = "application/pdf"
+                        putExtra(android.content.Intent.EXTRA_STREAM, savedUri)
+                        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        setPackage("com.whatsapp")
+                    }
                     startActivity(intent)
                 } catch (e: Exception) {
                     android.widget.Toast.makeText(
                         requireContext(),
-                        "WhatsApp tidak ditemukan",
+                        "Gagal membuka WhatsApp",
                         android.widget.Toast.LENGTH_SHORT
                     ).show()
                 }
             } else {
-                // Format nomor telepon untuk WhatsApp (hapus karakter non-digit)
-                val cleanPhone = phoneNumber.replace(Regex("[^0-9]"), "")
-
-                // Tambahkan kode negara jika belum ada (Indonesia = 62)
-                val formattedPhone = if (cleanPhone.startsWith("0")) {
-                    "62${cleanPhone.substring(1)}"
-                } else if (cleanPhone.startsWith("62")) {
-                    cleanPhone
-                } else {
-                    "62$cleanPhone"
-                }
-
-                // URL encode untuk message
-                val encodedMessage = android.net.Uri.encode(strukText)
-
-                // Buat WhatsApp intent dengan nomor spesifik
-                val whatsappUrl = "https://wa.me/$formattedPhone?text=$encodedMessage"
-                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
-                intent.setData(android.net.Uri.parse(whatsappUrl))
-
-                try {
-                    startActivity(intent)
-                } catch (e: Exception) {
-                    android.widget.Toast.makeText(
-                        requireContext(),
-                        "WhatsApp tidak ditemukan atau nomor tidak valid",
-                        android.widget.Toast.LENGTH_SHORT
-                    ).show()
-                }
+                android.widget.Toast.makeText(
+                    requireContext(),
+                    "Gagal menyimpan PDF",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
             }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            android.widget.Toast.makeText(
+                requireContext(),
+                "Error: ${e.message}",
+                android.widget.Toast.LENGTH_LONG
+            ).show()
         }
+    }
+
+    private fun drawDashedLine(canvas: Canvas, startX: Float, startY: Float, endX: Float, endY: Float) {
+        val paint = Paint().apply {
+            color = Color.GRAY
+            strokeWidth = 2f
+            style = Paint.Style.STROKE
+        }
+
+        var x = startX
+        while (x < endX) {
+            canvas.drawLine(x, startY, minOf(x + 10f, endX), startY, paint)
+            x += 20f
+        }
+    }
+
+    private fun formatRupiah(amount: Int): String {
+        return "Rp ${String.format("%,d", amount).replace(',', '.')}"
     }
 
     private fun printReceipt() {

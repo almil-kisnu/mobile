@@ -25,7 +25,7 @@
     <color name="status_merah_absen_dark">#F44336</color>
     <color name="status_oren_absen_dark">#FF9800</color>
 
-    <color name="status_warning">#FFF176</color>
+    <color name="status_warning">#FFC107</color>
     <color name="status_active">#00FF08</color>
     <color name="status_inactive">#FF0000</color>
 

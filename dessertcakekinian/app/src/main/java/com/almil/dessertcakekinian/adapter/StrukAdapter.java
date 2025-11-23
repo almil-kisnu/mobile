@@ -23,7 +23,6 @@ public class StrukAdapter extends RecyclerView.Adapter<StrukAdapter.StrukViewHol
         this.cartItemList = new ArrayList<>(cartItemsMap.values());
     }
 
-    // Metode ini untuk mengupdate data jika ada perubahan
     public void updateData(Map<Integer, CartItem> newCartItemsMap) {
         this.cartItemList = new ArrayList<>(newCartItemsMap.values());
         notifyDataSetChanged();
@@ -39,15 +38,12 @@ public class StrukAdapter extends RecyclerView.Adapter<StrukAdapter.StrukViewHol
     @Override
     public void onBindViewHolder(@NonNull StrukViewHolder holder, int position) {
         CartItem cartItem = cartItemList.get(position);
-        ProdukKategori produk = cartItem.getProdukDetail().getProduk(); // Masih dibutuhkan untuk nama produk
+        ProdukKategori produk = cartItem.getProdukDetail().getProduk();
         int quantity = cartItem.getQuantity();
-
-        // **MODIFIKASI UTAMA DI SINI:** Ambil Harga Satuan dari CartItem
-        // Karena CartViewModel sudah menghitung harga yang disesuaikan (Eceran/Grosir)
         Double hargaSatuan = cartItem.getHargaSatuan();
 
         if (hargaSatuan == null) {
-            hargaSatuan = 0.0; // Atur default jika null (seharusnya tidak terjadi jika CartViewModel sudah benar)
+            hargaSatuan = 0.0;
         }
 
         // 1. Nomor Urut + Nama Produk
@@ -57,13 +53,9 @@ public class StrukAdapter extends RecyclerView.Adapter<StrukAdapter.StrukViewHol
         // Hitung Harga Total
         double hargaTotal = quantity * hargaSatuan;
 
-        // 2. Qty x Harga Satuan (tv_qty)
-        // Format: [quantity] x [harga_satuan tanpa Rp.]
         String qtyText = quantity + " x " + decimalFormat.format(hargaSatuan);
         holder.tvQty.setText(qtyText);
 
-        // 3. Harga Total (tv_harga)
-        // Format: Rp [harga_total]
         String hargaTotalText = "Rp " + decimalFormat.format(hargaTotal);
         holder.tvHarga.setText(hargaTotalText);
     }

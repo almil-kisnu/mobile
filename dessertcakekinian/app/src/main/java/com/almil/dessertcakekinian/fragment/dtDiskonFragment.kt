@@ -86,7 +86,7 @@ class dtDiskonFragment : Fragment() {
         recyclerViewProduk = view.findViewById(R.id.recycler_view_produk_berlaku)
 
         btnBack.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
     }
 

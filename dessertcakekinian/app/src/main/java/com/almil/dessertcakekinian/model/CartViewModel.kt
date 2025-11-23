@@ -190,7 +190,7 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun clearCart() {
-        _cartItems.value = emptyMap()
+        _cartItems.value = mutableMapOf()
     }
 
     fun getCartQuantitiesMap(): Map<Int, Int> {

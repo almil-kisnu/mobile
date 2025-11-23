@@ -27,6 +27,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.almil.dessertcakekinian.activity.TransferActivity
 import kotlinx.coroutines.launch
 import com.almil.dessertcakekinian.model.OrderWithDetails
 
@@ -185,6 +186,9 @@ class HomePageFragment : Fragment() {
 
             view.findViewById<LinearLayout>(R.id.menuDiskon)?.setOnClickListener {
                 startActivity(Intent(requireContext(), DiskonActivity::class.java))
+            }
+            view.findViewById<LinearLayout>(R.id.menurequest)?.setOnClickListener {
+                startActivity(Intent(requireContext(), TransferActivity::class.java))
             }
             view.findViewById<LinearLayout>(R.id.menujadwal)?.setOnClickListener {
                 startActivity(Intent(requireContext(), JadwalActivity::class.java))

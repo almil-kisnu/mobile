@@ -45,10 +45,11 @@
                     android:textSize="10sp"
                     android:layout_marginTop="4dp" />
                 <TextView
+                    android:id="@+id/etCatatan"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Catatan"
+                    android:text="Catatan : hialang di jalan karana ada maling di buang ke tong samoah"
                     android:textColor="#555555"
                     android:textSize="14sp" />
 
@@ -60,22 +61,6 @@
                 android:layout_marginStart="8dp"
                 android:gravity="center"
                 android:orientation="horizontal">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnMinus"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:minWidth="40dp"
-                    android:text="-"
-                    android:textSize="18sp"
-                    app:iconPadding="0dp"
-                    app:strokeWidth="1dp"
-                    app:strokeColor="?attr/colorPrimary"
-                    android:insetLeft="0dp"
-                    android:insetTop="0dp"
-                    android:insetRight="0dp"
-                    android:insetBottom="0dp" />
 
                 <EditText
                     android:id="@+id/tvJumlah"
@@ -91,38 +76,7 @@
                     android:textStyle="bold"
                     android:maxLength="3" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnPlus"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:minWidth="40dp"
-                    android:text="+"
-                    android:textSize="18sp"
-                    app:strokeColor="?attr/colorPrimary"
-                    app:iconPadding="0dp"
-                    app:strokeWidth="1dp"
-                    android:insetLeft="0dp"
-                    android:insetTop="0dp"
-                    android:insetRight="0dp"
-                    android:insetBottom="0dp" />
             </LinearLayout>
         </LinearLayout>
-
-
-        <EditText
-            android:id="@+id/etCatatan"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:background="@drawable/bg_search"
-            android:hint="Tambahkan catatan..."
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="12dp"
-            android:textColorHint="#999999"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:elevation="2dp"/>
-
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -200,7 +200,7 @@ data class TransferStock(
     val idtransfer: Int = 0,
 
     @SerialName("idoutlet_asal")
-    val idoutletAsal: Int,
+    val idoutletAsal: Int?,
 
     @SerialName("idoutlet_tujuan")
     val idoutletTujuan: Int,
@@ -215,10 +215,13 @@ data class TransferStock(
     val status: String = "pending", // pending, dikirim, diterima, dibatalkan
 
     @SerialName("iduser_pengirim")
-    val iduserPengirim: Int,
+    val iduserPengirim: Int?,
 
     @SerialName("iduser_penerima")
     val iduserPenerima: Int? = null,
+
+    @SerialName("iduser_peminta")
+    val iduserPeminta: Int? = null,
 
     @SerialName("catatan")
     val catatan: String? = null
@@ -250,4 +253,70 @@ data class DetailTransfer(
 data class TransferWithDetails(
     val transfer: TransferStock,
     val details: List<DetailTransfer>
+)
+
+@Serializable
+data class Penggunakeseluruhan(
+    @SerialName("iduser")
+    val iduser: Int, // serial not null
+
+    @SerialName("username")
+    val username: String, // character varying(50) not null
+
+    @SerialName("password")
+    val password: String? = null, // character varying(255) null (Wajib Nullable!)
+
+    @SerialName("createdat")
+    val createdAt: String? = null, // timestamp without time zone null default now()
+
+    @SerialName("phone")
+    val phone: String? = null, // character varying(100) null
+
+    @SerialName("is_active")
+    val isActive: Boolean? = true, // boolean null default true
+
+    @SerialName("deactivated_at")
+    val deactivatedAt: String? = null, // date null
+
+    @SerialName("deactivated_reason")
+    val deactivatedReason: String? = null, // character varying(255) null
+
+    @SerialName("hired_date")
+    val hiredDate: String? = null, // date null default CURRENT_DATE
+
+    @SerialName("updated_at")
+    val updatedAt: String? = null, // timestamp without time zone null default CURRENT_TIMESTAMP
+
+    @SerialName("idoutlet")
+    val idoutlet: Int? = null, // integer null (Wajib Nullable!)
+
+    @SerialName("nik")
+    val nik: String? = null, // character varying null
+
+    @SerialName("role")
+    val role: String? = null // public.role null (Asumsikan sebagai String)
+)
+
+@Serializable
+data class outletkeseluruhan(
+    @SerialName("idoutlet")
+    val idoutlet: Int, // serial not null
+
+    @SerialName("kode_outlet")
+    val kodeOutlet: String, // character varying not null
+
+    @SerialName("nama_outlet")
+    val namaOutlet: String, // character varying not null
+
+    @SerialName("alamat")
+    val alamat: String? = null, // text null
+
+    @SerialName("telepon")
+    val telepon: String? = null, // character varying null
+
+    @SerialName("is_active")
+    val isActive: Boolean? = true, // boolean null default true
+
+    @SerialName("created_at")
+    val createdAt: String? = null // timestamp without time zone null default now()
 )

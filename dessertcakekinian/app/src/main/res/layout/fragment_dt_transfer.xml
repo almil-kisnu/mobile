@@ -31,7 +31,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Detail Riwayat"
+            android:text="Detail Request Stok"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@android:color/black"
@@ -54,7 +54,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Daftar Permintaan"
+                android:text="Daftar barang"
                 android:textSize="16sp"
                 android:textColor="@android:color/black"
                 android:textStyle="bold"
@@ -80,27 +80,6 @@
                 android:layout_marginBottom="16dp" />
 
             <!-- RecyclerView Diterima -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Daftar Diterima"
-                android:textSize="16sp"
-                android:textColor="@android:color/black"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp" />
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxHeight="400dp"
-                android:layout_marginBottom="16dp">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvDiterima"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-            </FrameLayout>
 
             <View
                 android:layout_width="match_parent"
@@ -353,45 +332,24 @@
                     android:textStyle="bold"
                     tools:text="Barang sudah diterima dalam kondisi baik dan sesuai pesanan. Terima kasih." />
             </LinearLayout>
-
-            <!-- Button Actions -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:background="@android:color/white">
-
-                <Button
-                    android:id="@+id/btnDownload"
-                    android:layout_width="0dp"
-                    android:layout_height="50dp"
-                    android:layout_weight="1"
-                    android:text="Whatshap"
-                    android:textColor="@android:color/white"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:backgroundTint="?attr/colorPrimary"
-                    android:layout_marginEnd="8dp"
-                    style="@style/Widget.MaterialComponents.Button"/>
-
-                <Button
-                    android:id="@+id/btnPrint"
-                    android:layout_width="0dp"
-                    android:layout_height="50dp"
-                    android:layout_weight="1"
-                    android:text="Print"
-                    android:textColor="?attr/colorPrimary"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:backgroundTint="@android:color/white"
-                    android:layout_marginStart="8dp"
-                    app:strokeColor="?attr/colorPrimary"
-                    app:strokeWidth="1dp"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-            </LinearLayout>
-
         </LinearLayout>
     </ScrollView>
+    <LinearLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:background="@android:color/white"
+        android:gravity="center"
+        android:layout_gravity="bottom"
+        android:visibility="gone">
+        <Button
+            android:id="@+id/btnAksi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Batalkan"
+            android:backgroundTint="?attr/colorPrimary"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+
 </FrameLayout>

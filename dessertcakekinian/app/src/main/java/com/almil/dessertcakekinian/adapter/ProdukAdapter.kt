@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.almil.dessertcakekinian.R
-import com.almil.dessertcakekinian.model.ProdukDetail // Ganti dengan path model Anda yang benar
+import com.almil.dessertcakekinian.model.ProdukDetail
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -19,7 +19,7 @@ interface OnProductItemClickListener {
 
 class ProductAdapter(
     private var productList: List<ProdukDetail>,
-    private val currentOutletId: Int, // ID Outlet yang akan difilter
+    private val currentOutletId: Int,
     private val listener: OnProductItemClickListener
 
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
@@ -51,8 +51,8 @@ class ProductAdapter(
         val totalStok = outletStokList.sumOf { it.stok }
         holder.tvStockValue.text = totalStok.toString()
         val nearestExpiryDate = outletStokList
+            .filter { it.stok > 0 } // Tambahkan filter stok > 0
             .mapNotNull { detail -> detail.tglKadaluarsa?.let { parseDate(it) } }
-// Sortir dan ambil tanggal yang paling kecil (paling dekat ke hari ini)
             .minOrNull()
         if (nearestExpiryDate != null) {
             holder.tvExpValue.text = displayDateFormatter.format(nearestExpiryDate)
@@ -66,7 +66,6 @@ class ProductAdapter(
             val finalColorId = try {
                 expColor
             } catch (e: Exception) {
-// Fallback jika R.color.status_warning tidak ada
                 if (daysDifference <= 30) R.color.status_inactive else R.color.status_active
             }
             holder.tvExpValue.setTextColor(
@@ -74,13 +73,10 @@ class ProductAdapter(
             )
         } else {
             holder.tvExpValue.text = "N/A"
-// Kembalikan ke warna hitam default
             holder.tvExpValue.setTextColor(
                 ContextCompat.getColor(holder.itemView.context, android.R.color.black)
             )
         }
-
-// 6. Item Click Listener
         holder.itemView.setOnClickListener {
             listener.onProductItemClicked(currentDetail)
         }

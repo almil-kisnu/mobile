@@ -30,6 +30,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Dessertcakekinian">
         <activity
+            android:name=".activity.TransferActivity"
+            android:exported="false" />
+        <activity
             android:name=".activity.JadwalActivity"
             android:exported="false" />
         <activity

@@ -1,5 +1,6 @@
 package com.almil.dessertcakekinian.dialog
 
+import android.content.Context
 import android.Manifest
 import android.app.Dialog
 import android.content.ContentValues
@@ -30,7 +31,6 @@ import com.almil.dessertcakekinian.R
 import com.almil.dessertcakekinian.adapter.StrukAdapter
 import java.io.File
 import java.io.FileOutputStream
-import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -125,14 +125,22 @@ class dialog_struk : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
+        val displayMetrics = resources.displayMetrics
         dialog?.window?.setLayout(
             (resources.displayMetrics.widthPixels * 0.9).toInt(),
-            ViewGroup.LayoutParams.WRAP_CONTENT
+            (displayMetrics.heightPixels * 0.7).toInt()
         )
         dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
     }
 
     private fun setupStrukData() {
+        // TAMBAHKAN: Ambil data outlet dari SharedPreferences jika tidak ada di arguments
+        if (alamatOutlet.isEmpty() || alamatOutlet == "-") {
+            val sharedPreferences = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE)
+            alamatOutlet = sharedPreferences.getString("OUTLET_ALAMAT", "Alamat tidak tersedia") ?: "Alamat tidak tersedia"
+            teleponOutlet = sharedPreferences.getString("OUTLET_TELEPON", "Telepon tidak tersedia") ?: "Telepon tidak tersedia"
+        }
+
         tvAlamatToko.text = alamatOutlet
         tvTeleponToko.text = teleponOutlet
 
