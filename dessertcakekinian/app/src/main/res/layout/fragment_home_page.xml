@@ -50,7 +50,7 @@
             android:layout_height="24dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_bell"
+            android:src="@drawable/ic_splash"
             app:tint="?android:attr/textColorSecondary" />
     </RelativeLayout>
 
@@ -107,7 +107,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp" android:text="Jam Masuk 08:06"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 app:layout_constraintStart_toStartOf="@id/ivStatusIcon"
                 app:layout_constraintTop_toBottomOf="@id/ivStatusIcon" />
             <com.google.android.material.button.MaterialButton
@@ -172,7 +172,8 @@
 
                 <LinearLayout
                     android:id="@+id/menuPresensi"
-                    android:layout_width="80dp" android:layout_height="wrap_content"
+                    android:layout_width="75dp"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
                     android:padding="12dp"
@@ -188,7 +189,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="presensi"
+                        android:text="Presensi"
                         android:textSize="12sp"
                         android:layout_marginTop="6dp"
                         android:gravity="center" />
@@ -196,7 +197,8 @@
 
                 <LinearLayout
                     android:id="@+id/menuProduk"
-                    android:layout_width="80dp" android:layout_height="wrap_content"
+                    android:layout_width="75dp"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
                     android:padding="12dp"
@@ -212,7 +214,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="produk"
+                        android:text="Produk"
                         android:textSize="12sp"
                         android:layout_marginTop="6dp"
                         android:gravity="center" />
@@ -220,7 +222,7 @@
 
                 <LinearLayout
                     android:id="@+id/menuTransaksi"
-                    android:layout_width="80dp" android:layout_height="wrap_content"
+                    android:layout_width="75dp" android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
                     android:padding="12dp"
@@ -237,7 +239,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="transaksi"
+                        android:text="Transaksi"
                         android:textSize="12sp"
                         android:layout_marginTop="6dp"
                         android:gravity="center" />
@@ -245,7 +247,8 @@
 
                 <LinearLayout
                     android:id="@+id/menuRiwayat"
-                    android:layout_width="80dp" android:layout_height="wrap_content"
+                    android:layout_width="75dp"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
                     android:padding="12dp"
@@ -261,7 +264,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="riwayat"
+                        android:text="Riwayat"
                         android:textSize="12sp"
                         android:layout_marginTop="6dp"
                         android:gravity="center" />
@@ -269,7 +272,7 @@
 
                 <LinearLayout
                     android:id="@+id/menuDiskon"
-                    android:layout_width="80dp" android:layout_height="wrap_content"
+                    android:layout_width="75dp" android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
                     android:padding="12dp"
@@ -295,7 +298,7 @@
 
                 <LinearLayout
                     android:id="@+id/menurequest"
-                    android:layout_width="80dp"
+                    android:layout_width="75dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
@@ -307,12 +310,12 @@
                     <ImageView
                         android:layout_width="34dp"
                         android:layout_height="34dp"
-                        android:src="@drawable/ic_riwayat"
+                        android:src="@drawable/ic_restok"
                         android:contentDescription="requeststok" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="restok"
+                        android:text="Restok"
                         android:textSize="12sp"
                         android:layout_marginTop="6dp"
                         android:gravity="center" />
@@ -320,7 +323,7 @@
 
                 <LinearLayout
                     android:id="@+id/menujadwal"
-                    android:layout_width="80dp"
+                    android:layout_width="75dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"

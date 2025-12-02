@@ -93,7 +93,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_filter_off"
+            android:src="@drawable/ic_kalender"
             android:padding="10dp"
             android:scaleType="centerInside"
             tools:ignore="ContentDescription" />

@@ -78,8 +78,8 @@ class ProfileFragment : Fragment(), editUserFragment.EditUserDialogListener {
         tvPhone = view.findViewById(R.id.tvPhone)
         tvOutlet = view.findViewById(R.id.tvOutlet)
         tvHiredDate = view.findViewById(R.id.tvHiredDate)
-        btnEditProfile = view.findViewById(R.id.btnEditProfile)
-        btnChangePassword = view.findViewById(R.id.btnChangePassword)
+      //  btnEditProfile = view.findViewById(R.id.btnEditProfile)
+      //  btnChangePassword = view.findViewById(R.id.btnChangePassword)
         btnLogout = view.findViewById(R.id.btnLogout)
     }
 
@@ -129,13 +129,13 @@ class ProfileFragment : Fragment(), editUserFragment.EditUserDialogListener {
     }
 
     private fun setupButtonActions() {
-        btnEditProfile.setOnClickListener {
-            showEditUserDialog()
-        }
+     //   btnEditProfile.setOnClickListener {
+     //      showEditUserDialog()
+     //   }
 
-        btnChangePassword.setOnClickListener {
-            showChangePasswordDialog()
-        }
+     //   btnChangePassword.setOnClickListener {
+     //       showChangePasswordDialog()
+     //   }
 
         btnLogout.setOnClickListener {
             performLogout()

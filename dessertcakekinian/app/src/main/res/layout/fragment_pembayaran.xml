@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.PembayaranFragment">
+    tools:context=".fragment.PembayaranFragment"
+    android:background="?attr/android:windowBackground">
 
     <!-- TAMBAHKAN LinearLayout wrapper vertikal -->
     <LinearLayout
@@ -40,7 +41,7 @@
                 android:text="Pembayaran"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@android:color/black"
+                android:textColor="?attr/android:textColor"
                 android:gravity="center"
                 android:layout_marginStart="-40dp" />
         </LinearLayout>
@@ -65,7 +66,7 @@
                     android:layout_height="wrap_content"
                     android:text="Daftar Produk"
                     android:textSize="16sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/android:textColor"
                     android:textStyle="bold"
                     android:layout_marginBottom="12dp" />
 
@@ -87,7 +88,7 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#DDDDDD"
+                    android:background="?android:attr/listDivider"
                     android:layout_marginBottom="24dp" />
 
                 <!-- Total Tagihan -->
@@ -104,7 +105,7 @@
                         android:layout_weight="1"
                         android:text="Total Tagihan"
                         android:textSize="16sp"
-                        android:textColor="@android:color/black"
+                        android:textColor="?attr/android:textColor"
                         android:textStyle="bold" />
 
                     <TextView
@@ -120,7 +121,7 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#DDDDDD"
+                    android:background="?android:attr/listDivider"
                     android:layout_marginBottom="24dp" />
 
                 <!-- Metode Pembayaran -->
@@ -129,7 +130,7 @@
                     android:layout_height="wrap_content"
                     android:text="Metode Pembayaran"
                     android:textSize="16sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/android:textColor"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp" />
 
@@ -187,7 +188,7 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#DDDDDD"
+                    android:background="?android:attr/listDivider"
                     android:layout_marginBottom="24dp" />
 
                 <!-- Kembalian -->
@@ -204,7 +205,7 @@
                         android:layout_weight="1"
                         android:text="Kembalian"
                         android:textSize="16sp"
-                        android:textColor="@android:color/black"
+                        android:textColor="?attr/android:textColor"
                         android:textStyle="bold" />
 
                     <TextView
@@ -212,7 +213,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="18sp"
-                        android:textColor="@android:color/black"
+                        android:textColor="?attr/android:textColor"
                         android:textStyle="bold"
                         tools:text="Rp 0" />
                 </LinearLayout>
