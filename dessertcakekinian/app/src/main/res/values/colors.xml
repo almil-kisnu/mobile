@@ -30,6 +30,10 @@
     <color name="status_inactive">#FF0000</color>
 
     <color name="white">#FFFFFF</color>
+    <color name="green_success">#4CAF50</color>
+    <color name="orange_warning">#FF9800</color>
+    <color name="red_error">#F44336</color>
+    <color name="gray_default">#9E9E9E</color>
 
 </resources>
 

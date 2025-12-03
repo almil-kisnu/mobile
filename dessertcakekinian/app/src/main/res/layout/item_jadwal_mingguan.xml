@@ -22,7 +22,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Karyawan"
+            android:text="Jadwal Mingguan Karyawan"
             android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="#FFFFFF" />
@@ -32,172 +32,123 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="alam_developer"
+            android:text="Total: 3 Karyawan"
             android:textSize="14sp"
             android:textColor="#FFFFFF"
             android:gravity="end" />
     </LinearLayout>
 
-    <!-- Tabel Header -->
-    <LinearLayout
+    <!-- Horizontal Scroll View untuk tabel besar -->
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="#F8F8F8"
-        android:padding="8dp"
-        android:weightSum="7">
+        android:scrollbars="horizontal">
 
-        <TextView
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="SENIN"
-            android:textSize="10sp"
-            android:textColor="#666666"
-            android:textStyle="bold"
-            android:gravity="center" />
+            android:orientation="vertical">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="SELASA"
-            android:textSize="10sp"
-            android:textColor="#666666"
-            android:textStyle="bold"
-            android:gravity="center" />
+            <!-- Header Tabel -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="#F8F8F8"
+                android:padding="8dp">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="RABU"
-            android:textSize="10sp"
-            android:textColor="#666666"
-            android:textStyle="bold"
-            android:gravity="center" />
+                <TextView
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:text="USERNAME"
+                    android:textSize="10sp"
+                    android:textColor="#666666"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:padding="8dp" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="KAMIS"
-            android:textSize="10sp"
-            android:textColor="#666666"
-            android:textStyle="bold"
-            android:gravity="center" />
+                <TextView
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="SENIN"
+                    android:textSize="10sp"
+                    android:textColor="#666666"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:padding="8dp" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="JUMAT"
-            android:textSize="10sp"
-            android:textColor="#666666"
-            android:textStyle="bold"
-            android:gravity="center" />
+                <TextView
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="SELASA"
+                    android:textSize="10sp"
+                    android:textColor="#666666"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:padding="8dp" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="SABTU"
-            android:textSize="10sp"
-            android:textColor="#666666"
-            android:textStyle="bold"
-            android:gravity="center" />
+                <TextView
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="RABU"
+                    android:textSize="10sp"
+                    android:textColor="#666666"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:padding="8dp" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="MINGGU"
-            android:textSize="10sp"
-            android:textColor="#666666"
-            android:textStyle="bold"
-            android:gravity="center" />
-    </LinearLayout>
+                <TextView
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="KAMIS"
+                    android:textSize="10sp"
+                    android:textColor="#666666"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:padding="8dp" />
 
-    <!-- Tabel Data -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:weightSum="7">
+                <TextView
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="JUMAT"
+                    android:textSize="10sp"
+                    android:textColor="#666666"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:padding="8dp" />
 
-        <TextView
-            android:id="@+id/tv_senin"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="-"
-            android:textSize="12sp"
-            android:textColor="#333333"
-            android:gravity="center" />
+                <TextView
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="SABTU"
+                    android:textSize="10sp"
+                    android:textColor="#666666"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:padding="8dp" />
 
-        <TextView
-            android:id="@+id/tv_selasa"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="-"
-            android:textSize="12sp"
-            android:textColor="#333333"
-            android:gravity="center" />
+                <TextView
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="MINGGU"
+                    android:textSize="10sp"
+                    android:textColor="#666666"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:padding="8dp" />
+            </LinearLayout>
 
-        <TextView
-            android:id="@+id/tv_rabu"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="-"
-            android:textSize="12sp"
-            android:textColor="#333333"
-            android:gravity="center" />
+            <!-- Container untuk data SEMUA karyawan -->
+            <LinearLayout
+                android:id="@+id/container_data_karyawan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
 
-        <TextView
-            android:id="@+id/tv_kamis"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="-"
-            android:textSize="12sp"
-            android:textColor="#333333"
-            android:gravity="center" />
+        </LinearLayout>
+    </HorizontalScrollView>
 
-        <TextView
-            android:id="@+id/tv_jumat"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="-"
-            android:textSize="12sp"
-            android:textColor="#333333"
-            android:gravity="center" />
-
-        <TextView
-            android:id="@+id/tv_sabtu"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="-"
-            android:textSize="12sp"
-            android:textColor="#333333"
-            android:gravity="center" />
-
-        <TextView
-            android:id="@+id/tv_minggu"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="-"
-            android:textSize="12sp"
-            android:textColor="#333333"
-            android:gravity="center" />
-    </LinearLayout>
-
-    <!-- Data Shift Definition (ditambah di sini) -->
+    <!-- Data Shift Definition -->
     <TextView
         android:id="@+id/tv_shift_info"
         android:layout_width="match_parent"
@@ -208,7 +159,5 @@
         android:layout_marginTop="8dp"
         android:padding="8dp"
         android:background="#F5F5F5" />
-
-
 
 </LinearLayout>

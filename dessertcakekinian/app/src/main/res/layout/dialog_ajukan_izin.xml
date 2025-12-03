@@ -68,116 +68,11 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/layoutTanggalIzin"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
-            android:hint="Tanggal Izin"
-            app:boxStrokeColor="?attr/colorPrimary"
-            app:endIconDrawable="@drawable/ic_kalender"
-            app:endIconMode="custom"
-            app:endIconTint="?android:attr/textColorSecondary">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etTanggalIzin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="false"
-                android:inputType="none" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginEnd="8dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:text="Mulai"
-                    android:textColor="?android:attr/textColorSecondary"
-                    android:textSize="12sp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/layoutJamMulai"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:boxStrokeColor="?attr/colorPrimary"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_jam"
-                    app:endIconTint="?android:attr/textColorSecondary">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etJamMulai"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clickable="true"
-                        android:focusable="false"
-                        android:inputType="none"
-                        tools:text="08:00 AM" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="8dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:text="Selesai"
-                    android:textColor="?android:attr/textColorSecondary"
-                    android:textSize="12sp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/layoutJamSelesai"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:boxStrokeColor="?attr/colorPrimary"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_jam"
-                    app:endIconTint="?android:attr/textColorSecondary">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etJamSelesai"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clickable="true"
-                        android:focusable="false"
-                        android:inputType="none"
-                        tools:text="12:00 PM" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-            </LinearLayout>
-        </LinearLayout>
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layoutAlasanIzin"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:hint="Keterangan / Alasan Izin"
             app:boxStrokeColor="?attr/colorPrimary">
 
@@ -188,7 +83,7 @@
                 android:gravity="top"
                 android:inputType="textMultiLine"
                 android:minLines="4"
-                tools:text="Contoh: Ada keperluan keluarga mendadak." />
+                tools:text="Contoh: Sakit demam dan perlu istirahat." />
 
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
@@ -200,7 +95,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="24dp"
-        android:text="Kirim "
+        android:text="Kirim"
         android:textColor="@android:color/white"
         app:backgroundTint="?attr/colorPrimary"
         app:cornerRadius="12dp" />

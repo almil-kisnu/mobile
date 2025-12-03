@@ -37,7 +37,8 @@ class JadwalMingguanApi {
         val shift_kamis: String = "",
         val shift_jumat: String = "",
         val shift_sabtu: String = "",
-        val shift_minggu: String = ""
+        val shift_minggu: String = "",
+        val idoutlet: Int? = null  // FIELD INI DIAMBIL DARI TABEL PENGGUNA
     )
 
     interface JadwalListCallback {
@@ -76,13 +77,20 @@ class JadwalMingguanApi {
                     // Ambil semua data shift untuk mapping
                     val listShift = getAllShift()
 
+                    println("🔍 Total jadwal ditemukan: ${arrJadwal.length()}")
+                    println("🔍 Total pengguna ditemukan: ${listPengguna.size}")
+                    println("🔍 Total shift definitions: ${listShift.size}")
+
                     for (i in 0 until arrJadwal.length()) {
                         val jadwalObj = arrJadwal.getJSONObject(i)
                         val jadwal = mapJadwalMingguan(jadwalObj)
 
-                        // Cari nama pengguna berdasarkan id_pengguna
+                        // Cari data pengguna berdasarkan id_pengguna
                         val pengguna = listPengguna.find { it.iduser == jadwal.id_pengguna }
                         val namaPengguna = pengguna?.username ?: "User ${jadwal.id_pengguna}"
+
+                        // Ambil idoutlet dari tabel pengguna (BUKAN dari jadwal_mingguan)
+                        val idoutlet = pengguna?.idoutlet
 
                         // Map shift IDs ke nama shift
                         val shiftSenin = getNamaShiftById(jadwal.id_shift_senin, listShift)
@@ -110,17 +118,24 @@ class JadwalMingguanApi {
                             shift_kamis = shiftKamis,
                             shift_jumat = shiftJumat,
                             shift_sabtu = shiftSabtu,
-                            shift_minggu = shiftMinggu
+                            shift_minggu = shiftMinggu,
+                            idoutlet = idoutlet  // Dari pengguna.idoutlet
                         )
 
                         listJadwal.add(jadwalDetail)
+
+                        println("📋 Jadwal: id_pengguna=${jadwal.id_pengguna}, nama=$namaPengguna, idoutlet=$idoutlet")
                     }
 
+                    println("✅ Jadwal berhasil diproses: ${listJadwal.size} entries")
                     mainHandler.post { callback.onSuccess(listJadwal) }
                 } else {
+                    println("❌ Error HTTP jadwal: $codeJadwal")
                     postError(callback, "Error: $codeJadwal")
                 }
             } catch (e: Exception) {
+                println("❌ Exception jadwal: ${e.message}")
+                e.printStackTrace()
                 postError(callback, "Error: ${e.message}")
             }
         }
@@ -158,11 +173,15 @@ class JadwalMingguanApi {
                     val o = arr.getJSONObject(i)
                     list.add(mapPengguna(o))
                 }
+                println("✅ Berhasil load ${list.size} pengguna")
                 list
             } else {
+                println("❌ Error HTTP pengguna: ${conn.responseCode}")
                 emptyList()
             }
         } catch (e: Exception) {
+            println("❌ Exception pengguna: ${e.message}")
+            e.printStackTrace()
             emptyList()
         }
     }
@@ -193,11 +212,15 @@ class JadwalMingguanApi {
                     val o = arr.getJSONObject(i)
                     list.add(ShiftDefinitionApi().mapShift(o))
                 }
+                println("✅ Berhasil load ${list.size} shift definitions")
                 list
             } else {
+                println("❌ Error HTTP shift: ${conn.responseCode}")
                 emptyList()
             }
         } catch (e: Exception) {
+            println("❌ Exception shift: ${e.message}")
+            e.printStackTrace()
             emptyList()
         }
     }
