@@ -1,10 +1,15 @@
 package com.almil.dessertcakekinian.activity
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.res.Resources
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -24,7 +29,9 @@ class JadwalActivity : AppCompatActivity() {
     private val items = mutableListOf<JadwalMingguanApi.JadwalMingguan>()
     private val shiftItems = mutableListOf<ShiftDefinitionApi.ShiftDefinition>()
 
-    @SuppressLint("MissingInflatedId")
+    private var currentUserOutletId: Int? = null
+
+    @SuppressLint("MissingInflatedId", "WrongViewCast")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -32,7 +39,7 @@ class JadwalActivity : AppCompatActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, 0, systemBars.right, 0)
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
             insets
         }
 
@@ -43,13 +50,41 @@ class JadwalActivity : AppCompatActivity() {
         adapter = JadwalAdapter(items, shiftItems)
         recyclerView.adapter = adapter
 
-        // Tombol X (close)
-        val btnClose: TextView = findViewById(R.id.btn_close)
+        // Tombol back (ganti dari TextView ke ImageView)
+        val btnClose: ImageView = findViewById(R.id.btn_close)
         btnClose.setOnClickListener {
             finish()
         }
 
-        // Load data jadwal mingguan
+        // Dapatkan idoutlet dari user yang login
+        getCurrentUserOutlet()
+    }
+
+    private fun getCurrentUserOutlet() {
+        val sharedPref = getSharedPreferences("user_session", Context.MODE_PRIVATE)
+        val username = sharedPref.getString("USER_NAME", null)
+        val userId = sharedPref.getInt("USER_ID", -1)
+        val outletId = sharedPref.getInt("USER_OUTLET_ID", -1)
+
+        println("🔍 DEBUG SharedPreferences:")
+        println("   - username = $username")
+        println("   - userId = $userId")
+        println("   - outletId = $outletId")
+
+        if (username.isNullOrEmpty() || userId <= 0) {
+            Toast.makeText(this, "User tidak ditemukan. Silakan login kembali.", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+
+        if (outletId > 0) {
+            currentUserOutletId = outletId
+            println("✅ Using outlet from SharedPreferences: $outletId")
+        } else {
+            currentUserOutletId = null
+            println("⚠️ No outlet ID found, showing all schedules")
+        }
+
         loadJadwalMingguan()
         loadShiftDefinitions()
     }
@@ -58,13 +93,26 @@ class JadwalActivity : AppCompatActivity() {
         JadwalMingguanApi().listAllWithDetails(object : JadwalMingguanApi.JadwalListCallback {
             override fun onSuccess(list: List<JadwalMingguanApi.JadwalMingguan>) {
                 items.clear()
-                items.addAll(list)
+
+                val filteredList = if (currentUserOutletId != null) {
+                    list.filter { it.idoutlet == currentUserOutletId }
+                } else {
+                    list
+                }
+
+                println("📋 Total jadwal dari database: ${list.size}")
+                println("📋 Filtered untuk outlet $currentUserOutletId: ${filteredList.size}")
+
+                items.addAll(filteredList)
                 adapter.notifyDataSetChanged()
 
-                if (list.isEmpty()) {
-                    Toast.makeText(this@JadwalActivity, "Belum ada data jadwal mingguan", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this@JadwalActivity, "Loaded ${list.size} jadwal", Toast.LENGTH_SHORT).show()
+                if (filteredList.isEmpty()) {
+                    val message = if (currentUserOutletId != null) {
+                        "Belum ada jadwal untuk outlet $currentUserOutletId"
+                    } else {
+                        "Belum ada data jadwal mingguan"
+                    }
+                    Toast.makeText(this@JadwalActivity, message, Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -96,13 +144,7 @@ class JadwalActivity : AppCompatActivity() {
         class JadwalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             val tvSiklus: TextView = itemView.findViewById(R.id.tv_siklus)
             val tvPengguna: TextView = itemView.findViewById(R.id.tv_pengguna)
-            val tvSenin: TextView = itemView.findViewById(R.id.tv_senin)
-            val tvSelasa: TextView = itemView.findViewById(R.id.tv_selasa)
-            val tvRabu: TextView = itemView.findViewById(R.id.tv_rabu)
-            val tvKamis: TextView = itemView.findViewById(R.id.tv_kamis)
-            val tvJumat: TextView = itemView.findViewById(R.id.tv_jumat)
-            val tvSabtu: TextView = itemView.findViewById(R.id.tv_sabtu)
-            val tvMinggu: TextView = itemView.findViewById(R.id.tv_minggu)
+            val containerDataKaryawan: LinearLayout = itemView.findViewById(R.id.container_data_karyawan)
             val tvShiftInfo: TextView = itemView.findViewById(R.id.tv_shift_info)
         }
 
@@ -112,37 +154,85 @@ class JadwalActivity : AppCompatActivity() {
             return JadwalViewHolder(view)
         }
 
+        @SuppressLint("SetTextI18n")
         override fun onBindViewHolder(holder: JadwalViewHolder, position: Int) {
-            val jadwal = data[position]
+            val outletInfo = if (data.isNotEmpty() && data[0].idoutlet != null) {
+                " - Outlet ${data[0].idoutlet}"
+            } else {
+                ""
+            }
 
-            // KIRI: "Karyawan"
-            holder.tvSiklus.text = "Karyawan"
-            // KANAN: username dari database
-            holder.tvPengguna.text = jadwal.nama_pengguna
+            holder.tvSiklus.text = "Jadwal Mingguan Karyawan$outletInfo"
+            holder.tvPengguna.text = "Total: ${data.size} Karyawan"
 
-            // Set data untuk setiap hari
-            holder.tvSenin.text = jadwal.shift_senin
-            holder.tvSelasa.text = jadwal.shift_selasa
-            holder.tvRabu.text = jadwal.shift_rabu
-            holder.tvKamis.text = jadwal.shift_kamis
-            holder.tvJumat.text = jadwal.shift_jumat
-            holder.tvSabtu.text = jadwal.shift_sabtu
-            holder.tvMinggu.text = jadwal.shift_minggu
+            holder.containerDataKaryawan.removeAllViews()
 
-            // Set warna berdasarkan shift
-            setShiftColor(holder.tvSenin, jadwal.shift_senin)
-            setShiftColor(holder.tvSelasa, jadwal.shift_selasa)
-            setShiftColor(holder.tvRabu, jadwal.shift_rabu)
-            setShiftColor(holder.tvKamis, jadwal.shift_kamis)
-            setShiftColor(holder.tvJumat, jadwal.shift_jumat)
-            setShiftColor(holder.tvSabtu, jadwal.shift_sabtu)
-            setShiftColor(holder.tvMinggu, jadwal.shift_minggu)
+            data.forEach { jadwal ->
+                val rowLayout = LinearLayout(holder.itemView.context)
+                val layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                rowLayout.layoutParams = layoutParams
+                rowLayout.orientation = LinearLayout.HORIZONTAL
 
-            // Tampilkan data shift definition
+                val tvUsername = TextView(holder.itemView.context)
+                val usernameParams = LinearLayout.LayoutParams(
+                    dpToPx(120, holder.itemView.context.resources),
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                tvUsername.layoutParams = usernameParams
+                tvUsername.text = jadwal.nama_pengguna
+                tvUsername.textSize = 12f
+                tvUsername.setTextColor(0xFF333333.toInt())
+                tvUsername.gravity = Gravity.CENTER
+                tvUsername.setPadding(
+                    dpToPx(8, holder.itemView.context.resources),
+                    dpToPx(8, holder.itemView.context.resources),
+                    dpToPx(8, holder.itemView.context.resources),
+                    dpToPx(8, holder.itemView.context.resources)
+                )
+                rowLayout.addView(tvUsername)
+
+                val days = listOf(
+                    jadwal.shift_senin,
+                    jadwal.shift_selasa,
+                    jadwal.shift_rabu,
+                    jadwal.shift_kamis,
+                    jadwal.shift_jumat,
+                    jadwal.shift_sabtu,
+                    jadwal.shift_minggu
+                )
+
+                days.forEach { shiftName ->
+                    val tvShift = TextView(holder.itemView.context)
+                    val shiftParams = LinearLayout.LayoutParams(
+                        dpToPx(80, holder.itemView.context.resources),
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    tvShift.layoutParams = shiftParams
+                    tvShift.text = formatShiftName(shiftName)
+                    tvShift.textSize = 12f
+                    tvShift.gravity = Gravity.CENTER
+                    tvShift.setPadding(
+                        dpToPx(8, holder.itemView.context.resources),
+                        dpToPx(8, holder.itemView.context.resources),
+                        dpToPx(8, holder.itemView.context.resources),
+                        dpToPx(8, holder.itemView.context.resources)
+                    )
+
+                    setShiftColor(tvShift, shiftName)
+                    rowLayout.addView(tvShift)
+                }
+
+                holder.containerDataKaryawan.addView(rowLayout)
+            }
+
             if (shiftData.isNotEmpty()) {
                 val shiftText = StringBuilder()
                 for (shift in shiftData) {
-                    shiftText.append("${shift.nama_shift} (${shift.jam_mulai}-${shift.jam_selesai})\n")
+                    val simpleName = formatShiftName(shift.nama_shift)
+                    shiftText.append("$simpleName (${shift.jam_mulai}-${shift.jam_selesai})\n")
                 }
                 holder.tvShiftInfo.text = shiftText.toString()
             } else {
@@ -150,26 +240,48 @@ class JadwalActivity : AppCompatActivity() {
             }
         }
 
-        private fun setShiftColor(textView: TextView, shiftName: String) {
+        private fun formatShiftName(shiftName: String?): String {
+            if (shiftName == null || shiftName.isEmpty()) return "-"
+
+            return when {
+                shiftName.contains("Pagi", ignoreCase = true) -> "Pagi"
+                shiftName.contains("Siang", ignoreCase = true) -> "Siang"
+                shiftName.contains("Malam", ignoreCase = true) -> "Malam"
+                shiftName.equals("Libur", ignoreCase = true) -> "Libur"
+                else -> shiftName
+            }
+        }
+
+        private fun setShiftColor(textView: TextView, shiftName: String?) {
+            val simpleName = formatShiftName(shiftName)
+
             when {
-                shiftName.contains("Pagi", ignoreCase = true) -> {
-                    textView.setTextColor(0xFFE690A5.toInt()) // Pink
+                simpleName == "-" -> {
+                    textView.setTextColor(0xFF666666.toInt())
                 }
-                shiftName.contains("Siang", ignoreCase = true) -> {
-                    textView.setTextColor(0xFFD81B60.toInt()) // Pink tua
+                simpleName == "Pagi" -> {
+                    textView.setTextColor(0xFFE690A5.toInt())
                 }
-                shiftName.contains("Malam", ignoreCase = true) -> {
-                    textView.setTextColor(0xFF880E4F.toInt()) // Pink gelap
+                simpleName == "Siang" -> {
+                    textView.setTextColor(0xFFD81B60.toInt())
                 }
-                shiftName.contains("Libur", ignoreCase = true) -> {
-                    textView.setTextColor(0xFFFF9800.toInt()) // Orange
+                simpleName == "Malam" -> {
+                    textView.setTextColor(0xFF880E4F.toInt())
+                }
+                simpleName == "Libur" -> {
+                    textView.setTextColor(0xFF4CAF50.toInt())
                 }
                 else -> {
-                    textView.setTextColor(0xFF333333.toInt()) // Hitam
+                    textView.setTextColor(0xFF333333.toInt())
                 }
             }
         }
 
-        override fun getItemCount(): Int = data.size
+        private fun dpToPx(dp: Int, resources: Resources): Int {
+            val density = resources.displayMetrics.density
+            return (dp * density).toInt()
+        }
+
+        override fun getItemCount(): Int = 1
     }
 }
