@@ -145,15 +145,17 @@ class RqProdukAdapter(
 
         holder.tvProductName.text = produk.namaproduk
 
+        // PENTING: Set listener ke null SEBELUM setQuantity untuk mencegah crash
+        holder.quantitySelector.setOnQuantityChangeListener(null)
 
         if (initialQuantity > 0) {
             holder.btnTambahAwal.visibility = View.GONE
             holder.quantitySelector.visibility = View.VISIBLE
-            holder.quantitySelector.setQuantity(initialQuantity)
+            holder.quantitySelector.setQuantitySilently(initialQuantity)
         } else {
             holder.btnTambahAwal.visibility = View.VISIBLE
             holder.quantitySelector.visibility = View.GONE
-            holder.quantitySelector.setQuantity(0)
+            holder.quantitySelector.setQuantitySilently(0)
         }
 
         holder.btnTambahAwal.setOnClickListener {
@@ -162,8 +164,6 @@ class RqProdukAdapter(
             holder.quantitySelector.setQuantity(1)
             listener.onUpdateRqCartItem(currentDetail, 1)
         }
-
-        holder.quantitySelector.setOnQuantityChangeListener(null)
 
         holder.quantitySelector.setOnQuantityChangeListener { qty ->
             if (qty <= 0) {

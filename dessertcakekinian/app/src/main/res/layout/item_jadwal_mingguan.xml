@@ -1,163 +1,164 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="#FFFFFF"
     android:layout_margin="8dp"
-    android:padding="16dp"
-    android:elevation="2dp">
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="1dp"
+    app:cardBackgroundColor="?attr/colorPrimaryVariant"
+    app:strokeColor="?attr/colorPrimary">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="#E690A5"
-        android:padding="12dp"
-        android:layout_marginBottom="8dp">
-
-        <TextView
-            android:id="@+id/tv_siklus"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Jadwal Mingguan Karyawan"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF" />
-
-        <TextView
-            android:id="@+id/tv_pengguna"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Total: 3 Karyawan"
-            android:textSize="14sp"
-            android:textColor="#FFFFFF"
-            android:gravity="end" />
-    </LinearLayout>
-
-    <!-- Horizontal Scroll View untuk tabel besar -->
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="horizontal">
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp"
+            android:gravity="center_vertical">
 
-            <!-- Header Tabel -->
-            <LinearLayout
+            <TextView
+                android:id="@+id/tv_siklus"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Jadwal Mingguan Karyawan"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="?attr/android:textColor" />
+
+            <TextView
+                android:id="@+id/tv_pengguna"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:background="#F8F8F8"
-                android:padding="8dp">
-
-                <TextView
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
-                    android:text="USERNAME"
-                    android:textSize="10sp"
-                    android:textColor="#666666"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:padding="8dp" />
-
-                <TextView
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:text="SENIN"
-                    android:textSize="10sp"
-                    android:textColor="#666666"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:padding="8dp" />
-
-                <TextView
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:text="SELASA"
-                    android:textSize="10sp"
-                    android:textColor="#666666"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:padding="8dp" />
-
-                <TextView
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:text="RABU"
-                    android:textSize="10sp"
-                    android:textColor="#666666"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:padding="8dp" />
-
-                <TextView
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:text="KAMIS"
-                    android:textSize="10sp"
-                    android:textColor="#666666"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:padding="8dp" />
-
-                <TextView
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:text="JUMAT"
-                    android:textSize="10sp"
-                    android:textColor="#666666"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:padding="8dp" />
-
-                <TextView
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:text="SABTU"
-                    android:textSize="10sp"
-                    android:textColor="#666666"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:padding="8dp" />
-
-                <TextView
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:text="MINGGU"
-                    android:textSize="10sp"
-                    android:textColor="#666666"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:padding="8dp" />
-            </LinearLayout>
-
-            <!-- Container untuk data SEMUA karyawan -->
-            <LinearLayout
-                android:id="@+id/container_data_karyawan"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-
+                android:text="Total: 3 Karyawan"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="?attr/android:textColor" />
         </LinearLayout>
-    </HorizontalScrollView>
 
-    <!-- Data Shift Definition -->
-    <TextView
-        android:id="@+id/tv_shift_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Shift: "
-        android:textSize="12sp"
-        android:textColor="#666666"
-        android:layout_marginTop="8dp"
-        android:padding="8dp"
-        android:background="#F5F5F5" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider"
+            android:layout_marginBottom="12dp"/>
 
-</LinearLayout>
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingBottom="8dp">
+
+                    <TextView
+                        android:layout_width="120dp"
+                        android:layout_height="wrap_content"
+                        android:text="USERNAME"
+                        android:textSize="11sp"
+                        android:textColor="?attr/android:textColor"
+                        android:textStyle="bold"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="SENIN"
+                        android:textSize="11sp"
+                        android:textColor="?attr/android:textColor"
+                        android:textStyle="bold"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="SELASA"
+                        android:textSize="11sp"
+                        android:textColor="?attr/android:textColor"
+                        android:textStyle="bold"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="RABU"
+                        android:textSize="11sp"
+                        android:textColor="?attr/android:textColor"
+                        android:textStyle="bold"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="KAMIS"
+                        android:textSize="11sp"
+                        android:textColor="?attr/android:textColor"
+                        android:textStyle="bold"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="JUMAT"
+                        android:textSize="11sp"
+                        android:textColor="?attr/android:textColor"
+                        android:textStyle="bold"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="SABTU"
+                        android:textSize="11sp"
+                        android:textColor="?attr/android:textColor"
+                        android:textStyle="bold"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="MINGGU"
+                        android:textSize="11sp"
+                        android:textColor="?attr/android:textColor"
+                        android:textStyle="bold"
+                        android:gravity="center" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/container_data_karyawan"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <TextView
+            android:id="@+id/tv_shift_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Shift :"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            android:textColor="?attr/android:textColorSecondary"
+            android:layout_marginTop="12dp" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

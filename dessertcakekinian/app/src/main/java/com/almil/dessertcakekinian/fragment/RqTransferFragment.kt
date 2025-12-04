@@ -126,7 +126,10 @@ class RqTransferFragment : Fragment(), OnRqProdukItemClickListener, ProductFilte
             recyclerViewCart.post {
                 cartAdapter.updateRqData(newCartItemsMap)
             }
-            transaksiAdapter.updateCartQuantities(cartViewModel.getCartQuantitiesMap())
+            // Gunakan post untuk memastikan notifyDataSetChanged tidak dipanggil saat RecyclerView sedang layout
+            recyclerView.post {
+                transaksiAdapter.updateCartQuantities(cartViewModel.getCartQuantitiesMap())
+            }
         }
 
 

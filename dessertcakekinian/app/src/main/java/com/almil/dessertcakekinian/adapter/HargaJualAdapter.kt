@@ -11,7 +11,8 @@ import com.almil.dessertcakekinian.model.HargaGrosir
 import java.text.NumberFormat
 import java.util.Locale
 
-class HargaJualAdapter(
+class
+HargaJualAdapter(
     private val hargaGrosirList: List<HargaGrosir>
 ) : RecyclerView.Adapter<HargaJualAdapter.JualViewHolder>() {
 
@@ -34,16 +35,9 @@ class HargaJualAdapter(
 
     override fun onBindViewHolder(holder: JualViewHolder, position: Int) {
         val currentHarga = hargaGrosirList[position]
-
-        // 1. Min Qty (Menggunakan tvHargaBeli)
         holder.tvMinQty.text = "Min: ${currentHarga.minQty} pcs"
-        // Atur agar teks tidak terlalu menonjol seperti harga beli
-
-        // 2. Harga Jual (Menggunakan tvExp)
         holder.tvHargaJual.text = currencyFormatter.format(currentHarga.hargaJual)
-        holder.tvHargaJual.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.status_active)) // Misal: warna hijau
-
-        // 3. Sembunyikan atau Kosongkan tvStok
+        holder.tvHargaJual.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.status_active))
         holder.tvStokIgnored.visibility = View.GONE
         holder.tvStokIgnored.text = ""
     }

@@ -65,18 +65,11 @@ class HomePageFragment : Fragment() {
             tvStatusTimestamp = view.findViewById(R.id.tvStatusTimestamp)
             btnAksiAbsen = view.findViewById(R.id.btnAksiAbsen)
             ivStatusIcon = view.findViewById(R.id.ivStatusIcon)
-
-            // Initialize RecyclerView
             rvPesananOnline = view.findViewById(R.id.rvPesananOnline)
             setupRecyclerView()
-
-            // Ambil username dan shift hari ini
             getCorrectUsernameAndShiftFromSupabase()
-
-            // Setup button click listener dengan logika absen yang benar
             setupAbsenButtonListener()
-
-            // Setup menu click listeners
+            setupMenuVisibilityBasedOnRole()
             setupMenuClickListeners(view)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -112,6 +105,40 @@ class HomePageFragment : Fragment() {
                 e.printStackTrace()
                 Toast.makeText(context, "Tidak dapat membuka halaman absen", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    private fun setupMenuVisibilityBasedOnRole() {
+        try {
+            val userSession = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE)
+            val userRole = userSession.getString("USER_ROLE", "")?.lowercase() ?: ""
+
+            println("🔍 HomePageFragment - User Role: '$userRole'")
+
+            val menuRequest = view?.findViewById<LinearLayout>(R.id.menurequest)
+            val menuTransaksi = view?.findViewById<LinearLayout>(R.id.menuTransaksi)
+
+            // Cek text button absen untuk menu Transaksi
+            val buttonText = btnAksiAbsen.text.toString()
+            val isAbsenPulang = buttonText == "Absen Pulang"
+
+            // ✅ Menu Restok: hanya tampil jika != karyawan DAN status Absen Pulang
+            if (userRole == "karyawan") {
+                menuRequest?.visibility = View.GONE
+                println("🔒 Menu Restok disembunyikan (Role: karyawan)")
+            } else {
+                // Untuk role selain karyawan, cek status absen
+                menuRequest?.visibility = if (isAbsenPulang) View.VISIBLE else View.GONE
+                println("${if (isAbsenPulang) "✅" else "🔒"} Menu Restok ${if (isAbsenPulang) "ditampilkan" else "disembunyikan"} (Role: $userRole, Status: $buttonText)")
+            }
+
+            // ✅ Menu Transaksi: bebas untuk semua role, tapi hanya tampil saat Absen Pulang
+            menuTransaksi?.visibility = if (isAbsenPulang) View.VISIBLE else View.GONE
+            println("${if (isAbsenPulang) "✅" else "🔒"} Menu Transaksi ${if (isAbsenPulang) "ditampilkan" else "disembunyikan"} (Status: $buttonText)")
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            println("❌ HomePageFragment - Error setup menu visibility: ${e.message}")
         }
     }
 
@@ -394,6 +421,7 @@ class HomePageFragment : Fragment() {
         }
     }
 
+
     // ✅ Fungsi update UI dengan WARNA ABU-ABU untuk belum absen
     private fun updateUI(status: String, jamMasuk: String, jamPulang: String) {
         try {
@@ -447,6 +475,10 @@ class HomePageFragment : Fragment() {
                     ivStatusIcon.visibility = View.VISIBLE
                 }
             }
+
+            // ✅ TAMBAHAN: Update visibilitas menu setelah update UI
+            setupMenuVisibilityBasedOnRole()
+
         } catch (e: Exception) {
             e.printStackTrace()
             // Default state juga ABU-ABU
@@ -456,6 +488,9 @@ class HomePageFragment : Fragment() {
             tvStatusTimestamp.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray_default))
             btnAksiAbsen.text = "Absen Masuk"
             ivStatusIcon.clearColorFilter()
+
+            // ✅ Update menu visibility meskipun error
+            setupMenuVisibilityBasedOnRole()
         }
     }
 
@@ -567,6 +602,7 @@ class HomePageFragment : Fragment() {
         super.onResume()
         println("🔄 HomePageFragment - onResume: Load data REAL-TIME")
         getCorrectUsernameAndShiftFromSupabase()
+        setupMenuVisibilityBasedOnRole()
     }
 
     companion object {
