@@ -14,7 +14,7 @@ import androidx.room.TypeConverters
         OrderEntity::class,
         DetailOrderEntity::class
     ],
-    version = 3, // Update versi database dari 2 ke 3
+    version = 4, // Update versi database: tambah kolom gambar di ProdukKategoriEntity
     exportSchema = false
 )
 @TypeConverters(Converters::class)

@@ -36,7 +36,6 @@ class loginFragment : Fragment() {
     private lateinit var phoneEditText: EditText
     private lateinit var passwordEditText: EditText
     private lateinit var loginButton: Button
-    private lateinit var forgotTextView: TextView
 
     private var isPasswordVisible: Boolean = false
     private lateinit var sharedPreferences: SharedPreferences
@@ -68,10 +67,8 @@ class loginFragment : Fragment() {
         phoneEditText = view.findViewById(R.id.phone)
         passwordEditText = view.findViewById(R.id.password)
         loginButton = view.findViewById(R.id.login_button)
-        forgotTextView = view.findViewById(R.id.lupa_sandi)
 
         setupPasswordToggle()
-        setupNavigationToForgot()
         setupLoginButton()
     }
 
@@ -102,26 +99,35 @@ class loginFragment : Fragment() {
                         ).decodeSingleOrNull<User>()
 
                         if (response != null) {
-                            // Step 2: Fetch outlet data if exists
-                            val outlet = if (response.idOutlet != null) {
-                                try {
-                                    supabase.postgrest["outlet"]
-                                        .select {
-                                            filter {
-                                                eq("idoutlet", response.idOutlet)
-                                            }
+
+                            // 🛑 BARU: VALIDASI ID OUTLET 🛑
+                            if (response.idOutlet == null) {
+                                showError("Aplikasi hanya di setup untuk karyawan")
+                                return@launch // Hentikan proses login
+                            }
+                            // 🛑 AKHIR VALIDASI BARU 🛑
+                            val outlet = try {
+                                supabase.postgrest["outlet"]
+                                    .select {
+                                        filter {
+                                            // Menggunakan response.idOutlet yang sudah dipastikan TIDAK null
+                                            eq("idoutlet", response.idOutlet)
                                         }
-                                        .decodeSingleOrNull<Outlet>()
-                                } catch (e: Exception) {
-                                    Log.e(TAG, "Failed to fetch outlet data: ", e)
-                                    null
-                                }
-                            } else {
+                                    }
+                                    .decodeSingleOrNull<Outlet>()
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Failed to fetch outlet data: ", e)
                                 null
                             }
 
+                            // Anda mungkin juga ingin memvalidasi apakah data outlet berhasil diambil:
+                            if (outlet == null) {
+                                showError("Gagal mengambil detail outlet. Silakan hubungi administrator.")
+                                return@launch
+                            }
+
                             // Step 3: Save user session
-                            saveUserSession(response, outlet)
+                            saveUserSession(response, outlet) // Kirim response dan outlet yang sudah valid
 
                             // Step 4: Sync all data from Supabase
                             loginButton.text = "Syncing data..."
@@ -133,9 +139,11 @@ class loginFragment : Fragment() {
                             showError("Nomor telepon atau Password salah.")
                         }
 
+// ...
+
                     } catch (e: Exception) {
                         Log.e(TAG, "Login failed via RPC: ", e)
-                        showError("Terjadi kesalahan. Coba lagi nanti.")
+                        showError("Terjadi kesalahan. Periksa koneksi internet.")
                     } finally {
                         activity?.runOnUiThread {
                             loginButton.isEnabled = true
@@ -248,12 +256,6 @@ class loginFragment : Fragment() {
                 }
             }
             false
-        }
-    }
-
-    private fun setupNavigationToForgot() {
-        forgotTextView.setOnClickListener {
-            findNavController().navigate(R.id.action_login_to_forgot)
         }
     }
 

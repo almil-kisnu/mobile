@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="8dp"
-            android:textSize="16sp"
+            android:textSize="13sp"
             android:textStyle="bold"
             android:textColor="?attr/android:textColor"
             app:layout_constraintEnd_toStartOf="@+id/tvBarcodeLabel"
@@ -87,7 +87,7 @@
 
             app:layout_constraintBaseline_toBaselineOf="@+id/tvExpLabel"
             app:layout_constraintStart_toEndOf="@+id/tvExpLabel"
-            tools:text="01 07 2025" />
+            tools:text="01-07-2025" />
 
         <TextView
             android:id="@+id/tvBarcodeLabel"

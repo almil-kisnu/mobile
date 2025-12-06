@@ -19,6 +19,16 @@ class RiwayatAdapter(private var riwayatList: List<PresensiFragment.RiwayatPrese
     private var riwayatListFiltered: MutableList<PresensiFragment.RiwayatPresensi> = ArrayList(riwayatList)
     private var selectedPosition = -1
 
+    // Tambahkan konstanta untuk status
+    companion object {
+        private const val STATUS_HADIR = "Hadir"
+        private const val STATUS_IZIN = "Izin"
+        private const val STATUS_TERLAMBAT = "Terlambat"
+        private const val STATUS_ALPHA = "Alpha"
+        private const val STATUS_SEMUA = "Semua Status"
+        private const val STATUS_UTANG_JAM = "Utang Jam"
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_riwayat_presensi, parent, false)
@@ -105,16 +115,20 @@ class RiwayatAdapter(private var riwayatList: List<PresensiFragment.RiwayatPrese
 
     private fun setStatusBadge(tvStatusBadge: TextView, status: String) {
         when (status.lowercase(Locale.getDefault())) {
-            "hadir" -> {
+            STATUS_HADIR.lowercase() -> {
                 tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_hadir)
                 tvStatusBadge.setTextColor(ContextCompat.getColor(tvStatusBadge.context, android.R.color.white))
             }
-            "izin" -> {
+            STATUS_IZIN.lowercase() -> {
                 tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_izin)
                 tvStatusBadge.setTextColor(ContextCompat.getColor(tvStatusBadge.context, android.R.color.white))
             }
-            "telat" -> {
-                tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_telat)
+            STATUS_TERLAMBAT.lowercase() -> {  // GANTI DARI "telat" KE "terlambat"
+                tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_terlambat) // Background tetap sama
+                tvStatusBadge.setTextColor(ContextCompat.getColor(tvStatusBadge.context, android.R.color.white))
+            }
+            STATUS_ALPHA.lowercase() -> {
+                tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_alpha)
                 tvStatusBadge.setTextColor(ContextCompat.getColor(tvStatusBadge.context, android.R.color.white))
             }
             else -> {
@@ -135,11 +149,12 @@ class RiwayatAdapter(private var riwayatList: List<PresensiFragment.RiwayatPrese
 
         for (riwayat in riwayatList) {
             val matchesStatus = when (selectedStatus) {
-                "Semua Status" -> true
-                "Hadir" -> riwayat.status == "Hadir"
-                "Izin" -> riwayat.status == "Izin"
-                "Telat" -> riwayat.status == "Telat"
-                "Utang Jam" -> riwayat.utangJam.isNotEmpty() && riwayat.utangJam != "0j"
+                STATUS_SEMUA -> true
+                STATUS_HADIR -> riwayat.status == STATUS_HADIR
+                STATUS_IZIN -> riwayat.status == STATUS_IZIN
+                STATUS_TERLAMBAT -> riwayat.status == STATUS_TERLAMBAT  // GANTI DARI "Telat"
+                STATUS_ALPHA -> riwayat.status == STATUS_ALPHA
+                STATUS_UTANG_JAM -> riwayat.utangJam.isNotEmpty() && riwayat.utangJam != "0j"
                 else -> true
             }
 

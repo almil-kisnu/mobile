@@ -11,6 +11,8 @@ data class ProdukKategoriEntity(
     val idproduk: Int,
     @ColumnInfo(name = "namaproduk")
     val namaproduk: String,
+    @ColumnInfo(name = "gambar")
+    val gambar: String?,
     @ColumnInfo(name = "kategori")
     val kategori: String?,
     @ColumnInfo(name = "status")

@@ -1,6 +1,7 @@
 package com.almil.dessertcakekinian.adapter
 
 import android.content.Context
+import android.graphics.Color
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.almil.dessertcakekinian.R
 import com.almil.dessertcakekinian.model.CartItem
 import com.almil.dessertcakekinian.model.CartViewModel
@@ -40,8 +42,22 @@ class RqCartAdapter(
         val produkDetail = cartItem.produkDetail
         val produk = produkDetail.produk
 
+        // Set background transparent
+        holder.itemView.setBackgroundColor(Color.TRANSPARENT)
+
         holder.tvNamaMenu.text = produk.namaproduk
+        
+        // Clear previous image first to prevent glitching
         holder.imgMenu.setImageResource(R.drawable.ic_cake)
+        
+        // Load gambar dengan Coil
+        if (!produk.gambar.isNullOrEmpty()) {
+            holder.imgMenu.load(produk.gambar) {
+                crossfade(true)
+                placeholder(R.drawable.ic_cake)
+                error(R.drawable.ic_cake)
+            }
+        }
         holder.etJumlah.isFocusable = false
         holder.etJumlah.isFocusableInTouchMode = false
         holder.etJumlah.isClickable = false

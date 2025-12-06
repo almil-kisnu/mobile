@@ -38,8 +38,38 @@ class RealtimeConnectionManager private constructor(private val context: Context
 
             Log.d(TAG, "📡 Subscribing channel: $channelId")
 
+            // Check websocket status before subscribing
+            val wsStatus = client.realtime.status.value.toString()
+            Log.d(TAG, "   Websocket status: $wsStatus")
+
+            // If websocket is connecting, wait for it
+            if (wsStatus == "CONNECTING") {
+                Log.d(TAG, "   Waiting for websocket connection...")
+                var waitRetries = 0
+                while (client.realtime.status.value.toString() == "CONNECTING" && waitRetries < 25) {
+                    delay(200)
+                    waitRetries++
+                }
+            }
+
             // Subscribe - SDK otomatis connect websocket jika belum
-            channel.subscribe()
+            try {
+                channel.subscribe()
+            } catch (e: IllegalStateException) {
+                // Handle "Websocket already connected" error
+                if (e.message?.contains("already connected", ignoreCase = true) == true) {
+                    Log.w(TAG, "⚠️ Websocket already connected, retrying subscribe...")
+                    delay(500)
+                    try {
+                        channel.subscribe()
+                    } catch (retryEx: Exception) {
+                        Log.e(TAG, "❌ Retry subscribe failed: ${retryEx.message}")
+                        return@withContext false
+                    }
+                } else {
+                    throw e
+                }
+            }
 
             // Wait untuk subscribe complete (max 5 detik)
             var retries = 0

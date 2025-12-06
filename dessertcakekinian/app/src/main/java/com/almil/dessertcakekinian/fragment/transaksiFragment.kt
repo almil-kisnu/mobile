@@ -119,7 +119,10 @@ class transaksiFragment : Fragment(), OnTransaksiItemClickListener {
             recyclerViewCart.post {
                 cartAdapter.updateData(newCartItemsMap)
             }
-            transaksiAdapter.updateCartQuantities(cartViewModel.getCartQuantitiesMap())
+            // Gunakan post untuk memastikan notifyDataSetChanged tidak dipanggil saat RecyclerView sedang layout
+            recyclerView.post {
+                transaksiAdapter.updateCartQuantities(cartViewModel.getCartQuantitiesMap())
+            }
         }
 
 

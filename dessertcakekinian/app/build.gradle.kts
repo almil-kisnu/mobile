@@ -63,6 +63,7 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:realtime-kt:2.0.0")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("com.itextpdf:itext7-core:7.2.5")
+    implementation("io.coil-kt:coil:2.5.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

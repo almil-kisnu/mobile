@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 data class ProdukKategori(
     val idproduk: Int,
     val namaproduk: String,
+    val gambar: String? = null,
     val kategori: String? = null,
     val status: String,
     val barcode: String? = null,

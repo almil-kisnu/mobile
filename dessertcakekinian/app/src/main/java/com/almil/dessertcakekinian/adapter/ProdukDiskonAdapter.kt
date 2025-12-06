@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.almil.dessertcakekinian.R
 import com.almil.dessertcakekinian.model.ProdukDetail
 import com.almil.dessertcakekinian.model.EventDiskon
@@ -51,6 +52,18 @@ class ProdukDiskonAdapter(
         fun bind(item: ProdukDiskonItem) {
             val produk = item.produkDetail.produk
             val diskon = item.diskon
+
+            // Clear previous image first to prevent glitching
+            ivProdukImage.setImageResource(com.almil.dessertcakekinian.R.drawable.ic_cake)
+            
+            // Set gambar produk
+            if (!produk.gambar.isNullOrEmpty()) {
+                ivProdukImage.load(produk.gambar) {
+                    crossfade(true)
+                    placeholder(com.almil.dessertcakekinian.R.drawable.ic_cake)
+                    error(com.almil.dessertcakekinian.R.drawable.ic_cake)
+                }
+            }
 
             // Set nama produk
             tvProdukName.text = produk.namaproduk

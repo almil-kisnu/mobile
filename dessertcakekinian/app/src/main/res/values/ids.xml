@@ -60,4 +60,14 @@
     <item name="tv_nama_shift" type="id"/>
     <item name="tv_jam_shift" type="id"/>
     <item name="tv_karyawan" type="id"/>
+    <item name="swipeRefresh" type="id"/>
+    <item name="iconCheck" type="id"/>
+    <item name="checkIcon" type="id"/>
+    <item name="statusIcon" type="id"/>
+    <item name="iconStatus" type="id"/>
+    <item name="checkboxStatus" type="id"/>
+    <item name="ivCheck" type="id"/>
+    <item name="imgCheck" type="id"/>
+    <item name="nav_host_fragment" type="id"/>
+    <item name="main_container" type="id"/>
 </resources>

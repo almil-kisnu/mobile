@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.almil.dessertcakekinian.R
 import com.almil.dessertcakekinian.model.ProdukDetail
 import java.text.SimpleDateFormat
@@ -25,6 +26,10 @@ class ProductAdapter(
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
     private val displayDateFormatter = SimpleDateFormat("dd MM yyyy", Locale.getDefault())
     private val apiDateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+    init {
+        setHasStableIds(true)
+    }
     inner class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val ivProductImage: ImageView = itemView.findViewById(R.id.ivProductImage)
         val tvProductName: TextView = itemView.findViewById(R.id.tvProductName)
@@ -43,7 +48,17 @@ class ProductAdapter(
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
         val currentDetail = productList[position]
         val produk = currentDetail.produk
+        
+        // Clear previous image first to prevent glitching
         holder.ivProductImage.setImageResource(R.drawable.ic_cake)
+        
+        if (!produk.gambar.isNullOrEmpty()) {
+            holder.ivProductImage.load(produk.gambar) {
+                crossfade(true)
+                placeholder(R.drawable.ic_cake)
+                error(R.drawable.ic_cake)
+            }
+        }
         holder.tvProductName.text = produk.namaproduk
         holder.tvBarcodeValue.text = produk.barcode ?: "-"
         val outletStokList = currentDetail.detailStok
@@ -91,6 +106,11 @@ class ProductAdapter(
     }
 
     override fun getItemCount(): Int = productList.size
+    
+    override fun getItemId(position: Int): Long {
+        return productList[position].produk.idproduk.toLong()
+    }
+    
     fun updateData(newList: List<ProdukDetail>) {
         productList = newList
         notifyDataSetChanged()

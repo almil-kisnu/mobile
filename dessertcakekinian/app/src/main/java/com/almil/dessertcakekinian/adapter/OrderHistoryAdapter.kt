@@ -101,7 +101,7 @@ class OrderHistoryAdapter(
                 tvStatus.setBackgroundResource(R.drawable.bg_status_selesai)
 
                 // Text Color
-                val statusTextColor = ContextCompat.getColor(context, R.color.status_active)
+                val statusTextColor = Color.parseColor("#4CAF50")
                 tvStatus.setTextColor(statusTextColor)
 
                 // Drawable Start (Icon)

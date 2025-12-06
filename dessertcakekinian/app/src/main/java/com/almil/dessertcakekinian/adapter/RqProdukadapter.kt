@@ -6,12 +6,13 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.almil.dessertcakekinian.R
 import com.almil.dessertcakekinian.common.QuantitySelector
 import com.almil.dessertcakekinian.model.ProdukDetail
 import com.google.android.material.button.MaterialButton
 import java.text.NumberFormat
-import java.util.Locale// TAMBAHKAN di bagian import
+import java.util.Locale
 import androidx.core.content.ContextCompat
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -39,6 +40,10 @@ class RqProdukAdapter(
         maximumFractionDigits = 0
     }
 
+    init {
+        setHasStableIds(true)
+    }
+
     inner class TransaksiViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val ivProductImage: ImageView = itemView.findViewById(R.id.ivProdukGambar)
         val tvProductName: TextView = itemView.findViewById(R.id.tvNamaProduk)
@@ -61,7 +66,19 @@ class RqProdukAdapter(
 
         val initialQuantity = cartQuantities[produk.idproduk] ?: 0
 
+        // Set background transparent
+        holder.itemView.setBackgroundColor(Color.TRANSPARENT)
+
+        // Clear previous image first to prevent glitching
         holder.ivProductImage.setImageResource(R.drawable.ic_cake)
+        
+        if (!produk.gambar.isNullOrEmpty()) {
+            holder.ivProductImage.load(produk.gambar) {
+                crossfade(true)
+                placeholder(R.drawable.ic_cake)
+                error(R.drawable.ic_cake)
+            }
+        }
 
 // Klik gambar untuk navigasi ke detail
         holder.ivProductImage.setOnClickListener {
@@ -145,15 +162,17 @@ class RqProdukAdapter(
 
         holder.tvProductName.text = produk.namaproduk
 
+        // PENTING: Set listener ke null SEBELUM setQuantity untuk mencegah crash
+        holder.quantitySelector.setOnQuantityChangeListener(null)
 
         if (initialQuantity > 0) {
             holder.btnTambahAwal.visibility = View.GONE
             holder.quantitySelector.visibility = View.VISIBLE
-            holder.quantitySelector.setQuantity(initialQuantity)
+            holder.quantitySelector.setQuantitySilently(initialQuantity)
         } else {
             holder.btnTambahAwal.visibility = View.VISIBLE
             holder.quantitySelector.visibility = View.GONE
-            holder.quantitySelector.setQuantity(0)
+            holder.quantitySelector.setQuantitySilently(0)
         }
 
         holder.btnTambahAwal.setOnClickListener {
@@ -162,8 +181,6 @@ class RqProdukAdapter(
             holder.quantitySelector.setQuantity(1)
             listener.onUpdateRqCartItem(currentDetail, 1)
         }
-
-        holder.quantitySelector.setOnQuantityChangeListener(null)
 
         holder.quantitySelector.setOnQuantityChangeListener { qty ->
             if (qty <= 0) {
@@ -184,15 +201,27 @@ class RqProdukAdapter(
     }
 
     override fun getItemCount(): Int = productList.size
+    
+    override fun getItemId(position: Int): Long {
+        return productList[position].produk.idproduk.toLong()
+    }
+    
     fun updateData(newList: List<ProdukDetail>, newCartQuantities: Map<Int, Int> = emptyMap()) {
         productList = newList
         cartQuantities = newCartQuantities
         notifyDataSetChanged()
     }
     fun updateCartQuantities(newCartQuantities: Map<Int, Int>) {
-        if (this.cartQuantities != newCartQuantities) {
-            this.cartQuantities = newCartQuantities
-            notifyDataSetChanged()
+        val oldQuantities = this.cartQuantities
+        this.cartQuantities = newCartQuantities
+        
+        // Only notify changed items instead of all
+        productList.forEachIndexed { index, produkDetail ->
+            val oldQty = oldQuantities[produkDetail.produk.idproduk] ?: 0
+            val newQty = newCartQuantities[produkDetail.produk.idproduk] ?: 0
+            if (oldQty != newQty) {
+                notifyItemChanged(index, "quantity")
+            }
         }
     }
 

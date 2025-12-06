@@ -80,7 +80,8 @@
         android:layout_height="wrap_content"
         android:scrollbars="none"
         android:layout_marginTop="7dp"
-        android:paddingHorizontal="12dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:clipToPadding="false"
         app:layout_constraintTop_toBottomOf="@id/card_search"
         app:layout_constraintStart_toStartOf="parent"
@@ -90,7 +91,7 @@
             android:id="@+id/chip_group_filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_gravity="center_vertical"
             app:singleSelection="true">
 
             <com.google.android.material.chip.Chip
@@ -100,7 +101,6 @@
                 android:layout_height="wrap_content"
                 android:minHeight="40dp"
                 android:text="Semua"
-                android:layout_marginStart="40dp"
                 android:checked="true"
                 android:textColor="?attr/android:textColor"
                 app:chipBackgroundColor="?attr/colorPrimaryVariant"

@@ -19,7 +19,7 @@
             android:layout_weight="1"
             tools:text="Rp 6.000"
             android:textSize="14sp"
-            android:textColor="@android:color/black"/>
+            android:textColor="?attr/android:textColor" />
 
         <TextView
             android:id="@+id/tvStok"
@@ -29,7 +29,7 @@
             android:gravity="center"
             tools:text="1400 pcs"
             android:textSize="14sp"
-            android:textColor="@android:color/black"/>
+            android:textColor="?attr/android:textColor"/>
 
         <TextView
             android:id="@+id/tvExp"
@@ -39,7 +39,7 @@
             android:gravity="end"
             tools:text="14 Okt 2025"
             android:textSize="14sp"
-            android:textColor="@android:color/black"/>
+            android:textColor="?attr/android:textColor"/>
     </LinearLayout>
 
     <View style="@style/Divider" />

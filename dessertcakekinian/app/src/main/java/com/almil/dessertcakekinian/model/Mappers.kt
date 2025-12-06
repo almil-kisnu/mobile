@@ -10,6 +10,7 @@ import com.almil.dessertcakekinian.database.DetailOrderEntity
 fun ProdukKategoriEntity.toModel() = ProdukKategori(
     idproduk = idproduk,
     namaproduk = namaproduk,
+    gambar = gambar,
     kategori = kategori,
     status = status,
     barcode = barcode,
@@ -36,6 +37,7 @@ fun HargaGrosirEntity.toModel() = HargaGrosir(
 fun ProdukKategori.toEntity() = ProdukKategoriEntity(
     idproduk = idproduk,
     namaproduk = namaproduk,
+    gambar = gambar,
     kategori = kategori,
     status = status,
     barcode = barcode,
