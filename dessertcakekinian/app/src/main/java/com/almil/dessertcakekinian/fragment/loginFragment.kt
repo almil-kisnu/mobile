@@ -36,7 +36,6 @@ class loginFragment : Fragment() {
     private lateinit var phoneEditText: EditText
     private lateinit var passwordEditText: EditText
     private lateinit var loginButton: Button
-    private lateinit var forgotTextView: TextView
 
     private var isPasswordVisible: Boolean = false
     private lateinit var sharedPreferences: SharedPreferences
@@ -70,7 +69,6 @@ class loginFragment : Fragment() {
         loginButton = view.findViewById(R.id.login_button)
 
         setupPasswordToggle()
-        setupNavigationToForgot()
         setupLoginButton()
     }
 
@@ -258,12 +256,6 @@ class loginFragment : Fragment() {
                 }
             }
             false
-        }
-    }
-
-    private fun setupNavigationToForgot() {
-        forgotTextView.setOnClickListener {
-            findNavController().navigate(R.id.action_login_to_forgot)
         }
     }
 

@@ -9,11 +9,13 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.almil.dessertcakekinian.R
+import com.almil.dessertcakekinian.database.SupabaseHelper
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class dialog_ajukan_izin : DialogFragment() {
 
@@ -57,34 +59,9 @@ class dialog_ajukan_izin : DialogFragment() {
         val userName = sharedPreferences.getString("USER_NAME", "Karyawan") ?: "Karyawan"
         etNamaKaryawan.setText(userName)
 
-        // Set shift default untuk hari ini
-        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale("id", "ID"))
-        val today = dateFormat.format(Date())
-        userShift = getShiftForDate(today)
-    }
-
-    private fun getShiftForDate(tanggal: String): String {
-        val userSession = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
-        val userName = userSession.getString("USER_NAME", "") ?: ""
-
-        if (userName.isEmpty()) return "Pagi"
-
-        try {
-            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-            val date = dateFormat.parse(tanggal) ?: return "Pagi"
-
-            val calendar = Calendar.getInstance()
-            calendar.time = date
-            val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-
-            return when (dayOfWeek) {
-                Calendar.SATURDAY, Calendar.SUNDAY -> "Siang"
-                else -> "Pagi"
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return "Pagi"
-        }
+        // Ambil shift dari absen_data (sudah di-set di HomePageFragment)
+        val absenPrefs = requireContext().getSharedPreferences("absen_data", Context.MODE_PRIVATE)
+        userShift = absenPrefs.getString("user_shift", "Pagi") ?: "Pagi"
     }
 
     // Fungsi untuk menghitung jam terhutang berdasarkan shift
@@ -125,50 +102,47 @@ class dialog_ajukan_izin : DialogFragment() {
     private fun kirimPermintaanIzin() {
         val nama = etNamaKaryawan.text.toString()
         val alasan = etAlasanIzin.text.toString()
-        val tanggalHariIni = SimpleDateFormat("dd/MM/yyyy", Locale("id", "ID")).format(Date())
+        
+        // Format tanggal ke yyyy-MM-dd untuk database
+        val tanggalFormatDb = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
         // Hitung jam terhutang untuk full shift
         val jamTerhutang = calculateJamTerhutangFullShift(userShift)
 
-        // Simpan ke SharedPreferences
-        val prefs = requireContext().getSharedPreferences("izin_data", Context.MODE_PRIVATE)
-        val editor = prefs.edit()
-        val izinId = "izin_${System.currentTimeMillis()}"
+        // Disable button saat proses
+        btnKirim.isEnabled = false
+        btnKirim.text = "Mengirim..."
 
-        // Format: nama|tanggal|jamMulai|jamSelesai|alasan|status|jamTerhutang|shift
-        val (jamMulai, jamSelesai) = when (userShift) {
-            "Pagi" -> Pair("07:00", "12:00")
-            "Siang" -> Pair("13:00", "17:00")
-            "Malam" -> Pair("18:00", "22:00")
-            else -> Pair("07:00", "12:00")
-        }
+        // Update status ke Izin di Supabase (record yang sudah ada)
+        SupabaseHelper().updateStatusToIzin(
+            username = nama,
+            tanggal = tanggalFormatDb,
+            shift = userShift,
+            keterangan = alasan,
+            callback = object : SupabaseHelper.SimpanCallback {
+                override fun onSuccess(message: String) {
+                    activity?.runOnUiThread {
+                        Toast.makeText(
+                            requireContext(),
+                            "Permintaan izin berhasil dikirim!\nJam terhutang: $jamTerhutang",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        dismiss()
+                    }
+                }
 
-        val izinData = "$nama|$tanggalHariIni|$jamMulai|$jamSelesai|$alasan|PENDING|$jamTerhutang|$userShift"
-        editor.putString(izinId, izinData)
-        editor.apply()
-
-        // Juga simpan flag izin untuk tanggal tersebut di absen_data
-        val absenPrefs = requireContext().getSharedPreferences("absen_data", Context.MODE_PRIVATE)
-        val absenEditor = absenPrefs.edit()
-
-        // Convert tanggal dari dd/MM/yyyy ke yyyy-MM-dd
-        try {
-            val inputFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-            val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val date = inputFormat.parse(tanggalHariIni)
-            val formattedTanggal = outputFormat.format(date ?: Date())
-
-            absenEditor.putBoolean("izin_$formattedTanggal", true)
-            absenEditor.apply()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        Toast.makeText(
-            requireContext(),
-            "Permintaan izin berhasil dikirim!\nJam terhutang: $jamTerhutang",
-            Toast.LENGTH_LONG
-        ).show()
-        dismiss()
+                override fun onError(error: String) {
+                    activity?.runOnUiThread {
+                        btnKirim.isEnabled = true
+                        btnKirim.text = "Kirim Permintaan"
+                        Toast.makeText(
+                            requireContext(),
+                            "Gagal mengirim izin: $error",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+        )
     }
 }

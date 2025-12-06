@@ -514,63 +514,70 @@ class SupabaseHelper {
         }
     }
 
-    fun updateStatusToIzin(userId: Int, tanggal: String, shift: String, keterangan: String, callback: SimpleCallback) {
-        executor.execute {
-            try {
-                println("🔄 UPDATE STATUS TO IZIN: user=$userId, tanggal=$tanggal, shift=$shift, keterangan=$keterangan")
+    fun updateStatusToIzin(username: String, tanggal: String, shift: String, keterangan: String, callback: SimpanCallback) {
+        getUserIdFromUsername(username) { userId ->
+            executor.execute {
+                try {
+                    println("🔄 UPDATE STATUS TO IZIN: user=$userId, tanggal=$tanggal, shift=$shift, keterangan=$keterangan")
 
-                val filter = "tanggal=eq.${URLEncoder.encode(tanggal, "UTF-8")}" +
-                        "&id_pengguna=eq.$userId" +
-                        "&shift=eq.${URLEncoder.encode(shift, "UTF-8")}"
+                    // Get current time as jam_pulang
+                    val jamPulang = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
 
-                val url = URL("${SUPABASE_URL}presensi?$filter")
-                val conn = url.openConnection() as HttpURLConnection
-                conn.apply {
-                    requestMethod = "PATCH"
-                    doOutput = true
-                    setRequestProperty("Content-Type", "application/json")
-                    setRequestProperty("apikey", SUPABASE_KEY)
-                    setRequestProperty("Authorization", "Bearer $SUPABASE_KEY")
-                    setRequestProperty("Prefer", "return=minimal")
-                    connectTimeout = 10000
-                    readTimeout = 10000
-                }
+                    val filter = "tanggal=eq.${URLEncoder.encode(tanggal, "UTF-8")}" +
+                            "&id_pengguna=eq.$userId" +
+                            "&shift=eq.${URLEncoder.encode(shift, "UTF-8")}" +
+                            "&jam_pulang=is.null"
 
-                val jsonData = JSONObject().apply {
-                    put("status", STATUS_IZIN)
-                    put("keterangan_izin", keterangan)
-                }
-
-                println("📄 Update status to Izin: $jsonData")
-
-                val os: OutputStream = conn.outputStream
-                os.write(jsonData.toString().toByteArray(Charsets.UTF_8))
-                os.flush()
-                os.close()
-
-                val responseCode = conn.responseCode
-                println("📨 Response Code Update Izin: $responseCode")
-
-                if (responseCode == HttpURLConnection.HTTP_NO_CONTENT || responseCode == HttpURLConnection.HTTP_OK) {
-                    println("✅ Status updated to Izin in database")
-                    mainHandler.post { callback.onSuccess() }
-                } else {
-                    val errorStream = if (conn.errorStream != null) {
-                        val br = BufferedReader(InputStreamReader(conn.errorStream))
-                        val response = StringBuilder()
-                        var line: String?
-                        while (br.readLine().also { line = it } != null) response.append(line)
-                        br.close()
-                        response.toString()
-                    } else {
-                        "No error stream"
+                    val url = URL("${SUPABASE_URL}presensi?$filter")
+                    val conn = url.openConnection() as HttpURLConnection
+                    conn.apply {
+                        requestMethod = "PATCH"
+                        doOutput = true
+                        setRequestProperty("Content-Type", "application/json")
+                        setRequestProperty("apikey", SUPABASE_KEY)
+                        setRequestProperty("Authorization", "Bearer $SUPABASE_KEY")
+                        setRequestProperty("Prefer", "return=minimal")
+                        connectTimeout = 10000
+                        readTimeout = 10000
                     }
-                    println("❌ ERROR Update Izin: $responseCode - $errorStream")
-                    mainHandler.post { callback.onError("Gagal update status izin: $responseCode") }
+
+                    val jsonData = JSONObject().apply {
+                        put("status", STATUS_IZIN)
+                        put("keterangan_izin", keterangan)
+                        put("jam_pulang", jamPulang)
+                    }
+
+                    println("📄 Update status to Izin: $jsonData")
+
+                    val os: OutputStream = conn.outputStream
+                    os.write(jsonData.toString().toByteArray(Charsets.UTF_8))
+                    os.flush()
+                    os.close()
+
+                    val responseCode = conn.responseCode
+                    println("📨 Response Code Update Izin: $responseCode")
+
+                    if (responseCode == HttpURLConnection.HTTP_NO_CONTENT || responseCode == HttpURLConnection.HTTP_OK) {
+                        println("✅ Status updated to Izin in database")
+                        mainHandler.post { callback.onSuccess("✅ Izin berhasil dikirim") }
+                    } else {
+                        val errorStream = if (conn.errorStream != null) {
+                            val br = BufferedReader(InputStreamReader(conn.errorStream))
+                            val response = StringBuilder()
+                            var line: String?
+                            while (br.readLine().also { line = it } != null) response.append(line)
+                            br.close()
+                            response.toString()
+                        } else {
+                            "No error stream"
+                        }
+                        println("❌ ERROR Update Izin: $responseCode - $errorStream")
+                        mainHandler.post { callback.onError("Gagal update status izin: $responseCode") }
+                    }
+                } catch (e: Exception) {
+                    println("❌ EXCEPTION Update Izin: ${e.message}")
+                    mainHandler.post { callback.onError("Error: ${e.message}") }
                 }
-            } catch (e: Exception) {
-                println("❌ EXCEPTION Update Izin: ${e.message}")
-                mainHandler.post { callback.onError("Error: ${e.message}") }
             }
         }
     }

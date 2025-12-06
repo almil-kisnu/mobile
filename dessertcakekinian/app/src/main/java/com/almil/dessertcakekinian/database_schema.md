@@ -78,6 +78,26 @@ harga_jual numeric NOT NULL,
 CONSTRAINT harga_grosir_pkey PRIMARY KEY (id_harga),
 CONSTRAINT fk_produk_harga FOREIGN KEY (idproduk) REFERENCES public.produk(idproduk)
 );
+CREATE TABLE public.jadwal_mingguan (
+id_siklus uuid NOT NULL DEFAULT gen_random_uuid(),
+id_pengguna integer NOT NULL,
+id_shift_senin integer,
+id_shift_selasa integer,
+id_shift_rabu integer,
+id_shift_kamis integer,
+id_shift_jumat integer,
+id_shift_sabtu integer,
+id_shift_minggu integer,
+CONSTRAINT jadwal_mingguan_pkey PRIMARY KEY (id_siklus),
+CONSTRAINT siklus_mingguan_id_shift_senin_fkey FOREIGN KEY (id_shift_senin) REFERENCES public.shift(id_shift_def),
+CONSTRAINT siklus_mingguan_id_shift_selasa_fkey FOREIGN KEY (id_shift_selasa) REFERENCES public.shift(id_shift_def),
+CONSTRAINT siklus_mingguan_id_shift_rabu_fkey FOREIGN KEY (id_shift_rabu) REFERENCES public.shift(id_shift_def),
+CONSTRAINT siklus_mingguan_id_shift_kamis_fkey FOREIGN KEY (id_shift_kamis) REFERENCES public.shift(id_shift_def),
+CONSTRAINT siklus_mingguan_id_shift_jumat_fkey FOREIGN KEY (id_shift_jumat) REFERENCES public.shift(id_shift_def),
+CONSTRAINT siklus_mingguan_id_shift_sabtu_fkey FOREIGN KEY (id_shift_sabtu) REFERENCES public.shift(id_shift_def),
+CONSTRAINT siklus_mingguan_id_shift_minggu_fkey FOREIGN KEY (id_shift_minggu) REFERENCES public.shift(id_shift_def),
+CONSTRAINT fk_pengguna FOREIGN KEY (id_pengguna) REFERENCES public.pengguna(iduser)
+);
 CREATE TABLE public.kartustock (
 idkartustock integer NOT NULL DEFAULT nextval('kartustock_idkartustock_seq'::regclass),
 idproduk integer,
@@ -127,7 +147,7 @@ namapelanggan character varying NOT NULL DEFAULT 'Umum'::character varying,
 grandtotal numeric NOT NULL,
 bayar numeric NOT NULL,
 kembalian numeric NOT NULL,
-idkasir integer NOT NULL,
+idkasir integer,
 tanggalorder timestamp without time zone NOT NULL DEFAULT now(),
 idoutlet integer NOT NULL DEFAULT 1,
 metode_pembayaran USER-DEFINED NOT NULL DEFAULT 'transfer'::metode_pembayaran_enum,
@@ -206,6 +226,24 @@ created_at timestamp with time zone NOT NULL DEFAULT now(),
 status text NOT NULL DEFAULT 'pending'::text,
 CONSTRAINT pre_orders_pkey PRIMARY KEY (id_pre_order)
 );
+CREATE TABLE public.presensi (
+id uuid NOT NULL DEFAULT gen_random_uuid(),
+tanggal date NOT NULL,
+jam_masuk time without time zone NOT NULL,
+jam_pulang time without time zone,
+status USER-DEFINED NOT NULL,
+keterangan_izin text,
+pesan_owner text,
+created_at timestamp with time zone DEFAULT now(),
+id_pengguna integer,
+id_shift_def integer,
+waktu_kerja text,
+shift text,
+lokasi text,
+CONSTRAINT presensi_pkey PRIMARY KEY (id),
+CONSTRAINT absensi_id_pengguna_fkey FOREIGN KEY (id_pengguna) REFERENCES public.pengguna(iduser),
+CONSTRAINT absensi_id_shift_def_fkey FOREIGN KEY (id_shift_def) REFERENCES public.shift(id_shift_def)
+);
 CREATE TABLE public.produk (
 idproduk integer NOT NULL DEFAULT nextval('produk_idproduk_seq'::regclass),
 namaproduk character varying NOT NULL,
@@ -231,6 +269,13 @@ CONSTRAINT rusak_pkey PRIMARY KEY (idrusak),
 CONSTRAINT rusak_idproduk_fkey FOREIGN KEY (idproduk) REFERENCES public.produk(idproduk),
 CONSTRAINT rusak_idoutlet_fkey FOREIGN KEY (idoutlet) REFERENCES public.outlet(idoutlet)
 );
+CREATE TABLE public.shift (
+id_shift_def integer NOT NULL DEFAULT nextval('shift_definition_id_shift_def_seq'::regclass),
+nama_shift character varying NOT NULL,
+jam_mulai time without time zone NOT NULL,
+jam_selesai time without time zone NOT NULL,
+CONSTRAINT shift_pkey PRIMARY KEY (id_shift_def)
+);
 CREATE TABLE public.transfer_stock (
 idtransfer integer NOT NULL DEFAULT nextval('transfer_stock_idtransfer_seq'::regclass),
 idoutlet_asal integer,
@@ -248,48 +293,4 @@ CONSTRAINT transfer_idoutlet_tujuan_fkey FOREIGN KEY (idoutlet_tujuan) REFERENCE
 CONSTRAINT transfer_iduser_pengirim_fkey FOREIGN KEY (iduser_pengirim) REFERENCES public.pengguna(iduser),
 CONSTRAINT transfer_iduser_penerima_fkey FOREIGN KEY (iduser_penerima) REFERENCES public.pengguna(iduser),
 CONSTRAINT transfer_iduser_peminta_fkey FOREIGN KEY (iduser_peminta) REFERENCES public.pengguna(iduser)
-);
-CREATE TABLE public.jadwal_mingguan (
-id_siklus uuid NOT NULL DEFAULT (),
-id_pengguna integer NOT NULL,
-id_shift_senin integer,
-id_shift_selasa integer,
-id_shift_rabu integer,
-id_shift_kamis integer,
-id_shift_jumat integer,
-id_shift_sabtu integer,
-id_shift_minggu integer,
-CONSTRAINT jadwal_mingguan_pkey PRIMARY KEY (id_siklus),
-CONSTRAINT siklus_mingguan_id_shift_senin_fkey FOREIGN KEY (id_shift_senin) REFERENCES public.shift(id_shift_def),
-CONSTRAINT siklus_mingguan_id_shift_selasa_fkey FOREIGN KEY (id_shift_selasa) REFERENCES public.shift(id_shift_def),
-CONSTRAINT siklus_mingguan_id_shift_rabu_fkey FOREIGN KEY (id_shift_rabu) REFERENCES public.shift(id_shift_def),
-CONSTRAINT siklus_mingguan_id_shift_kamis_fkey FOREIGN KEY (id_shift_kamis) REFERENCES public.shift(id_shift_def),
-CONSTRAINT siklus_mingguan_id_shift_jumat_fkey FOREIGN KEY (id_shift_jumat) REFERENCES public.shift(id_shift_def),
-CONSTRAINT siklus_mingguan_id_shift_sabtu_fkey FOREIGN KEY (id_shift_sabtu) REFERENCES public.shift(id_shift_def),
-CONSTRAINT siklus_mingguan_id_shift_minggu_fkey FOREIGN KEY (id_shift_minggu) REFERENCES public.shift(id_shift_def),
-CONSTRAINT fk_pengguna FOREIGN KEY (id_pengguna) REFERENCES public.pengguna(iduser)
-);
-CREATE TABLE public.presensi (
-id uuid NOT NULL DEFAULT gen_random_uuid(),
-tanggal date NOT NULL,
-jam_masuk time without time zone NOT NULL,
-jam_pulang time without time zone,
-status USER-DEFINED NOT NULL,
-keterangan_izin text,
-pesan_owner text,
-created_at timestamp with time zone DEFAULT now(),
-id_pengguna integer,
-id_shift_def integer,
-waktu_kerja text,
-shift text,
-CONSTRAINT presensi_pkey PRIMARY KEY (id),
-CONSTRAINT absensi_id_pengguna_fkey FOREIGN KEY (id_pengguna) REFERENCES public.pengguna(iduser),
-CONSTRAINT absensi_id_shift_def_fkey FOREIGN KEY (id_shift_def) REFERENCES public.shift(id_shift_def)
-);
-CREATE TABLE public.shift (
-id_shift_def integer NOT NULL DEFAULT nextval('shift_definition_id_shift_def_seq'::regclass),
-nama_shift character varying NOT NULL,
-jam_mulai time without time zone NOT NULL,
-jam_selesai time without time zone NOT NULL,
-CONSTRAINT shift_pkey PRIMARY KEY (id_shift_def)
 );

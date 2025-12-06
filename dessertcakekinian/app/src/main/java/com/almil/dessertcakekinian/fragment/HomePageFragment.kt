@@ -133,8 +133,13 @@ class HomePageFragment : Fragment() {
             }
 
             // ✅ Menu Transaksi: bebas untuk semua role, tapi hanya tampil saat Absen Pulang
-            menuTransaksi?.visibility = if (isAbsenPulang) View.VISIBLE else View.GONE
+            val transaksiVisibility = if (isAbsenPulang) View.VISIBLE else View.GONE
+            menuTransaksi?.visibility = transaksiVisibility
             println("${if (isAbsenPulang) "✅" else "🔒"} Menu Transaksi ${if (isAbsenPulang) "ditampilkan" else "disembunyikan"} (Status: $buttonText)")
+
+            // ✅ Pesanan Online (RecyclerView): ikut visible kalau menu Transaksi visible (status Absen Pulang)
+            rvPesananOnline.visibility = transaksiVisibility
+            println("${if (isAbsenPulang) "✅" else "🔒"} Pesanan Online ${if (isAbsenPulang) "ditampilkan" else "disembunyikan"} (Status: $buttonText)")
 
         } catch (e: Exception) {
             e.printStackTrace()

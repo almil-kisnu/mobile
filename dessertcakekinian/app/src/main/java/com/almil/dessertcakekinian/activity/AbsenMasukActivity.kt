@@ -35,8 +35,8 @@ class AbsenMasukActivity : AppCompatActivity() {
 
     private companion object {
         const val LOCATION_PERMISSION_REQUEST_CODE = 1001
-        const val TARGET_LATITUDE = -8.157678
-        const val TARGET_LONGITUDE = 113.723130
+        const val TARGET_LATITUDE = -8.375066
+        const val TARGET_LONGITUDE = 113.603322
         const val RADIUS_METERS = 50.0f
     }
 
