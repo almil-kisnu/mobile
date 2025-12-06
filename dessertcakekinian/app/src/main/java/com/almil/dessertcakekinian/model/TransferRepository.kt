@@ -1,10 +1,13 @@
 package com.almil.dessertcakekinian.model
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
+import com.almil.dessertcakekinian.database.RealtimeConnectionManager
 import com.almil.dessertcakekinian.database.SupabaseClientProvider
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.realtime.PostgresAction
+import io.github.jan.supabase.realtime.RealtimeChannel
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
 import io.github.jan.supabase.realtime.decodeRecord
@@ -12,10 +15,18 @@ import io.github.jan.supabase.realtime.decodeOldRecord
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
-class TransferRepository private constructor(context: Context) {
+class TransferRepository private constructor(private val context: Context) {
 
     private val client = SupabaseClientProvider.client
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val realtimeManager = RealtimeConnectionManager.getInstance(context)
+
+    private var transferChannel: RealtimeChannel? = null
+    private var detailChannel: RealtimeChannel? = null
+    private var transferRealtimeJob: Job? = null
+    private var detailRealtimeJob: Job? = null
+    private var isTransferRealtimeActive = false
+    private var isDetailRealtimeActive = false
 
     // Flow untuk Transfer Stock
     private val _transferStockFlow = MutableStateFlow<List<TransferStock>>(emptyList())
@@ -33,6 +44,10 @@ class TransferRepository private constructor(context: Context) {
 
     private val _outletFlow = MutableStateFlow<List<outletkeseluruhan>>(emptyList())
     val outletFlow: StateFlow<List<outletkeseluruhan>> = _outletFlow.asStateFlow()
+    private val sharedPreferences: SharedPreferences = context.getSharedPreferences(
+        "user_session", // Sesuaikan nama file dengan yang digunakan di LoginActivity
+        Context.MODE_PRIVATE
+    )
 
     // Flow untuk Joined Data
     val transferWithDetailsFlow: StateFlow<List<TransferWithDetails>> = combine(
@@ -71,10 +86,12 @@ class TransferRepository private constructor(context: Context) {
         try {
             Log.d(TAG, "📥 Loading data from Supabase...")
             _dataState.value = TransferDataState.Loading
+            val userOutletId = sharedPreferences.getInt("USER_OUTLET_ID", -1)
 
-            // Fetch transfer stock
             val transfers = client.from("transfer_stock")
-                .select()
+                .select {
+                    filter { eq("idoutlet_tujuan", userOutletId) }
+                }
                 .decodeList<TransferStock>()
 
             Log.d(TAG, "✅ Transfer Stock fetched: ${transfers.size} records")
@@ -156,40 +173,130 @@ class TransferRepository private constructor(context: Context) {
         try {
             Log.d(TAG, "🔴 Setting up realtime listeners...")
 
-            // Channel untuk transfer_stock
-            val transferChannel = client.channel("transfer_events")
-            val transferFlow = transferChannel.postgresChangeFlow<PostgresAction>(schema = "public") {
-                table = "transfer_stock"
-            }
+            setupTransferRealtimeListener()
+            delay(500)
+            setupDetailTransferRealtimeListener()
 
-            scope.launch {
-                transferFlow.collect { change ->
-                    handleTransferChange(change)
-                }
-            }
-
-            transferChannel.subscribe()
-            Log.d(TAG, "✅ Realtime listener 'transfer_events' subscribed")
-
-            // Channel untuk detail_transfer
-            val detailChannel = client.channel("detail_transfer_events")
-            val detailFlow = detailChannel.postgresChangeFlow<PostgresAction>(schema = "public") {
-                table = "detail_transfer"
-            }
-
-            scope.launch {
-                detailFlow.collect { change ->
-                    handleDetailChange(change)
-                }
-            }
-
-            detailChannel.subscribe()
-            Log.d(TAG, "✅ Realtime listener 'detail_transfer_events' subscribed")
-
-            Log.d(TAG, "🎉 All realtime listeners active!")
+            Log.d(TAG, "🎉 All realtime listeners setup complete!")
 
         } catch (e: Exception) {
             Log.e(TAG, "❌ Realtime setup error: ${e.message}", e)
+        }
+    }
+
+    private suspend fun setupTransferRealtimeListener() {
+        if (isTransferRealtimeActive) {
+            Log.w(TAG, "⚠️ Transfer realtime already active")
+            return
+        }
+
+        try {
+            Log.d(TAG, "🔴 Setting up TRANSFER listener...")
+
+            val channel = client.channel("transfer_events")
+
+            val transferFlow = channel.postgresChangeFlow<PostgresAction>(schema = "public") {
+                table = "transfer_stock"
+            }
+
+            transferRealtimeJob = scope.launch {
+                try {
+                    transferFlow.collect { change ->
+                        handleTransferChange(change)
+                    }
+                } catch (e: CancellationException) {
+                    Log.d(TAG, "Transfer flow cancelled")
+                } catch (e: Exception) {
+                    Log.e(TAG, "❌ Transfer flow error: ${e.message}", e)
+                    isTransferRealtimeActive = false
+
+                    delay(5000)
+                    if (!isTransferRealtimeActive) {
+                        Log.d(TAG, "🔄 Retrying transfer realtime...")
+                        setupTransferRealtimeListener()
+                    }
+                }
+            }
+
+            val subscribed = realtimeManager.subscribeChannel(
+                channelId = CHANNEL_ID_TRANSFER,
+                channel = channel,
+                job = transferRealtimeJob!!
+            )
+
+            if (subscribed) {
+                transferChannel = channel
+                isTransferRealtimeActive = true
+                Log.d(TAG, "✅ Transfer realtime ACTIVE")
+            } else {
+                transferRealtimeJob?.cancel()
+                transferRealtimeJob = null
+                Log.e(TAG, "❌ Failed to subscribe transfer")
+            }
+
+        } catch (e: Exception) {
+            isTransferRealtimeActive = false
+            transferRealtimeJob?.cancel()
+            transferRealtimeJob = null
+            Log.e(TAG, "❌ Transfer setup error: ${e.message}", e)
+        }
+    }
+
+    private suspend fun setupDetailTransferRealtimeListener() {
+        if (isDetailRealtimeActive) {
+            Log.w(TAG, "⚠️ Detail transfer realtime already active")
+            return
+        }
+
+        try {
+            Log.d(TAG, "🔴 Setting up DETAIL TRANSFER listener...")
+
+            val channel = client.channel("detail_transfer_events")
+
+            val detailFlow = channel.postgresChangeFlow<PostgresAction>(schema = "public") {
+                table = "detail_transfer"
+            }
+
+            detailRealtimeJob = scope.launch {
+                try {
+                    detailFlow.collect { change ->
+                        handleDetailChange(change)
+                    }
+                } catch (e: CancellationException) {
+                    Log.d(TAG, "Detail transfer flow cancelled")
+                } catch (e: Exception) {
+                    Log.e(TAG, "❌ Detail transfer flow error: ${e.message}", e)
+                    isDetailRealtimeActive = false
+
+                    delay(5000)
+                    if (!isDetailRealtimeActive) {
+                        Log.d(TAG, "🔄 Retrying detail transfer realtime...")
+                        setupDetailTransferRealtimeListener()
+                    }
+                }
+            }
+
+            val subscribed = realtimeManager.subscribeChannel(
+                channelId = CHANNEL_ID_DETAIL_TRANSFER,
+                channel = channel,
+                job = detailRealtimeJob!!
+            )
+
+            if (subscribed) {
+                detailChannel = channel
+                isDetailRealtimeActive = true
+                Log.d(TAG, "✅ Detail transfer realtime ACTIVE")
+            } else {
+                detailRealtimeJob?.cancel()
+                detailRealtimeJob = null
+                Log.e(TAG, "❌ Failed to subscribe detail transfer")
+            }
+
+        } catch (e: Exception) {
+            isDetailRealtimeActive = false
+            detailRealtimeJob?.cancel()
+            detailRealtimeJob = null
+            Log.e(TAG, "❌ Detail transfer setup error: ${e.message}", e)
         }
     }
 
@@ -276,8 +383,36 @@ class TransferRepository private constructor(context: Context) {
         }
     }
 
+    suspend fun cleanup() {
+        Log.d(TAG, "🧹 Cleaning up...")
+
+        isTransferRealtimeActive = false
+        isDetailRealtimeActive = false
+
+        transferRealtimeJob?.cancel()
+        detailRealtimeJob?.cancel()
+        transferRealtimeJob = null
+        detailRealtimeJob = null
+
+        delay(500)
+
+        transferChannel?.let {
+            realtimeManager.unsubscribeChannel(CHANNEL_ID_TRANSFER)
+        }
+        detailChannel?.let {
+            realtimeManager.unsubscribeChannel(CHANNEL_ID_DETAIL_TRANSFER)
+        }
+
+        transferChannel = null
+        detailChannel = null
+
+        Log.d(TAG, "✅ Cleanup done")
+    }
+
     companion object {
         private const val TAG = "TransferRepository"
+        private const val CHANNEL_ID_TRANSFER = "transfer_channel"
+        private const val CHANNEL_ID_DETAIL_TRANSFER = "detail_transfer_channel"
 
         @Volatile
         private var INSTANCE: TransferRepository? = null

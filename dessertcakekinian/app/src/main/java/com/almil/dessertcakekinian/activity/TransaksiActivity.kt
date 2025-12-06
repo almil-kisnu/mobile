@@ -20,7 +20,6 @@ class TransaksiActivity : AppCompatActivity() {
             insets
         }
 
-        // Cek apakah fragment sudah ada (misalnya, setelah rotasi layar)
         if (savedInstanceState == null) {
             // 1. Buat instance dari transaksiFragment
             val fragment = transaksiFragment()

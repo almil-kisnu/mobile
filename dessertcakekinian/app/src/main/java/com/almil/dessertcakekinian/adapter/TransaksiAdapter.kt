@@ -66,14 +66,17 @@ class TransaksiAdapter(
         holder.tvPriceValue.text = produk.harga_eceran?.takeIf { it > 0 }
             ?.let { currencyFormat.format(it) } ?: "Rp 0"
 
+        // PENTING: Set listener ke null SEBELUM setQuantity untuk mencegah crash
+        holder.quantitySelector.setOnQuantityChangeListener(null)
+
         if (initialQuantity > 0) {
             holder.btnTambahAwal.visibility = View.GONE
             holder.quantitySelector.visibility = View.VISIBLE
-            holder.quantitySelector.setQuantity(initialQuantity)
+            holder.quantitySelector.setQuantitySilently(initialQuantity)
         } else {
             holder.btnTambahAwal.visibility = View.VISIBLE
             holder.quantitySelector.visibility = View.GONE
-            holder.quantitySelector.setQuantity(0)
+            holder.quantitySelector.setQuantitySilently(0)
         }
 
         holder.btnTambahAwal.setOnClickListener {
@@ -92,8 +95,6 @@ class TransaksiAdapter(
                 ).show()
             }
         }
-
-        holder.quantitySelector.setOnQuantityChangeListener(null)
 
         holder.quantitySelector.setOnQuantityChangeListener { qty ->
             if (qty <= 0) {

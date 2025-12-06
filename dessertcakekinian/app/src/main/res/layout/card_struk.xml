@@ -32,8 +32,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="1."
+                android:textSize="12sp"
                 android:textStyle="bold"
-                android:textColor="#000"
+                android:textColor="?attr/android:textColor"
                 android:layout_marginEnd="4dp" />
 
             <TextView
@@ -41,9 +42,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Indomie Goreng"
-                android:textSize="14sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
-                android:textColor="#000" />
+                android:textColor="?attr/android:textColor" />
 
         </LinearLayout>
 
@@ -67,8 +68,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Rp 36.000"
+            android:textSize="12sp"
             android:textStyle="bold"
-            android:textColor="#000"
+            android:textColor="?attr/android:textColor"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />

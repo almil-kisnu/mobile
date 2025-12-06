@@ -219,7 +219,7 @@ class ResTransferFragment : Fragment(), ResponAdapter.OnItemActionListener {
         // Validasi: pastikan semua item sudah diisi jumlah diterimanya
         val hasInvalidQuantity = detailList.any {
             val qty = it.jumlahDiterima ?: it.jumlah
-            qty <= 0
+            qty < 0
         }
 
         if (hasInvalidQuantity) {

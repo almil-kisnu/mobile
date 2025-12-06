@@ -35,7 +35,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Peminta: "
+                    android:text="Peminta : "
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -57,7 +57,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Pengirim: "
+                    android:text="Pengirim   : "
                     android:textSize="12sp" />
 
                 <TextView
@@ -78,7 +78,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Catatan: "
+                    android:text="Catatan     : "
                     android:textSize="12sp" />
 
                 <TextView
@@ -99,7 +99,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tanggal: "
+                    android:text="Tanggal     : "
                     android:textSize="12sp" />
 
                 <TextView

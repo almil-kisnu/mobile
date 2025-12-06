@@ -239,6 +239,17 @@ public class QuantitySelector extends LinearLayout {
         notifyQuantityChange();
     }
 
+    // Set quantity tanpa trigger listener (untuk digunakan saat binding RecyclerView)
+    public void setQuantitySilently(int quantity) {
+        if (quantity > maxQuantity) {
+            this.quantity = maxQuantity;
+        } else {
+            this.quantity = Math.max(0, quantity);
+        }
+        updateUI();
+        // TIDAK memanggil notifyQuantityChange() untuk mencegah crash saat RecyclerView layout
+    }
+
     public int getQuantity() {
         return quantity;
     }

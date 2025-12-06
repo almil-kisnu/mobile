@@ -5,7 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.dtTransferFragment">
+    tools:context=".fragment.dtTransferFragment"
+    android:background="?attr/android:windowBackground">
 
     <LinearLayout
         android:id="@+id/headerLayout"
@@ -34,7 +35,7 @@
             android:text="Detail Request Stok"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black"
+            android:textColor="?attr/android:textColor"
             android:gravity="center"
             android:layout_marginStart="-40dp" />
     </LinearLayout>
@@ -56,7 +57,7 @@
                 android:layout_height="wrap_content"
                 android:text="Daftar barang"
                 android:textSize="16sp"
-                android:textColor="@android:color/black"
+                android:textColor="?attr/android:textColor"
                 android:textStyle="bold"
                 android:layout_marginBottom="12dp" />
 
@@ -76,7 +77,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#DDDDDD"
+                android:background="?android:attr/listDivider"
                 android:layout_marginBottom="16dp" />
 
             <!-- RecyclerView Diterima -->
@@ -84,7 +85,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#DDDDDD"
+                android:background="?android:attr/listDivider"
                 android:layout_marginBottom="16dp" />
 
             <!-- Detail Informasi -->
@@ -93,7 +94,7 @@
                 android:layout_height="wrap_content"
                 android:text="Informasi Detail"
                 android:textSize="16sp"
-                android:textColor="@android:color/black"
+                android:textColor="?attr/android:textColor"
                 android:textStyle="bold"
                 android:layout_marginBottom="16dp" />
 
@@ -110,14 +111,14 @@
                     android:layout_weight="1"
                     android:text="Toko Penerima"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="?attr/android:textColor" />
 
                 <TextView
                     android:id="@+id/tvTokoPenerima"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/android:textColor"
                     android:textStyle="bold"
                     tools:text="Toko Maju Jaya" />
             </LinearLayout>
@@ -125,7 +126,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#EEEEEE" />
+                android:background="?android:attr/listDivider" />
 
             <!-- Toko Pengirim -->
             <LinearLayout
@@ -140,14 +141,14 @@
                     android:layout_weight="1"
                     android:text="Toko Pengirim"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="?attr/android:textColor" />
 
                 <TextView
                     android:id="@+id/tvTokoPengirim"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/android:textColor"
                     android:textStyle="bold"
                     tools:text="Toko Sejahtera" />
             </LinearLayout>
@@ -155,7 +156,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#EEEEEE" />
+                android:background="?android:attr/listDivider" />
 
             <!-- User Penerima -->
             <LinearLayout
@@ -170,14 +171,14 @@
                     android:layout_weight="1"
                     android:text="User Penerima"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="?attr/android:textColor" />
 
                 <TextView
                     android:id="@+id/tvUserPenerima"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/android:textColor"
                     android:textStyle="bold"
                     tools:text="Budi Santoso" />
             </LinearLayout>
@@ -185,7 +186,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#EEEEEE" />
+                android:background="?android:attr/listDivider" />
 
             <!-- User Pengirim -->
             <LinearLayout
@@ -200,14 +201,14 @@
                     android:layout_weight="1"
                     android:text="User Pengirim"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="?attr/android:textColor" />
 
                 <TextView
                     android:id="@+id/tvUserPengirim"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/android:textColor"
                     android:textStyle="bold"
                     tools:text="Andi Wijaya" />
             </LinearLayout>
@@ -215,7 +216,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#EEEEEE" />
+                android:background="?android:attr/listDivider" />
 
             <!-- Tanggal Diterima -->
             <LinearLayout
@@ -230,14 +231,14 @@
                     android:layout_weight="1"
                     android:text="Tanggal Diterima"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="?attr/android:textColor" />
 
                 <TextView
                     android:id="@+id/tvTanggalDiterima"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/android:textColor"
                     android:textStyle="bold"
                     tools:text="15 Nov 2025, 14:30" />
             </LinearLayout>
@@ -245,7 +246,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#EEEEEE" />
+                android:background="?android:attr/listDivider" />
 
             <!-- Tanggal Dikirim -->
             <LinearLayout
@@ -260,14 +261,14 @@
                     android:layout_weight="1"
                     android:text="Tanggal Dikirim"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="?attr/android:textColor" />
 
                 <TextView
                     android:id="@+id/tvTanggalDikirim"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/android:textColor"
                     android:textStyle="bold"
                     tools:text="14 Nov 2025, 10:00" />
             </LinearLayout>
@@ -275,7 +276,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#EEEEEE" />
+                android:background="?android:attr/listDivider" />
 
             <!-- Status -->
             <LinearLayout
@@ -290,7 +291,7 @@
                     android:layout_weight="1"
                     android:text="Status"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="?attr/android:textColor" />
 
                 <TextView
                     android:id="@+id/tvStatus"
@@ -305,7 +306,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#EEEEEE" />
+                android:background="?android:attr/listDivider" />
 
             <!-- Catatan -->
             <LinearLayout
@@ -320,7 +321,7 @@
                     android:layout_height="wrap_content"
                     android:text="Catatan"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/android:textColor"
                     android:layout_marginBottom="8dp" />
 
                 <TextView
@@ -328,7 +329,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/android:textColor"
                     android:textStyle="bold"
                     tools:text="Barang sudah diterima dalam kondisi baik dan sesuai pesanan. Terima kasih." />
             </LinearLayout>

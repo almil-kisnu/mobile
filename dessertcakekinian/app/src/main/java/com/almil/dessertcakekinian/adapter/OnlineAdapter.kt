@@ -26,10 +26,6 @@ class OnlineAdapter(
         private const val TAG = "OnlineAdapter"
     }
 
-    /**
-     * Fungsi untuk set data dengan filter berdasarkan outlet
-     * Panggil fungsi ini untuk submit data ke adapter
-     */
     fun submitFilteredList(list: List<OrderWithDetails>, context: Context) {
         // Ambil kode outlet dari SharedPreferences (HARUS SAMA DENGAN LOGIN!)
         val sharedPreferences = context.getSharedPreferences("user_session", Context.MODE_PRIVATE)

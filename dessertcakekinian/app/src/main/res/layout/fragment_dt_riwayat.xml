@@ -5,7 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.PembayaranFragment">
+    tools:context=".fragment.PembayaranFragment"
+    android:background="?attr/android:windowBackground">
 
     <LinearLayout
         android:id="@+id/headerLayout"
@@ -34,7 +35,7 @@
             android:text="Detail Transaksi"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black"
+            android:textColor="?attr/android:textColor"
             android:gravity="center"
             android:layout_marginStart="-40dp" />
     </LinearLayout>
@@ -55,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:text="Daftar Produk"
                 android:textSize="16sp"
-                android:textColor="@android:color/black"
+                android:textColor="?attr/android:textColor"
                 android:textStyle="bold"
                 android:layout_marginBottom="12dp" />
 
@@ -75,7 +76,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#DDDDDD"
+                android:background="?android:attr/listDivider"
                 android:layout_marginBottom="16dp" />
 
             <TextView
@@ -83,7 +84,7 @@
                 android:layout_height="wrap_content"
                 android:text="Ringkasan Pembayaran"
                 android:textSize="16sp"
-                android:textColor="@android:color/black"
+                android:textColor="?attr/android:textColor"
                 android:textStyle="bold"
                 android:layout_marginBottom="16dp" />
 
@@ -99,14 +100,14 @@
                     android:layout_weight="1"
                     android:text="Waktu Transaksi"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="?attr/android:textColor" />
 
                 <TextView
                     android:id="@+id/tvWaktuTransaksi"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/android:textColor"
                     android:textStyle="bold"
                     tools:text="12 Nov 2025, 12:38" />
             </LinearLayout>
@@ -114,7 +115,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#EEEEEE" />
+                android:background="?android:attr/listDivider" />
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -127,14 +128,14 @@
                     android:layout_weight="1"
                     android:text="Metode Pembayaran"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="?attr/android:textColor" />
 
                 <TextView
                     android:id="@+id/tvMetodePembayaran"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/android:textColor"
                     android:textStyle="bold"
                     tools:text="QRIS" />
             </LinearLayout>
@@ -142,7 +143,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#EEEEEE" />
+                android:background="?android:attr/listDivider" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -156,7 +157,7 @@
                     android:layout_weight="1"
                     android:text="Total Tagihan"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="?attr/android:textColor" />
 
                 <TextView
                     android:id="@+id/tvTotalTagihan"
@@ -171,7 +172,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#EEEEEE" />
+                android:background="?android:attr/listDivider" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -185,14 +186,14 @@
                     android:layout_weight="1"
                     android:text="Uang Diberikan (Bayar)"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="?attr/android:textColor" />
 
                 <TextView
                     android:id="@+id/tvUangDibayar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/android:textColor"
                     android:textStyle="bold"
                     tools:text="Rp 200.000" />
             </LinearLayout>
@@ -200,7 +201,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#EEEEEE" />
+                android:background="?android:attr/listDivider" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -215,7 +216,7 @@
                     android:layout_weight="1"
                     android:text="Kembalian"
                     android:textSize="16sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/android:textColor"
                     android:textStyle="bold" />
 
                 <TextView
@@ -223,7 +224,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="18sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/android:textColor"
                     android:textStyle="bold"
                     tools:text="Rp 50.000" />
             </LinearLayout>
@@ -234,14 +235,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="16dp"
-                android:background="@android:color/white">
+                android:textColor="?attr/android:textColor">
 
                 <Button
                     android:id="@+id/btnDownload"
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight="1"
-                    android:text="Whatshap"
+                    android:text="Whatsapp"
                     android:textColor="@android:color/white"
                     android:textSize="14sp"
                     android:textStyle="bold"

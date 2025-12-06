@@ -41,6 +41,7 @@ import androidx.core.content.ContextCompat
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Date
+import android.content.Context
 
 class dtOnlineFragment : DialogFragment() {
 
@@ -179,13 +180,32 @@ class dtOnlineFragment : DialogFragment() {
         orderWithDetails?.let { data ->
             val orderId = data.order.idorder
 
+            // Ambil user ID dari SharedPreferences
+            val sharedPreferences = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE)
+            val currentUserId = sharedPreferences.getInt("USER_ID", -1)
+
+            if (currentUserId == -1) {
+                android.widget.Toast.makeText(
+                    requireContext(),
+                    "Error: User session tidak ditemukan",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
+
             CoroutineScope(Dispatchers.IO).launch {
                 try {
+                    // Waktu sekarang dalam format timestamp
+                    val currentTimestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                        .format(Date())
+
                     // Direct Postgrest query ke Supabase
                     SupabaseClientProvider.client.postgrest["orders"]
                         .update(
                             update = {
                                 set("status", "aman")
+                                set("idkasir", currentUserId)
+                                set("tanggalorder", currentTimestamp)
                             }
                         ) {
                             filter {
@@ -195,6 +215,9 @@ class dtOnlineFragment : DialogFragment() {
 
                     withContext(Dispatchers.Main) {
                         Log.d(TAG, "Status order $orderId berhasil diubah ke 'aman'")
+                        Log.d(TAG, "Kasir diupdate: $currentUserId")
+                        Log.d(TAG, "Tanggal order diupdate: $currentTimestamp")
+
                         android.widget.Toast.makeText(
                             requireContext(),
                             "Status berhasil diperbarui",
@@ -203,7 +226,11 @@ class dtOnlineFragment : DialogFragment() {
 
                         // Update data lokal
                         orderWithDetails = data.copy(
-                            order = data.order.copy(status = "aman")
+                            order = data.order.copy(
+                                status = "aman",
+                                idkasir = currentUserId,
+                                tanggalorder = currentTimestamp
+                            )
                         )
 
                         // Jalankan callback

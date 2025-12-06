@@ -25,7 +25,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
-            android:textColor="@android:color/black"
+            android:textColor="?attr/android:textColor"
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@+id/tvTotalPrice"
@@ -93,10 +93,9 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/divider"
-            tools:background="@drawable/bg_status_selesai"
             tools:drawableStart="@drawable/ic_status_selesai"
             tools:text="Selesai"
-            tools:textColor="#00695C" />
+            tools:textColor="#4CAF50" />
 
         <ImageView
             android:id="@+id/imageView"
