@@ -5,8 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/android:windowBackground"
-    tools:context=".fragment.FormResponStokFragment">
+    android:background="?attr/android:windowBackground">
     <LinearLayout
     android:id="@+id/headerLayout"
     android:layout_width="0dp"
