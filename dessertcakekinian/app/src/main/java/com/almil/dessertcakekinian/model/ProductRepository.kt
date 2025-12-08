@@ -34,39 +34,17 @@ class ProductRepository private constructor(private val context: Context) {
 
     private val prefsManager = PreferencesManager(context)
 
-    private val sharedProdukDetailFlow: Flow<List<ProdukDetail>> = combine(
-        produkDao.getAllProduk(),
-        detailStokDao.getAllStok(),
-        hargaGrosirDao.getAllHarga()
-    ) { produkList, stokList, hargaList ->
-        Log.d(TAG, "📊 Combining: ${produkList.size} products")
-
-        produkList.map { produkEntity ->
-            val produk = produkEntity.toModel()
-            val hargaGrosirProduk = hargaList
-                .filter { it.idproduk == produk.idproduk }
-                .map { it.toModel() }
-            val stokProduk = stokList
-                .filter { it.idproduk == produk.idproduk }
-                .map { it.toModel() }
-
-            ProdukDetail(
-                produk = produk,
-                hargaGrosir = hargaGrosirProduk,
-                detailStok = stokProduk
-            )
-        }
-    }.shareIn(
-        scope = applicationScope,
-        started = SharingStarted.WhileSubscribed(5000L),
-        replay = 1
-    )
+    // In-memory cache untuk instant realtime updates
+    private val _productDetailCache = MutableStateFlow<List<ProdukDetail>>(emptyList())
 
     init {
         Log.d(TAG, "🚀 ProductRepository initialized")
 
         applicationScope.launch {
-            // Sync data first
+            // Load from Room first (offline capability)
+            loadFromRoomToCache()
+
+            // Then sync if needed
             syncDataIfNeeded()
 
             // Setup realtime - SDK will auto-reconnect on network changes
@@ -75,7 +53,30 @@ class ProductRepository private constructor(private val context: Context) {
         }
     }
 
-    fun getSharedProdukDetail(): Flow<List<ProdukDetail>> = sharedProdukDetailFlow
+    fun getSharedProdukDetail(): Flow<List<ProdukDetail>> = _productDetailCache.asStateFlow()
+
+    private suspend fun loadFromRoomToCache() = withContext(Dispatchers.IO) {
+        try {
+            Log.d(TAG, "📂 Loading data from Room to cache...")
+            
+            val produkList = produkDao.getAllProdukOnce()
+            val stokList = detailStokDao.getAllStokOnce()
+            val hargaList = hargaGrosirDao.getAllHargaOnce()
+            
+            if (produkList.isNotEmpty()) {
+                updateCache(
+                    produkList.map { it.toModel() },
+                    hargaList.map { it.toModel() },
+                    stokList.map { it.toModel() }
+                )
+                Log.d(TAG, "✅ Loaded ${produkList.size} products from Room to cache")
+            } else {
+                Log.d(TAG, "⚠️ Room database is empty, will sync from server")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error loading from Room: ${e.message}", e)
+        }
+    }
 
     private suspend fun syncDataIfNeeded() = withContext(Dispatchers.IO) {
         try {
@@ -114,13 +115,17 @@ class ProductRepository private constructor(private val context: Context) {
 
             Log.d(TAG, "📦 Fetched - Produk: ${produkList.size}, Harga: ${hargaList.size}, Stok: ${stokList.size}")
 
+            // Update Room (untuk offline)
             produkDao.insertAll(produkList.map { it.toEntity() })
             hargaGrosirDao.insertAll(hargaList.map { it.toEntity() })
             detailStokDao.insertAll(stokList.map { it.toEntity() })
 
+            // Update in-memory cache (untuk realtime)
+            updateCache(produkList, hargaList, stokList)
+
             prefsManager.setLastSyncTime(System.currentTimeMillis())
 
-            Log.d(TAG, "✅ Sync completed")
+            Log.d(TAG, "✅ Sync completed and cache updated")
         } catch (e: Exception) {
             Log.e(TAG, "❌ Sync error", e)
             throw e
@@ -196,20 +201,29 @@ class ProductRepository private constructor(private val context: Context) {
             when (change) {
                 is PostgresAction.Insert -> {
                     val newStock = change.decodeRecord<DetailStok>()
+                    // Update Room (untuk offline)
                     detailStokDao.insert(newStock.toEntity())
+                    // Update cache instantly (untuk UI)
+                    updateCacheWithStockChange(newStock)
                     Log.d(TAG, "   🆕 INSERT: ID=${newStock.idDetailStock}, Qty=${newStock.stok}")
                 }
 
                 is PostgresAction.Update -> {
                     val updatedStock = change.decodeRecord<DetailStok>()
+                    // Update Room (untuk offline)
                     detailStokDao.update(updatedStock.toEntity())
+                    // Update cache instantly (untuk UI)
+                    updateCacheWithStockChange(updatedStock)
                     Log.d(TAG, "   🔄 UPDATE: ID=${updatedStock.idDetailStock}, Qty=${updatedStock.stok}")
                 }
 
                 is PostgresAction.Delete -> {
                     val deletedStock = change.decodeOldRecord<DetailStok>()
                     if (deletedStock != null) {
+                        // Update Room (untuk offline)
                         detailStokDao.deleteById(deletedStock.idDetailStock)
+                        // Update cache instantly (untuk UI)
+                        removeCacheStockItem(deletedStock.idDetailStock)
                         Log.d(TAG, "   🗑️ DELETE: ID=${deletedStock.idDetailStock}")
                     }
                 }
@@ -260,6 +274,68 @@ class ProductRepository private constructor(private val context: Context) {
             isOnline = NetworkUtils.isNetworkAvailable(context),
             isRealtimeActive = isRealtimeActive
         )
+    }
+
+    private fun updateCache(
+        produkList: List<ProdukKategori>,
+        hargaList: List<HargaGrosir>,
+        stokList: List<DetailStok>
+    ) {
+        val cache = produkList.map { produk ->
+            ProdukDetail(
+                produk = produk,
+                hargaGrosir = hargaList.filter { it.idproduk == produk.idproduk },
+                detailStok = stokList.filter { it.idproduk == produk.idproduk }
+            )
+        }
+        _productDetailCache.value = cache
+        Log.d(TAG, "✅ Cache updated with ${cache.size} products")
+    }
+
+    private fun updateCacheWithStockChange(stock: DetailStok) {
+        val currentCache = _productDetailCache.value.toMutableList()
+        val productIndex = currentCache.indexOfFirst { it.produk.idproduk == stock.idproduk }
+        
+        if (productIndex != -1) {
+            val product = currentCache[productIndex]
+            val updatedStocks = product.detailStok.toMutableList()
+            
+            val stockIndex = updatedStocks.indexOfFirst { it.idDetailStock == stock.idDetailStock }
+            if (stockIndex != -1) {
+                updatedStocks[stockIndex] = stock
+                Log.d(TAG, "   🔄 Updated existing stock: ${stock.idDetailStock}, qty=${stock.stok}")
+            } else {
+                updatedStocks.add(stock)
+                Log.d(TAG, "   ➕ Added new stock: ${stock.idDetailStock}, qty=${stock.stok}")
+            }
+            
+            currentCache[productIndex] = product.copy(detailStok = updatedStocks)
+            _productDetailCache.value = currentCache
+            Log.d(TAG, "✅ Cache updated for product ${stock.idproduk}")
+        } else {
+            Log.w(TAG, "⚠️ Product ${stock.idproduk} not found in cache")
+        }
+    }
+
+    private fun removeCacheStockItem(idDetailStock: Int) {
+        val currentCache = _productDetailCache.value.toMutableList()
+        var removed = false
+        
+        currentCache.forEachIndexed { index, product ->
+            val updatedStocks = product.detailStok.filter { it.idDetailStock != idDetailStock }
+            if (updatedStocks.size != product.detailStok.size) {
+                currentCache[index] = product.copy(detailStok = updatedStocks)
+                removed = true
+                Log.d(TAG, "   🗑️ Removed stock from product ${product.produk.idproduk}")
+            }
+        }
+        
+        if (removed) {
+            _productDetailCache.value = currentCache
+            Log.d(TAG, "✅ Cache updated - stock item $idDetailStock removed")
+        } else {
+            Log.w(TAG, "⚠️ Stock item $idDetailStock not found in cache")
+        }
     }
 
     suspend fun cleanup() {

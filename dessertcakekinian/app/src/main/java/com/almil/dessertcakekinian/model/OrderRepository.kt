@@ -38,29 +38,17 @@ class OrderRepository private constructor(private val context: Context) {
     private val detailOrderDao = database.detailOrderDao()
     private val prefsManager = PreferencesManager(context)
 
-    private val sharedOrderDetailFlow: Flow<List<OrderWithDetails>> = combine(
-        orderDao.getAllOrders(),
-        detailOrderDao.getAllDetailOrders()
-    ) { orderList, detailOrderList ->
-        Log.d(TAG, "📊 Combining: ${orderList.size} orders")
-        orderList.map { orderEntity ->
-            val order = orderEntity.toModel()
-            val details = detailOrderList
-                .filter { it.idorder == order.idorder }
-                .map { it.toModel() }
-            OrderWithDetails(order = order, details = details)
-        }
-    }.shareIn(
-        scope = applicationScope,
-        started = SharingStarted.WhileSubscribed(5000L),
-        replay = 1
-    )
+    // In-memory cache untuk instant realtime updates
+    private val _orderDetailCache = MutableStateFlow<List<OrderWithDetails>>(emptyList())
 
     init {
         Log.d(TAG, "🚀 OrderRepository initialized")
 
         applicationScope.launch {
-            // Sync data first
+            // Load from Room first (offline capability)
+            loadFromRoomToCache()
+
+            // Then sync if needed
             syncDataIfNeeded()
 
             // Setup realtime - SDK auto-reconnect
@@ -69,7 +57,28 @@ class OrderRepository private constructor(private val context: Context) {
         }
     }
 
-    fun getSharedOrderDetail(): Flow<List<OrderWithDetails>> = sharedOrderDetailFlow
+    fun getSharedOrderDetail(): Flow<List<OrderWithDetails>> = _orderDetailCache.asStateFlow()
+
+    private suspend fun loadFromRoomToCache() = withContext(Dispatchers.IO) {
+        try {
+            Log.d(TAG, "📂 Loading data from Room to cache...")
+            
+            val orderList = orderDao.getAllOrdersOnce()
+            val detailList = detailOrderDao.getAllDetailOrdersOnce()
+            
+            if (orderList.isNotEmpty()) {
+                updateCache(
+                    orderList.map { it.toModel() },
+                    detailList.map { it.toModel() }
+                )
+                Log.d(TAG, "✅ Loaded ${orderList.size} orders from Room to cache")
+            } else {
+                Log.d(TAG, "⚠️ Room database is empty, will sync from server")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error loading from Room: ${e.message}", e)
+        }
+    }
 
     private suspend fun syncDataIfNeeded() = withContext(Dispatchers.IO) {
         try {
@@ -104,15 +113,19 @@ class OrderRepository private constructor(private val context: Context) {
 
             Log.d(TAG, "📦 Fetched - Orders: ${orderList.size}, Details: ${detailOrderList.size}")
 
+            // Update Room (untuk offline)
             orderDao.deleteAll()
             detailOrderDao.deleteAll()
 
             orderDao.insertAll(orderList.map { it.toEntity() })
             detailOrderDao.insertAll(detailOrderList.map { it.toEntity() })
 
+            // Update in-memory cache (untuk realtime)
+            updateCache(orderList, detailOrderList)
+
             prefsManager.setLastOrderSyncTime(System.currentTimeMillis())
 
-            Log.d(TAG, "✅ Sync completed")
+            Log.d(TAG, "✅ Sync completed and cache updated")
         } catch (e: Exception) {
             Log.e(TAG, "❌ Sync error", e)
             throw e
@@ -141,12 +154,16 @@ class OrderRepository private constructor(private val context: Context) {
 
         try {
             Log.d(TAG, "🔴 Setting up ORDER listener...")
+            Log.d(TAG, "   📋 Table: orders")
+            Log.d(TAG, "   📋 Schema: public")
 
             val channel = client.channel("orders_channel")
 
             val orderFlow = channel.postgresChangeFlow<PostgresAction>(schema = "public") {
                 table = "orders"
             }
+            
+            Log.d(TAG, "   ✅ Flow created successfully")
 
             orderRealtimeJob = applicationScope.launch {
                 try {
@@ -169,25 +186,16 @@ class OrderRepository private constructor(private val context: Context) {
                 }
             }
 
-            val subscribed = realtimeManager.subscribeChannel(
-                channelId = CHANNEL_ID_ORDER,
-                channel = channel,
-                job = orderRealtimeJob!!
-            )
+            // Subscribe langsung seperti DiskonRepository
+            channel.subscribe()
 
-            if (subscribed) {
-                orderChannel = channel
-                isOrderRealtimeActive = true
+            orderChannel = channel
+            isOrderRealtimeActive = true
 
-                // Hitung jumlah data orders
-                val orderCount = orderDao.getOrderCount()
-                Log.d(TAG, "✅ Order realtime ACTIVE")
-                Log.d(TAG, "📊 Total Orders in Database: $orderCount")
-            } else {
-                orderRealtimeJob?.cancel()
-                orderRealtimeJob = null
-                Log.e(TAG, "❌ Failed to subscribe order")
-            }
+            // Hitung jumlah data orders
+            val orderCount = orderDao.getOrderCount()
+            Log.d(TAG, "✅ Order realtime ACTIVE (direct subscribe)")
+            Log.d(TAG, "📊 Total Orders in Database: $orderCount")
 
         } catch (e: Exception) {
             isOrderRealtimeActive = false
@@ -205,12 +213,16 @@ class OrderRepository private constructor(private val context: Context) {
 
         try {
             Log.d(TAG, "🔴 Setting up DETAIL listener...")
+            Log.d(TAG, "   📋 Table: detailorder")
+            Log.d(TAG, "   📋 Schema: public")
 
             val channel = client.channel("details_channel")
 
             val detailOrderFlow = channel.postgresChangeFlow<PostgresAction>(schema = "public") {
                 table = "detailorder"
             }
+
+            Log.d(TAG, "   ✅ Flow created successfully")
 
             detailOrderRealtimeJob = applicationScope.launch {
                 try {
@@ -233,21 +245,12 @@ class OrderRepository private constructor(private val context: Context) {
                 }
             }
 
-            val subscribed = realtimeManager.subscribeChannel(
-                channelId = CHANNEL_ID_DETAIL,
-                channel = channel,
-                job = detailOrderRealtimeJob!!
-            )
+            // Subscribe langsung seperti DiskonRepository
+            channel.subscribe()
 
-            if (subscribed) {
-                detailOrderChannel = channel
-                isDetailOrderRealtimeActive = true
-                Log.d(TAG, "✅ Detail realtime ACTIVE")
-            } else {
-                detailOrderRealtimeJob?.cancel()
-                detailOrderRealtimeJob = null
-                Log.e(TAG, "❌ Failed to subscribe detail")
-            }
+            detailOrderChannel = channel
+            isDetailOrderRealtimeActive = true
+            Log.d(TAG, "✅ Detail realtime ACTIVE (direct subscribe)")
 
         } catch (e: Exception) {
             isDetailOrderRealtimeActive = false
@@ -264,13 +267,17 @@ class OrderRepository private constructor(private val context: Context) {
                     val rawOrder = change.decodeRecord<RawOrder>()
                     Log.d(TAG, "   🆕 INSERT Order: #${rawOrder.idorder}")
 
+                    // ✅ PERBAIKAN: Fetch dari view untuk mendapat data lengkap dengan JOIN
                     val fullOrder = client.from("view_orders")
                         .select {
                             filter { eq("idorder", rawOrder.idorder) }
                         }
                         .decodeSingle<Order>()
 
+                    // Update Room (untuk offline)
                     orderDao.insert(fullOrder.toEntity())
+                    // Update cache instantly (untuk UI)
+                    updateCacheWithOrderChange(fullOrder)
                     Log.d(TAG, "   ✅ Order #${fullOrder.idorder} saved")
                 }
 
@@ -278,20 +285,28 @@ class OrderRepository private constructor(private val context: Context) {
                     val rawOrder = change.decodeRecord<RawOrder>()
                     Log.d(TAG, "   🔄 UPDATE Order: #${rawOrder.idorder}")
 
+                    // ✅ PERBAIKAN: Fetch dari view untuk mendapat data lengkap dengan JOIN
                     val fullOrder = client.from("view_orders")
                         .select {
                             filter { eq("idorder", rawOrder.idorder) }
                         }
                         .decodeSingle<Order>()
 
+                    // Update Room (untuk offline)
                     orderDao.update(fullOrder.toEntity())
+                    // Update cache instantly (untuk UI)
+                    updateCacheWithOrderChange(fullOrder)
                     Log.d(TAG, "   ✅ Order #${fullOrder.idorder} updated")
                 }
 
                 is PostgresAction.Delete -> {
                     val deletedOrder = change.decodeOldRecord<RawOrder>()
                     if (deletedOrder != null) {
+                        Log.d(TAG, "   🗑️ DELETE Order: #${deletedOrder.idorder}")
+                        // Update Room (untuk offline)
                         orderDao.deleteById(deletedOrder.idorder)
+                        // Update cache instantly (untuk UI)
+                        removeCacheOrderItem(deletedOrder.idorder)
                         Log.d(TAG, "   ✅ Order #${deletedOrder.idorder} deleted")
                     }
                 }
@@ -312,13 +327,17 @@ class OrderRepository private constructor(private val context: Context) {
                     val rawDetail = change.decodeRecord<RawDetailOrder>()
                     Log.d(TAG, "   🆕 INSERT Detail: #${rawDetail.iddetail}")
 
+                    // ✅ PERBAIKAN: Fetch dari view untuk mendapat data lengkap dengan JOIN
                     val fullDetail = client.from("view_detailorder")
                         .select {
                             filter { eq("iddetail", rawDetail.iddetail) }
                         }
                         .decodeSingle<DetailOrder>()
 
+                    // Update Room (untuk offline)
                     detailOrderDao.insert(fullDetail.toEntity())
+                    // Update cache instantly (untuk UI)
+                    updateCacheWithDetailChange(fullDetail)
                     Log.d(TAG, "   ✅ Detail #${fullDetail.iddetail} saved")
                 }
 
@@ -326,20 +345,28 @@ class OrderRepository private constructor(private val context: Context) {
                     val rawDetail = change.decodeRecord<RawDetailOrder>()
                     Log.d(TAG, "   🔄 UPDATE Detail: #${rawDetail.iddetail}")
 
+                    // ✅ PERBAIKAN: Fetch dari view untuk mendapat data lengkap dengan JOIN
                     val fullDetail = client.from("view_detailorder")
                         .select {
                             filter { eq("iddetail", rawDetail.iddetail) }
                         }
                         .decodeSingle<DetailOrder>()
 
+                    // Update Room (untuk offline)
                     detailOrderDao.update(fullDetail.toEntity())
+                    // Update cache instantly (untuk UI)
+                    updateCacheWithDetailChange(fullDetail)
                     Log.d(TAG, "   ✅ Detail #${fullDetail.iddetail} updated")
                 }
 
                 is PostgresAction.Delete -> {
                     val deletedDetail = change.decodeOldRecord<RawDetailOrder>()
                     if (deletedDetail != null) {
+                        Log.d(TAG, "   🗑️ DELETE Detail: #${deletedDetail.iddetail}")
+                        // Update Room (untuk offline)
                         detailOrderDao.deleteById(deletedDetail.iddetail)
+                        // Update cache instantly (untuk UI)
+                        removeCacheDetailItem(deletedDetail.iddetail)
                         Log.d(TAG, "   ✅ Detail #${deletedDetail.iddetail} deleted")
                     }
                 }
@@ -352,7 +379,6 @@ class OrderRepository private constructor(private val context: Context) {
             Log.e(TAG, "❌ Handle detail change: ${e.message}", e)
         }
     }
-
     private var lastSyncTime = 0L
     private val syncDebounceMs = 2000L
 
@@ -401,6 +427,97 @@ class OrderRepository private constructor(private val context: Context) {
         )
     }
 
+    private fun updateCache(
+        orderList: List<Order>,
+        detailList: List<DetailOrder>
+    ) {
+        val cache = orderList.map { order ->
+            OrderWithDetails(
+                order = order,
+                details = detailList.filter { it.idorder == order.idorder }
+            )
+        }
+        _orderDetailCache.value = cache
+        Log.d(TAG, "✅ Cache updated with ${cache.size} orders")
+    }
+
+    private fun updateCacheWithOrderChange(order: Order) {
+        val currentCache = _orderDetailCache.value.toMutableList()
+        val orderIndex = currentCache.indexOfFirst { it.order.idorder == order.idorder }
+
+        if (orderIndex != -1) {
+            // Update existing order, keep details
+            val existingDetails = currentCache[orderIndex].details
+            currentCache[orderIndex] = OrderWithDetails(order = order, details = existingDetails)
+            Log.d(TAG, "   🔄 Updated existing order in cache: ${order.idorder}")
+        } else {
+            // Add new order with empty details
+            currentCache.add(0, OrderWithDetails(order = order, details = emptyList()))
+            Log.d(TAG, "   ➕ Added new order to cache: ${order.idorder}")
+        }
+
+        _orderDetailCache.value = currentCache
+        Log.d(TAG, "✅ Cache updated for order ${order.idorder}")
+    }
+
+    private fun updateCacheWithDetailChange(detail: DetailOrder) {
+        val currentCache = _orderDetailCache.value.toMutableList()
+        val orderIndex = currentCache.indexOfFirst { it.order.idorder == detail.idorder }
+
+        if (orderIndex != -1) {
+            val orderWithDetails = currentCache[orderIndex]
+            val updatedDetails = orderWithDetails.details.toMutableList()
+
+            val detailIndex = updatedDetails.indexOfFirst { it.iddetail == detail.iddetail }
+            if (detailIndex != -1) {
+                updatedDetails[detailIndex] = detail
+                Log.d(TAG, "   🔄 Updated existing detail: ${detail.iddetail}")
+            } else {
+                updatedDetails.add(detail)
+                Log.d(TAG, "   ➕ Added new detail: ${detail.iddetail}")
+            }
+
+            currentCache[orderIndex] = orderWithDetails.copy(details = updatedDetails)
+            _orderDetailCache.value = currentCache
+            Log.d(TAG, "✅ Cache updated with detail for order ${detail.idorder}")
+        } else {
+            Log.w(TAG, "⚠️ Order ${detail.idorder} not found in cache for detail update")
+        }
+    }
+
+    private fun removeCacheOrderItem(idorder: Int) {
+        val currentCache = _orderDetailCache.value.toMutableList()
+        val removed = currentCache.removeAll { it.order.idorder == idorder }
+
+        if (removed) {
+            _orderDetailCache.value = currentCache
+            Log.d(TAG, "✅ Order $idorder removed from cache")
+        } else {
+            Log.w(TAG, "⚠️ Order $idorder not found in cache")
+        }
+    }
+
+    private fun removeCacheDetailItem(iddetail: Int) {
+        val currentCache = _orderDetailCache.value.toMutableList()
+        var removed = false
+
+        currentCache.forEachIndexed { index, orderWithDetails ->
+            val updatedDetails = orderWithDetails.details.filter { it.iddetail != iddetail }
+            if (updatedDetails.size != orderWithDetails.details.size) {
+                currentCache[index] = orderWithDetails.copy(details = updatedDetails)
+                removed = true
+                Log.d(TAG, "   🗑️ Removed detail from order ${orderWithDetails.order.idorder}")
+            }
+        }
+
+        if (removed) {
+            _orderDetailCache.value = currentCache
+            Log.d(TAG, "✅ Detail $iddetail removed from cache")
+        } else {
+            Log.w(TAG, "⚠️ Detail $iddetail not found in cache")
+        }
+    }
+
     suspend fun cleanup() {
         Log.d(TAG, "🧹 Cleaning up...")
 
@@ -414,11 +531,12 @@ class OrderRepository private constructor(private val context: Context) {
 
         delay(500)
 
-        orderChannel?.let {
-            realtimeManager.unsubscribeChannel(CHANNEL_ID_ORDER)
-        }
-        detailOrderChannel?.let {
-            realtimeManager.unsubscribeChannel(CHANNEL_ID_DETAIL)
+        // Unsubscribe langsung
+        try {
+            orderChannel?.unsubscribe()
+            detailOrderChannel?.unsubscribe()
+        } catch (e: Exception) {
+            Log.w(TAG, "⚠️ Unsubscribe warning: ${e.message}")
         }
 
         orderChannel = null
@@ -429,8 +547,6 @@ class OrderRepository private constructor(private val context: Context) {
 
     companion object {
         private const val TAG = "OrderRepository"
-        private const val CHANNEL_ID_ORDER = "order_channel"
-        private const val CHANNEL_ID_DETAIL = "detail_channel"
 
         @Volatile
         private var INSTANCE: OrderRepository? = null

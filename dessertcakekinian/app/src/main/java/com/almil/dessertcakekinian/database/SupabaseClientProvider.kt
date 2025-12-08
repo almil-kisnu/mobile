@@ -6,6 +6,8 @@ import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.realtime.Realtime
 import io.github.jan.supabase.storage.Storage
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.websocket.WebSockets
 
 object SupabaseClientProvider {
     private const val SUPABASE_URL = "https://rujrwhtwkoferxhhnruq.supabase.co"
@@ -16,10 +18,12 @@ object SupabaseClientProvider {
             supabaseUrl = SUPABASE_URL,
             supabaseKey = SUPABASE_KEY
         ) {
-            install(Auth)   // auth
-            install(Postgrest) // query database
-            install(Storage) //kalau butuh upload file
-            install(Realtime) //kalau butuh live data
+            install(Auth)
+            install(Postgrest)
+            install(Storage)
+            install(Realtime)
+            
+            httpEngine = OkHttp.create()
         }
     }
 }

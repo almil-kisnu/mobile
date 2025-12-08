@@ -9,6 +9,8 @@ interface ProdukDao {
     fun getAllProduk(): Flow<List<ProdukKategoriEntity>>
     @Query("SELECT * FROM produk_kategori WHERE idproduk = :id")
     suspend fun getProdukById(id: Int): ProdukKategoriEntity?
+    @Query("SELECT * FROM produk_kategori")
+    suspend fun getAllProdukOnce(): List<ProdukKategoriEntity>
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(produk: List<ProdukKategoriEntity>)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -27,6 +29,8 @@ interface DetailStokDao {
     fun getStokByProdukId(idproduk: Int): Flow<List<DetailStokEntity>>
     @Query("SELECT * FROM detail_stok")
     fun getAllStok(): Flow<List<DetailStokEntity>>
+    @Query("SELECT * FROM detail_stok")
+    suspend fun getAllStokOnce(): List<DetailStokEntity>
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(stok: List<DetailStokEntity>)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -47,6 +51,8 @@ interface HargaGrosirDao {
     fun getHargaByProdukId(idproduk: Int): Flow<List<HargaGrosirEntity>>
     @Query("SELECT * FROM harga_grosir")
     fun getAllHarga(): Flow<List<HargaGrosirEntity>>
+    @Query("SELECT * FROM harga_grosir")
+    suspend fun getAllHargaOnce(): List<HargaGrosirEntity>
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(harga: List<HargaGrosirEntity>)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -63,6 +69,8 @@ interface HargaGrosirDao {
 interface OrderDao {
     @Query("SELECT * FROM orders ORDER BY idorder DESC")
     fun getAllOrders(): Flow<List<OrderEntity>>
+    @Query("SELECT * FROM orders ORDER BY idorder DESC")
+    suspend fun getAllOrdersOnce(): List<OrderEntity>
     @Query("SELECT * FROM orders WHERE idorder = :orderId")
     suspend fun getOrderById(orderId: Int): OrderEntity?
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -85,6 +93,8 @@ interface OrderDao {
 interface DetailOrderDao {
     @Query("SELECT * FROM detail_orders ORDER BY iddetail DESC")
     fun getAllDetailOrders(): Flow<List<DetailOrderEntity>>
+    @Query("SELECT * FROM detail_orders ORDER BY iddetail DESC")
+    suspend fun getAllDetailOrdersOnce(): List<DetailOrderEntity>
     @Query("SELECT * FROM detail_orders WHERE idorder = :orderId")
     suspend fun getDetailsByOrderId(orderId: Int): List<DetailOrderEntity>
     @Query("SELECT * FROM detail_orders WHERE iddetail = :detailId")
